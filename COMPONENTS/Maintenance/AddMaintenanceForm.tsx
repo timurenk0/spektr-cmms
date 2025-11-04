@@ -39,7 +39,7 @@ const AddMaintenanceForm = ({
   
   /* ======================================DATA FETCHING=========================================== */
 
-  const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{data: IEquipment[], totalCount: number}>({
+  const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{equips: IEquipment[], totalCount: number}>({
     queryKey: ["/api/equipments?concise=true"]
   });
   
@@ -99,6 +99,7 @@ const AddMaintenanceForm = ({
       
       if (!response.ok) {
         const message = data.error || `Request failed: ${response.status} ${response.statusText}`
+        throw new Error(message);
       }
       
       return data;
@@ -136,7 +137,7 @@ const AddMaintenanceForm = ({
   if (isLoading) return "sosal?";
 
   const equipmentUnderMaintenance = maintenances.map(m => m.equipmentId);
-  const availableEquipment = equipments.data.filter(eq => !equipmentUnderMaintenance.includes(eq.id) && eq.status !== "Out Of Service");
+  const availableEquipment = equipments.equips.filter(eq => !equipmentUnderMaintenance.includes(eq.id) && eq.status !== "Out Of Service");
   
   return (
     <form className="space-y-4 px-1" onSubmit={form.handleSubmit(onSubmit, (error) => console.log(error))}>
@@ -144,7 +145,7 @@ const AddMaintenanceForm = ({
         <Controller
           name="equipmentId"
           control={form.control}
-          defaultValue=""
+          defaultValue={0}
           render={({ field }) => (
             <FormControl fullWidth>
               <InputLabel id="select-equipment" color="info" required sx={{ margin: "8px 0" }}>Select Equipment</InputLabel>

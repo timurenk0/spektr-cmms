@@ -172,7 +172,7 @@ const MyCalendar = () => {
             eventClick={(e) => setSelectedEvent(e.event)}
       />
 
-      {(selectedEvent && user.role === "admin" && selectedEvent._def.extendedProps.status !== "complete" && selectedEvent._def.extendedProps.status !== "incomplete") && <EventForm event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
+      {(selectedEvent && user.role === "admin" && selectedEvent._def.extendedProps.status === "upcoming") && <EventForm event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
     </>
   )
 }

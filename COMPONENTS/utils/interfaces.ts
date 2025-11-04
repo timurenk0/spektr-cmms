@@ -33,13 +33,15 @@ interface IEquipment {
     dateOfManufacturing: string,
     inServiceDate: string,
     usefulLifeSpan: number,
-    totalWorkingHours: number,
+    totalWorkingHours: number | null,
     requirements: string,
     location: string,
-    department: string,
+    department: string | null,
     equipmentImage: string,
-    healthIndex: number,
-    notes?: string,
+    healthIndex: string | null,
+    notes: string | null,
+    lastEvent: string,
+    nextEvent: string,
 }
 
 interface IMaintenance {

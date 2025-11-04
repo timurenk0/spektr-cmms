@@ -15,6 +15,7 @@ import type { NeonDatabase, NeonQueryResultHKT } from "drizzle-orm/neon-serverle
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { differenceInCalendarMonths } from "date-fns";
 
 
 type Schema = typeof schema;
@@ -88,7 +89,7 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
 
     /* ================================================ Equipment Methods ===================================================== */
-    async getEquipments(concise?:string, limit?: number, page?: number): Promise<{data: Equipment[], totalCount: number}> {
+    async getEquipments(concise?:string, limit?: number, page?: number): Promise<{equips: IEquipment[], totalCount: number}> {
         // Another format just for fun why not
         const data = await db.query.equipments.findMany({
             orderBy: equipments.id,
@@ -99,13 +100,25 @@ export class DatabaseStorage {
                 name: true,
                 assetId: true,
                 equipmentImage: true,
-                status: true
+                status: true,
             }: undefined
         });
         
         const count = await db.select({ count: sql<number>`count(*)` }).from(equipments);
-    
-        return { data, totalCount: count[0].count }
+
+        const equips = await Promise.all(
+            data.map(async (d) => {
+                const {lastEvent, nextEvent} = await this.getClosestMaintenanceEventsForEquipment(d.id);
+
+                return {
+                    ...d,
+                    lastEvent,
+                    nextEvent
+                }
+            })
+        )
+
+        return { equips, totalCount: count[0].count }
     }
     
     async getEquipment(id: number): Promise<Equipment | undefined> {
@@ -123,6 +136,8 @@ export class DatabaseStorage {
     
     async updateEquipment(id: number, updateData: Partial<InsertEquipment>): Promise<Equipment | undefined> {
         const [equipment] = await db.update(equipments).set(updateData).where(eq(equipments.id, id)).returning();
+
+        console.log(equipment);
         return equipment;
     }
     
@@ -196,13 +211,13 @@ export class DatabaseStorage {
         return await db.select().from(maintenanceEvents).where(eq(maintenanceEvents.equipmentId, id));
     }
 
-    async getClosestMaintenanceEventsForEquipment(id: number): Promise<MaintenanceEvent[]> {
+    async getClosestMaintenanceEventsForEquipment(id: number): Promise<{lastEvent: string, nextEvent: string}> {
         const today = new Date().toISOString();
         
         const [prev] = await db.select().from(maintenanceEvents).where(and(eq(maintenanceEvents.equipmentId, id), sql`${maintenanceEvents.start} < ${today}`)).limit(1);
         const [next] = await db.select().from(maintenanceEvents).where(and(eq(maintenanceEvents.equipmentId, id), sql`${maintenanceEvents.start} > ${today}`)).limit(1);
 
-        return [prev, next];
+        return {lastEvent: prev?.scheduledAt ?? "N/A", nextEvent: next?.scheduledAt ?? "N/A"};
     }
     
     async addMaintenanceEvents(
@@ -218,6 +233,9 @@ export class DatabaseStorage {
         updateData: Partial<InsertMaintenanceEvent>
     ): Promise<MaintenanceEvent | undefined> {
         const [event] = await db.update(maintenanceEvents).set(updateData).where(eq(maintenanceEvents.id, id)).returning();
+
+        // const updatedEquipment = await this.subtractPenaltyScore(event);
+
         return event;
     }
             
@@ -293,31 +311,75 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
     
     
-    // Additional methods
+    /* =========================================== Miscellaneous Methods ====================================================== */
+    
     async calculateHealthIndex(
         equipmentId: number,
-        maintenance: Maintenance
-    ): Promise<number | undefined> {
-        try {
-            const equipment = await db.execute(sql`
-                SELECT useful_life_span,
-                EXTRACT(YEAR FROM AGE(CURRENT_DATE, date_of_manufacturing)) * 12 +
-                EXTRACT(MONTH FROM AGE(CURRENT_DATE, date_of_manufacturing)) AS age_in_months
-                FROM equipments
-                WHERE id = ${equipmentId}
-            `);
+        givenHealthIndex: number | undefined | null
+    ) {
+        const equipment = await this.getEquipment(equipmentId);
+        if (!equipment) throw new Error("No equipment found");
+        if (!givenHealthIndex) throw new Error("No given health index");
 
-            if (!equipment.rows[0]) return undefined;
+        const { usefulLifeSpan, dateOfManufacturing } = equipment;
 
-            const { useful_life_span, age_in_months } = equipment.rows[0];
-            if (!useful_life_span || age_in_months == null) return undefined;
+        const monthlyHealthDrop = Number((100 / usefulLifeSpan).toFixed(2));
 
-            return 0;            
-        } catch (error) {
-            const msg = error instanceof Error ? error.message : "Unknown error";
-            throw new Error(`Failed to calculate health index for specified equipment: ${msg}`);
-        }
+        const idealHealthIndex = 100 - differenceInCalendarMonths(Date(), dateOfManufacturing) * monthlyHealthDrop;
+
+        
+        let trueHealthIndex = givenHealthIndex > idealHealthIndex ? idealHealthIndex : givenHealthIndex;
+        console.log("Ideal | True", idealHealthIndex, trueHealthIndex);
+
+        return trueHealthIndex;
     }
+
+    async subtractPenaltyScore(
+        event: MaintenanceEvent
+    ) {
+        const levelCoeffs: Record<string, number> = {
+            "A": 1,
+            "B": 2,
+            "C": 3,
+            "D": 4,
+        };
+        const statusCoeffs: Record<string, number> = {
+            "complete": 0,
+            "overdue": 0.5,
+            "incomplete": 1
+        };
+
+        const score = levelCoeffs[event.level]*statusCoeffs[event.status];
+
+        console.log(levelCoeffs[event.level]+"*"+statusCoeffs[event.status])
+        
+        return await db.update(equipments).set({ healthIndex: sql`${equipments.healthIndex} - ${score}` }).where(eq(equipments.id, event.equipmentId));
+    }
+    
+    // async calculateHealthIndex(
+    //     equipmentId: number,
+    //     maintenance: Maintenance
+    // ): Promise<number | undefined> {
+    //     try {
+    //         const equipment = await db.execute(sql`
+    //             SELECT useful_life_span,
+    //             EXTRACT(YEAR FROM AGE(CURRENT_DATE, date_of_manufacturing)) * 12 +
+    //             EXTRACT(MONTH FROM AGE(CURRENT_DATE, date_of_manufacturing)) AS age_in_months
+    //             FROM equipments
+    //             WHERE id = ${equipmentId}
+    //         `);
+
+    //         if (!equipment.rows[0]) return undefined;
+
+    //         const { useful_life_span, age_in_months } = equipment.rows[0];
+    //         if (!useful_life_span || age_in_months == null) return undefined;
+
+    //         return 0;            
+    //     } catch (error) {
+    //         const msg = error instanceof Error ? error.message : "Unknown error";
+    //         throw new Error(`Failed to calculate health index for specified equipment: ${msg}`);
+    //     }
+    // }
 
 }
 

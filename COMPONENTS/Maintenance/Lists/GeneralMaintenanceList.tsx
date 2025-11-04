@@ -79,7 +79,7 @@ const GeneralMaintenanceList = ({
                 {complete && (
                     <TableCell>Completed Date</TableCell>
                 )}
-                <TableCell>{getLevelBadge("D")}</TableCell>
+                <TableCell>{getLevelBadge(ev.level)}</TableCell>
             </TableRow>
             )}): (
             <TableRow>

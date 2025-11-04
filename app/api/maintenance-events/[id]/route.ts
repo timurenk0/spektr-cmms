@@ -2,6 +2,7 @@ import { insertMaintenanceEventSchema } from "@/BACKEND/Database/schema";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
+import { differenceInDays } from "date-fns";
 import { NextRequest, NextResponse as res } from "next/server";
 
 
@@ -41,18 +42,22 @@ export async function PUT(
 
         const body = await req.json();
 
-        
         const event = await storage.getMaintenanceEvent(eventId);
         if (!event) return res.json({ error: "Specified maintenance event not found" }, { status: 404 });
-        console.log(body);
+
+        const eventStatus = differenceInDays(body.performedAt, event.scheduledAt) < 3 ? "complete" : 
+                            differenceInDays(body.performedAt, event.scheduledAt) < 10 ? "overdue" : 
+                            "incomplete"
+
         
         const eventValidatedData = insertMaintenanceEventSchema.partial().parse({
             ...body,
-            color: body.status === "complete" ? getEventColor(event.level) : "oklch(44.4% 0.177 26.899)"
+            status: body.status === "incomplete" ? "incomplete" : eventStatus,
+            color: body.status === "incomplete" ? "oklch(44.4% 0.177 26.899)" : getEventColor(event.level),
         });
 
-
         console.log(eventValidatedData);
+        
         
         const updatedEvent = await storage.updateMaintenanceEvent(eventId, eventValidatedData);
 

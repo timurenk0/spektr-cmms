@@ -3,6 +3,7 @@ import {
   text,
   serial,
   integer,
+  decimal,
   date,
   timestamp,
   check,
@@ -77,7 +78,7 @@ export const equipments = pgTable(
     location: text("location").notNull(),
     department: text("department"),
     equipmentImage: text("equipment_image").notNull(),
-    healthIndex: integer("health_index"),
+    healthIndex: decimal("health_index"),
     notes: text("notes"),
   },
   (table) => ({

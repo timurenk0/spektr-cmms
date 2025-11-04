@@ -31,10 +31,6 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
   if (isLoading) return (<h1>Loading...</h1>);
 
 
-  const bgColor = "bg-red-200";
-  const textColor = "text-red-600";
-  const healthIndex = 33;
-    
   return (
     <div>
       <div className="bg-white rounded-lg shadow-sm">
@@ -164,7 +160,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
               </div>
               <div>
                 <div className="text-sm font-medium text-orange-600">
-                  Not Scheduled
+                  {equipment.lastEvent}
                 </div>
                 <div className="text-xs text-gray-500">Last Maintenance</div>
               </div>
@@ -176,19 +172,19 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
               </div>
               <div>
                 <div className="text-sm font-meidum text-purple-600">
-                  Not Scheduled
+                  {equipment.nextEvent}
                 </div>
                 <div className="text-xs text-gray-500">Next Maintenance</div>
               </div>
             </div>
 
             <div className="flex items-center">
-              <div className={`w-10 h-10 rounded-full ${bgColor || "bg-gray-200"} flex items-center justify-center mr-3`}>
-                <Activity width={24} height={24} className={textColor || "text-gray-600"} />
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3`}>
+                <Activity width={24} height={24} />
               </div>
               <div className="relative">
-                <div className={`text-sm font-medium ${textColor || "text-gray-600"}`}>
-                  {healthIndex ? healthIndex.toFixed(2) : "NaN"}%
+                <div className={`text-sm font-medium`}>
+                  {equipment.healthIndex ? `${equipment.healthIndex}%` : "N/A"}
                 </div>
                 <div className="text-xs text-gray-500">Health Score</div>
               </div>

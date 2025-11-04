@@ -22,7 +22,7 @@ const MaintenanceList = () => {
     queryKey: ["/api/maintenance-events"]
   });
 
-  const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ data: IEquipment[], totalCount: number }>({
+  const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ equips: IEquipment[], totalCount: number }>({
     queryKey: ["/api/equipments?concise=true"]
   });
 
@@ -54,16 +54,16 @@ const MaintenanceList = () => {
           <Tab label={`Overdue (${overdueMaintenances.length})`} value="Overdue"  />
         </TabList>
         <TabPanel value="All">
-          <AllMaintenanceList maintenances={maintenances} mEvents={[]} equipments={equipments.data} />
+          <AllMaintenanceList maintenances={maintenances} mEvents={[]} equipments={equipments.equips} />
         </TabPanel>
         <TabPanel value="Upcoming">
-          <UpcomingMaintenanceList mEvents={upcomingMantenances} equipments={equipments.data} />
+          <UpcomingMaintenanceList mEvents={upcomingMantenances} equipments={equipments.equips} />
         </TabPanel>
         <TabPanel value="Complete">
-          <GeneralMaintenanceList mEvents={completeMaintenances} equipments={equipments.data} complete />
+          <GeneralMaintenanceList mEvents={completeMaintenances} equipments={equipments.equips} complete />
         </TabPanel>
         <TabPanel value="Overdue">
-          <GeneralMaintenanceList mEvents={overdueMaintenances} equipments={equipments.data} />
+          <GeneralMaintenanceList mEvents={overdueMaintenances} equipments={equipments.equips} />
         </TabPanel>
       </TabContext>
     </Paper>

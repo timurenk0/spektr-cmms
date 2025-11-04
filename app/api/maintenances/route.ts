@@ -32,10 +32,11 @@ export async function POST(req: NextRequest) {
 
         // Add validated maintenance data to the DB.
         const newMaintenance = await storage.addMaintenance(maintenanceValidatedData);
-
+        const healthIndex = await storage.calculateHealthIndex(maintenanceValidatedData.equipmentId, maintenanceValidatedData.givenHealthIndex)
 
         await storage.updateEquipment(newMaintenance.equipmentId, {
             totalWorkingHours: body.totalWorkingHours,
+            healthIndex: healthIndex.toString()
         });        
 
         // Log activity for added maintenance using helper logger method.

@@ -51,8 +51,8 @@ const EquipmentListEl = ({ equipment }: { equipment: IEquipment }) => {
         <TableCell>{equipment.assetId}</TableCell>
         <TableCell>{getStatusBadge(equipment.status)}</TableCell>
         <TableCell>{equipment.location}</TableCell>
-        <TableCell>{"sosal"}</TableCell>
-        <TableCell>{"sosal"}</TableCell>
+        <TableCell>{equipment.lastEvent}</TableCell>
+        <TableCell>{equipment.nextEvent}</TableCell>
         <TableCell>{equipment.healthIndex ?? "-"}</TableCell>
     </TableRow>
   )

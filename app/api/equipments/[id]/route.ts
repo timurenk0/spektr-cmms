@@ -18,8 +18,10 @@ export async function GET(
         // Fetch specified equipment by ID and check if it exists.
         const equipment = await storage.getEquipment(equipmentId);
         if (!equipment) return res.json({ error: "Specified equipment not found" }, { status: 404 });
+        
+        const closestEvents = await storage.getClosestMaintenanceEventsForEquipment(equipmentId);
 
-        return res.json(equipment, { status: 200 });
+        return res.json({...equipment, ...closestEvents}, { status: 200 });
     } catch (error: unknown) {
         const msg = error instanceof Error ? error.message : "Unkown error";
         return res.json({ error: `Failed to fetch specified equipment" ${msg}` }, { status: 500 });
@@ -77,6 +79,7 @@ export async function DELETE(
         // Fetch specified equipment by ID and check if it exists.
         const equipment = await storage.getEquipment(equipmentId);
         if (!equipment) return res.json({ error: "Specified equipment not found" }, { status: 404 });
+
 
         // Log the activity for deleted equipment using helper logger method.
         await activityLogger(user, "delete", "Equipment deleted", `Equipment ${equipment.name} deleted by user ${user.username}`, equipmentId);       

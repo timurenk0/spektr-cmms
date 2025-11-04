@@ -15,7 +15,7 @@ import {
 
 const StatusChart = () => {
 
-   const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ data: IEquipment[], count: number }>({
+   const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ equips: IEquipment[], count: number }>({
     queryKey: ["/api/equipments"]
    });
 
@@ -23,9 +23,9 @@ const StatusChart = () => {
    if (isLoading) return (<h1>Loading...</h1>)
 
    const statusData = [
-    {name: "Operational", value: equipments.data.filter(eq => eq.status==="operational").length},
-    {name: "Under Repair", value: equipments.data.filter(eq => eq.status==="under repair").length},
-    {name: "Out of Service", value: equipments.data.filter(eq => eq.status==="out of service").length},
+    {name: "Operational", value: equipments.equips.filter(eq => eq.status==="operational").length},
+    {name: "Under Repair", value: equipments.equips.filter(eq => eq.status==="under repair").length},
+    {name: "Out of Service", value: equipments.equips.filter(eq => eq.status==="out of service").length},
    ]
 
 

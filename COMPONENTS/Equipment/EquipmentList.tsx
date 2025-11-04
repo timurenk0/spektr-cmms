@@ -29,7 +29,7 @@ const EquipmentList = () => {
   }
 
 
-  const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ data: IEquipment[], totalCount: number }>({
+  const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ equips: IEquipment[], totalCount: number }>({
     queryKey: [`/api/equipments?limit=${rowsPerPage}&page=${page+1}`]
   });
 
@@ -40,7 +40,7 @@ const EquipmentList = () => {
   )
 
 
-  const filteredEquipments = equipments.data.filter(eq => {
+  const filteredEquipments = equipments.equips.filter(eq => {
     const matchSearch = searchQuery === "" ? true :
       ( eq.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         eq.serialNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
