@@ -1,0 +1,110 @@
+import { Building2, Cog, FlaskConical, Thermometer, Trash2, Truck, Wrench, Zap } from "lucide-react";
+
+export const EquipmentTypes = [
+    {
+        id: "Mechanical",
+        icon: <Wrench className="min-h-4 min-w-4" />,
+        categories: [
+            "Pumps",
+            "Motors",
+            "Compressors",
+            "Gearboxes / Reducers",
+            "Blowers & Fans",
+            "Valves",
+            "Actuators",
+            "Conveyors",
+            "Hydraulic Systems",
+            "Pneumatic Systems",
+        ],
+    },
+    {
+        id: "Electrical",
+        icon: <Zap className="min-h-4 min-w-4" />,
+        categories: [
+            "Transformers",
+            "Generators",
+            "Switchgear",
+            "Circuit Breakers",
+            "UPS Systems",
+            "Power Panels / Distribution Boards",
+            "Electrical Motors",
+            "VFDs (Variable Frequency Drives)",
+            "Lighting Systems",
+        ],
+    },
+    {
+        id: "HVAC",
+        icon: <Thermometer className="min-h-4 min-w-4" />,
+        categories: [
+            "Chillers",
+            "Boilers",
+            "Air Handling Units (AHUs)",
+            "Cooling Towers",
+            "Heat Exchangers",
+            "Water Heaters",
+            "Dehumidifiers",
+            "Air Compressors",
+        ]
+    },
+    {
+        id: "Production",
+        icon: <Cog className="min-h-4 min-w-4" />,
+        categories: [
+            "CNC Machines",
+            "Lathes / Mills",
+            "Presses",
+            "Injection Molding Machines",
+            "Mixers / Agitators",
+            "Furnaces / Ovens",
+            "Packaging Machines",
+            "Filling Machines",
+            "Extruders",
+        ],
+    },
+    {
+        id: "Test",
+        icon: <FlaskConical className="min-h-4 min-w-4" />,
+        categories: [
+            "Flow Meters",
+            "Gauges",
+            "Detectors",
+            "Test Benches",
+            "Testers",
+        ],
+    },
+    {
+        id: "Material",
+        icon: <Truck className="min-h-4 min-w-4" />,
+        categories: [
+            "Forklifts",
+            "Pallet Jacks",
+            "Cranes / Hoists",
+            "Elevators / Lifts",
+            "AGVs (Automated Guided Vehicles)",
+            "Racking Systems",
+        ],
+    },
+    {
+        id: "Facility",
+        icon: <Building2 className="min-h-4 min-w-4" />,
+        categories: [
+            "Fire Protection Systems",
+            "Elevators / Escalators",
+            "Security Systems",
+            "Plumbing Systems",
+            "Doors / Gates (Motorized)",
+            "Lighting",
+        ],
+    },
+    {
+        id: "Cleaning",
+        icon: <Trash2 className="min-h-4 min-w-4" />,
+        categories: [
+            "Industrial Vacuums",
+            "Scrubbers / Sweepers",
+            "Waste Compactors",
+            "Incinerators",
+            "Water Treatment Systems",
+        ],
+  },
+]

@@ -10,6 +10,8 @@
 !.yarn/releases
 !.yarn/versions
 
+.gcb_creds.json
+
 # testing
 /coverage
 
@@ -39,3 +41,29 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ==================================================
+# CMMS app specific (recommended additions)
+# ==================================================
+
+# Local data, reports, and temporary exports
+/data/cache/
+/data/exports/
+/data/models/
+/logs/
+/tmp/
+
+# Generated files or uploads
+/public/uploads/
+/public/generated/
+/public/temp/
+
+# Excel / CSV prototypes (calculation models, local testing)
+*.xlsx
+*.xlsm
+*.csv
+!data/sample-data.csv  # keep demo/sample data if needed
+
+# Local scripts or analysis helpers
+scripts/local_tests/
+__pycache__/
