@@ -8,10 +8,10 @@ import { Button, Paper, Tab } from "@mui/material";
 import { Activity, ArrowBigDown, Calendar, ChevronLeft, Clock, Pencil, RotateCcw, Wrench } from "lucide-react";
 import Link from "next/link";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import EquipmentOverview from "./EquipmentOverview/EquipmentOverview";
+import EquipmentOverview from "./OverviewTab/EquipmentOverview";
 import EquipmentDocuments from "./DocumentTab/EquipmentDocuments";
 import EquipmentPhotos from "./PhotoTab/EquipmentPhotos";
-import EquipmentActivity from "./EquipmentActivity/EquipmentActivity";
+import EquipmentActivity from "./ActivityTab/EquipmentActivity";
 
 const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
   const [statusSelectionOpen, setStatusSelectionOpen] = useState(false);

@@ -36,10 +36,10 @@ interface IEquipment {
     totalWorkingHours: number | null,
     requirements: string,
     location: string,
-    department: string | null,
+    department: string,
     equipmentImage: string,
     healthIndex: string | null,
-    notes: string | null,
+    notes: string,
     lastEvent: string,
     nextEvent: string,
 }

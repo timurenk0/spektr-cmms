@@ -25,6 +25,7 @@ const formSchema = insertEquipmentSchema.extend({
     dateOfManufacturing: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
     inServiceDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
     location: z.string().min(1, { error: "Location is required" }),
+    projectId: z.string().optional(),
     department: z.string().min(1, { error: "Department is required" }).transform((val) => val.trim()),
     requirements: z.string().min(1, { error: "Equipment requirements are required." }),
     usefulLifeSpan: z.number().min(1),
@@ -97,6 +98,7 @@ export default function AddEquipmentForm(
             dateOfManufacturing: format(new Date(), "yyyy-MM-dd"),
             inServiceDate: format(new Date(), "yyyy-MM-dd"),
             location: "",
+            projectId: "",
             requirements: "",
             department: "",
             usefulLifeSpan: 180,
@@ -111,7 +113,13 @@ export default function AddEquipmentForm(
     // Populate form if equipment ID is passed (edit mode).
     useEffect(() => {
         if (equipment) {
-            form.reset({...equipment});
+            const equipmentLocation = equipment.location.split(/\s(.+)/);
+            const formData = {
+                ...equipment,
+                location: equipmentLocation[0],
+                projectId: equipment.location === "Base" ? "" : equipmentLocation[1]
+            }
+            form.reset(formData);
             setEquipmentImage(equipment.equipmentImage);
         }
     }, [equipment, form]);
@@ -323,14 +331,14 @@ export default function AddEquipmentForm(
                         </FormControl>
                     )}
                  />
-                 {eqLocation === "Project" && (
+                 {(eqLocation === "Project" || (equipment && equipment.location !== "Base")) && (
                     <TextField
                         label="Project ID"
                         color="info"
                         margin="dense"
                         fullWidth
+                        {...form.register("projectId")}
                         required={eqLocation === "Project"}
-                        onChange={(e) => setProjectId(e.target.value)}
                      />
                  )}
             </div>

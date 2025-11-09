@@ -215,7 +215,7 @@ export class DatabaseStorage {
         const today = new Date().toISOString();
         
         const [prev] = await db.select().from(maintenanceEvents).where(and(eq(maintenanceEvents.equipmentId, id), sql`${maintenanceEvents.start} < ${today}`)).limit(1);
-        const [next] = await db.select().from(maintenanceEvents).where(and(eq(maintenanceEvents.equipmentId, id), sql`${maintenanceEvents.start} > ${today}`)).limit(1);
+        const [next] = await db.select().from(maintenanceEvents).where(and(eq(maintenanceEvents.equipmentId, id), and(sql`${maintenanceEvents.start} > ${today}`, eq(maintenanceEvents.status, "upcoming")))).limit(1);
 
         return {lastEvent: prev?.scheduledAt ?? "N/A", nextEvent: next?.scheduledAt ?? "N/A"};
     }

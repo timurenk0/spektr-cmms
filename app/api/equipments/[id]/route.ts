@@ -68,13 +68,14 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const user = await validateUser("admin");
+
         // Check wheter passed equipment ID is valid.
         const { id } = await params;
         const equipmentId = parseInt(id);
         if (isNaN(equipmentId)) return res.json({ error: "Invalid equipment ID" }, { status: 400 });
 
         // Validate user.
-        const user = await validateUser("admin");
         
         // Fetch specified equipment by ID and check if it exists.
         const equipment = await storage.getEquipment(equipmentId);
@@ -82,7 +83,7 @@ export async function DELETE(
 
 
         // Log the activity for deleted equipment using helper logger method.
-        await activityLogger(user, "delete", "Equipment deleted", `Equipment ${equipment.name} deleted by user ${user.username}`, equipmentId);       
+        await activityLogger(user, "delete", "Equipment deleted", `Equipment ${equipment.name} with id ${equipment.id} deleted by user ${user.username}`);       
 
         // Delete specified equipment.
         await storage.deleteEquipment(equipmentId);

@@ -83,7 +83,7 @@ export async function generateEvents(
                 equipmentId: equipment.id,
                 maintenanceId: maintenance.id,
                 level, status,
-                color: getColor(level),
+                color: status !== "incomplete" ? getColor(level) : "oklch(44.4% 0.177 26.899)",
                 start: format(eventStartDate, "yyyy-MM-dd"),
                 end: format(eventEndDate, "yyyy-MM-dd"),
                 scheduledAt: format(eventStartDate, "yyyy-MM-dd")

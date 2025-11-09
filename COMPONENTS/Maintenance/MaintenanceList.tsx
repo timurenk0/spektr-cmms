@@ -54,7 +54,7 @@ const MaintenanceList = () => {
           <Tab label={`Overdue (${overdueMaintenances.length})`} value="Overdue"  />
         </TabList>
         <TabPanel value="All">
-          <AllMaintenanceList maintenances={maintenances} mEvents={[]} equipments={equipments.equips} />
+          <AllMaintenanceList maintenances={maintenances} mEvents={mEvents} equipments={equipments.equips} />
         </TabPanel>
         <TabPanel value="Upcoming">
           <UpcomingMaintenanceList mEvents={upcomingMantenances} equipments={equipments.equips} />

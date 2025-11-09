@@ -7,10 +7,13 @@ import { useState } from "react";
 import { EquipmentTypes } from "../utils/equipmentTypes";
 import EquipmentListEl from "./EquipmentListEl";
 import ListSkeleton from "../SKELETONS/ListSkeleteon";
+import { useAuth } from "../utils/authContext";
 
 const EquipmentList = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const { user, isLoading: isLoadingUser } = useAuth();
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,7 +36,7 @@ const EquipmentList = () => {
     queryKey: [`/api/equipments?limit=${rowsPerPage}&page=${page+1}`]
   });
 
-  const isLoading = (isLoadingEquipments || !equipments);
+  const isLoading = (isLoadingEquipments || !equipments) || (isLoadingUser || !user);
 
   if (isLoading) return (
     <ListSkeleton />
@@ -137,11 +140,14 @@ const EquipmentList = () => {
                 <TableCell>Last Maintenance</TableCell>
                 <TableCell>Next Maintenance</TableCell>
                 <TableCell>Health Score</TableCell>
+                {user.role==="admin" && (
+                  <TableCell>Admin</TableCell>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
               {filteredEquipments.map((equipment: IEquipment, idx: number) => (
-                <EquipmentListEl key={idx} equipment={equipment} />
+                <EquipmentListEl key={idx} equipment={equipment} userRole={user.role} />
               ))}            
             </TableBody>
           </Table>

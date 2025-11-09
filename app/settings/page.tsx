@@ -24,6 +24,16 @@ const formSchema = z.object({
 });
 type ProfileFormValues = z.infer<typeof formSchema>;
 
+
+const generatePassword = (length = 8) => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}<>?';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+}
+
 const Settings = () => {
     const queryClient = useQueryClient();
     
@@ -35,9 +45,6 @@ const Settings = () => {
         setValue(val)
     }
     
-    const showPassword = () => {
-        setShowPw(!showPw);
-    }
 
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(formSchema),
@@ -124,14 +131,20 @@ const Settings = () => {
                                 required
                                 {...form.register("username")}
                             />
-                            <TextField
-                                type="password"
-                                label="Password"
-                                color="info"
-                                margin="dense"
-                                required
-                                {...form.register("password")}
-                            />
+                            <div className="flex flex-col">
+                                <TextField
+                                    type={showPw ? "text" : "password"}
+                                    onFocus={() => setShowPw(true)}
+                                    label="Password"
+                                    color="info"
+                                    defaultValue=""
+                                    margin="dense"
+                                    required
+                                    {...form.register("password")}
+                                    onBlur={() => setShowPw(false)}
+                                />
+                                <button type="button" className="underline text-blue-500 text-sm me-auto cursor-pointer" onClick={() => form.setValue("password", generatePassword())}>Generate Password</button>
+                            </div>
                             <Controller
                                 name="role"
                                 control={form.control}

@@ -19,7 +19,7 @@ const AllMaintenanceList = ({
           <TableCell>Equipment</TableCell>
           <TableCell>All</TableCell>
           <TableCell>Upcoming</TableCell>
-          <TableCell>Completed</TableCell>
+          <TableCell>Complete</TableCell>
           <TableCell>Overdue</TableCell>
         </TableRow>
       </TableHead>
@@ -43,10 +43,10 @@ const AllMaintenanceList = ({
                 </div>
               </div>
             </TableCell>
-            <TableCell>All</TableCell>
-            <TableCell>Upcoming</TableCell>
-            <TableCell>Completed</TableCell>
-            <TableCell>Overdue</TableCell>
+            <TableCell>{mEvents.filter(ev=>ev.maintenanceId===m.id).length}</TableCell>
+            <TableCell>{mEvents.filter(ev=>ev.maintenanceId===m.id && ev.status==="upcoming").length}</TableCell>
+            <TableCell>{mEvents.filter(ev=>ev.maintenanceId===m.id && ev.status==="complete").length}</TableCell>
+            <TableCell>{mEvents.filter(ev=>ev.maintenanceId===m.id && ev.status==="overdue").length}</TableCell>
           </TableRow>
         )}): (
           <TableRow>
