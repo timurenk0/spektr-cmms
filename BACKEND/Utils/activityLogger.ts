@@ -1,4 +1,4 @@
-import { Equipment, insertActivitySchema, MaintenanceEvent, maintenanceEvents } from "../Database/schema";
+import { insertActivitySchema } from "../Database/schema";
 import { AuthUser } from "../Middleware/AuthService";
 import { storage } from "../storage";
 

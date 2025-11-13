@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
 
         await storage.updateEquipment(newMaintenance.equipmentId, {
             totalWorkingHours: body.totalWorkingHours,
-            healthIndex: healthIndex.toString()
+            healthIndex: healthIndex.toFixed(2)
         });        
 
         // Log activity for added maintenance using helper logger method.

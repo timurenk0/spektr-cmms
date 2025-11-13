@@ -20,7 +20,7 @@ const DeleteEquipmentForm = (
             mutationFn: async ({ id, reason }: { id: number, reason: string }) => {
                 try {
                     const response = await fetch(`/api/equipments/${id}`, {
-                        method: "DELETE",
+                        method: "PATCH",
                         body: JSON.stringify({
                             reason
                         }),

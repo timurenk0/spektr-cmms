@@ -76,6 +76,7 @@ export async function generateEvents(
             if (eventEndDate > end) break;
 
             const today = new Date();
+            today.setHours(0, 0, 0, 0);
             const status = (today <= eventStartDate) ? "upcoming" : differenceInDays(today, eventStartDate) > 10 ? "incomplete" : "overdue";
 
             const event: InsertMaintenanceEvent = {

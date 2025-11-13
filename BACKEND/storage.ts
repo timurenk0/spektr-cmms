@@ -10,7 +10,7 @@ import {
 import * as schema from "./Database/schema";
 import { db } from "./Database/db";
 import { generateEvents } from "./Middleware/EventManager";
-import { eq, and, desc, sql, not, ExtractTablesWithRelations, lt, gte, lte } from "drizzle-orm";
+import { eq, and, desc, sql, not, ExtractTablesWithRelations, lt, gte, lte, isNull } from "drizzle-orm";
 import type { NeonDatabase, NeonQueryResultHKT } from "drizzle-orm/neon-serverless";
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import jwt from "jsonwebtoken";
@@ -233,7 +233,7 @@ export class DatabaseStorage {
                             WHEN 'E' THEN '#CC3700'
                             ELSE '#4D96FF'
                         END
-                    WHEN ${maintenanceEvents.status} = 'incomplete' THEN '#FF6B6B'
+                    WHEN ${maintenanceEvents.status} = 'incomplete' THEN '#22222275'
                     WHEN ${maintenanceEvents.start} >= CURRENT_DATE THEN
                         CASE ${maintenanceEvents.level}
                             WHEN 'A' THEN 'oklch(76.5% 0.177 163.223)'
@@ -243,9 +243,6 @@ export class DatabaseStorage {
                             WHEN 'E' THEN '#FF4500'
                             ELSE '#4D96FF'
                         END
-                    WHEN ${maintenanceEvents.start} < CURRENT_DATE
-                        AND CURRENT_DATE - ${maintenanceEvents.start} < 10 THEN '#FF8C00'
-                    ELSE '#FF6B6B' -- fallback incomplete
                 END
             `.as("color")
         }).from(maintenanceEvents).where(and(...conditions));
@@ -319,6 +316,20 @@ export class DatabaseStorage {
         // const updatedEquipment = await this.subtractPenaltyScore(event);
 
         return event;
+    }
+
+    async updateIncompleteEvents(): Promise<{id: number}[]> {
+        const updatedEvents = await db.update(maintenanceEvents).set({ status: "incomplete" }).
+                        where(
+                            and(
+                                eq(maintenanceEvents.status, "overdue"),
+                                isNull(maintenanceEvents.performedAt),
+                                lt(maintenanceEvents.start, sql`CURRENT_DATE - INTERVAL '10 days'`)
+
+                            )
+                        ).returning({ id: maintenanceEvents.id });
+
+        return updatedEvents;
     }
             
     async moveEmergencyEvents(): Promise<MaintenanceEvent[]> {

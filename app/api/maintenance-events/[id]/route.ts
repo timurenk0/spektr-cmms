@@ -53,12 +53,8 @@ export async function PUT(
         const eventValidatedData = insertMaintenanceEventSchema.partial().parse({
             ...body,
             status: body.status === "incomplete" ? "incomplete" : eventStatus,
-            color: body.status === "incomplete" ? "oklch(44.4% 0.177 26.899)" : getEventColor(event.level),
         });
 
-        console.log(eventValidatedData);
-        
-        
         const updatedEvent = await storage.updateMaintenanceEvent(eventId, eventValidatedData);
 
         if (!updatedEvent) {

@@ -22,7 +22,7 @@ import { z } from "zod";
 export const activities = pgTable("activities", {
     id: serial("id").primaryKey(),
     userId: integer("user_id").notNull().references(() => users.id),
-    equipmentId: integer("equipment_id").references(() => equipments.id, { onDelete: "cascade" }),
+    equipmentId: integer("equipment_id"),
     username: text("username").notNull(),
     action: text("action").notNull(),
     title: text("title").notNull(),

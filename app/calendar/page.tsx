@@ -70,10 +70,12 @@ const MyCalendar = () => {
                 placement: "top",
               })
             }}
-            eventClick={(e) => setSelectedEvent(e.event)}
+            eventClick={(e) => {
+              e.event._def.extendedProps.status === "upcoming" || e.event._def.extendedProps.status === "overdue" ? setSelectedEvent(e.event) : console.log("Incomplete event");
+            }}
       />
 
-      {(selectedEvent && user.role === "admin" && selectedEvent._def.extendedProps.status === "upcoming") && <EventForm event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
+      {(selectedEvent && user.role === "admin") && <EventForm event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
     </>
   )
 }

@@ -63,7 +63,7 @@ export async function PUT(
     }
 }
 
-export async function DELETE(
+export async function PATCH(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
@@ -75,6 +75,9 @@ export async function DELETE(
         const equipmentId = parseInt(id);
         if (isNaN(equipmentId)) return res.json({ error: "Invalid equipment ID" }, { status: 400 });
 
+        const body = await req.json();
+        const { reason } = body;
+
         // Validate user.
         
         // Fetch specified equipment by ID and check if it exists.
@@ -83,7 +86,7 @@ export async function DELETE(
 
 
         // Log the activity for deleted equipment using helper logger method.
-        await activityLogger(user, "delete", "Equipment deleted", `Equipment ${equipment.name} with id ${equipment.id} deleted by user ${user.username}`);       
+        await activityLogger(user, "delete", "Equipment deleted", `Equipment ${equipment.name} with id ${equipment.id} deleted by user ${user.username} | Reason: ${reason}`, equipmentId);       
 
         // Delete specified equipment.
         await storage.deleteEquipment(equipmentId);

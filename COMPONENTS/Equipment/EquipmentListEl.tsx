@@ -60,7 +60,7 @@ const EquipmentListEl = ({ equipment, userRole }: { equipment: IEquipment, userR
             <TableCell>{equipment.location}</TableCell>
             <TableCell>{equipment.lastEvent}</TableCell>
             <TableCell>{equipment.nextEvent}</TableCell>
-            <TableCell>{equipment.healthIndex ?? "-"}</TableCell>
+            <TableCell>{equipment.healthIndex ?? "-"}%</TableCell>
             {userRole === "admin" && (
                 <TableCell onClick={(e) => e.stopPropagation()}>
                     <SlideDialog
