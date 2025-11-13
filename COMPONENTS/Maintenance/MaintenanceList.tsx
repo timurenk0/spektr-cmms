@@ -9,6 +9,8 @@ import AllMaintenanceList from "./Lists/AllMainetnanceList";
 import UpcomingMaintenanceList from "./Lists/UpcomingMaintenanceList";
 import GeneralMaintenanceList from "./Lists/GeneralMaintenanceList";
 import ListSkeleton from "../SKELETONS/ListSkeleteon";
+import CompleteMaintenanceList from "./Lists/CompleteMaintenanceList";
+import OverdueMaintenanceList from "./Lists/IncompleteMaintenanceList";
 
 const MaintenanceList = () => {
   const [value, setValue] = useState("All");
@@ -18,8 +20,8 @@ const MaintenanceList = () => {
     queryKey: ["/api/maintenances"]
   });
 
-  const { data: mEvents, isLoading: isLoadingMEvents } = useQuery<IMaintenanceEvent[]>({
-    queryKey: ["/api/maintenance-events"]
+  const { data: info, isLoading: isLoadingInfo } = useQuery<{total: number, upcoming: number, overdue: number, complete: number, incomplete: number}>({
+    queryKey: ["/api/maintenance-events/info"]
   });
 
   const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ equips: IEquipment[], totalCount: number }>({
@@ -34,36 +36,33 @@ const MaintenanceList = () => {
   const isLoading =
     (isLoadingMaintenances || !maintenances) ||
     (isLoadingEquipments || !equipments) ||
-    (isLoadingMEvents || !mEvents);
+    (isLoadingInfo || !info);
 
   if (isLoading) return (
     <ListSkeleton />
   )
 
-  const upcomingMantenances = mEvents.filter(ev => ev.status === "upcoming");
-  const completeMaintenances = mEvents.filter(ev => ev.status === "complete");
-  const overdueMaintenances = mEvents.filter(ev => ev.status === "overdue");
-
+  
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>
       <TabContext value={value}>
         <TabList onChange={handleValueChange} variant="fullWidth" className="border-b border-gray-300">
-          <Tab label={`All (${mEvents.length})`} value="All"  />
-          <Tab label={`Upcoming (${upcomingMantenances.length})`} value="Upcoming"  />
-          <Tab label={`Complete (${completeMaintenances.length})`} value="Complete"  />
-          <Tab label={`Overdue (${overdueMaintenances.length})`} value="Overdue"  />
+          <Tab label={`All (${info.total})`} value="All"  />
+          <Tab label={`Upcoming (${info.upcoming})`} value="Upcoming"  />
+          <Tab label={`Complete (${info.complete})`} value="Complete"  />
+          <Tab label={`Overdue (${info.overdue})`} value="Overdue"  />
         </TabList>
         <TabPanel value="All">
-          <AllMaintenanceList maintenances={maintenances} mEvents={mEvents} equipments={equipments.equips} />
+          <AllMaintenanceList maintenances={maintenances} info={info} equipments={equipments.equips} />
         </TabPanel>
         <TabPanel value="Upcoming">
-          <UpcomingMaintenanceList mEvents={upcomingMantenances} equipments={equipments.equips} />
+          <UpcomingMaintenanceList equipments={equipments.equips} />
         </TabPanel>
         <TabPanel value="Complete">
-          <GeneralMaintenanceList mEvents={completeMaintenances} equipments={equipments.equips} complete />
+          <CompleteMaintenanceList equipments={equipments.equips} />
         </TabPanel>
         <TabPanel value="Overdue">
-          <GeneralMaintenanceList mEvents={overdueMaintenances} equipments={equipments.equips} />
+          <OverdueMaintenanceList equipments={equipments.equips} />
         </TabPanel>
       </TabContext>
     </Paper>

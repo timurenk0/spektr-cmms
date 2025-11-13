@@ -3,11 +3,17 @@ import Image from "next/image";
 
 const AllMaintenanceList = ({
   maintenances,
-  mEvents,
+  info,
   equipments,
 }: {
   maintenances: IMaintenance[],
-  mEvents: IMaintenanceEvent[],
+  info: {
+    total: number,
+    upcoming: number,
+    overdue: number,
+    complete: number,
+    incomplete: number
+  },
   equipments: IEquipment[],
 }) => {
 
@@ -43,10 +49,10 @@ const AllMaintenanceList = ({
                 </div>
               </div>
             </TableCell>
-            <TableCell>{mEvents.filter(ev=>ev.maintenanceId===m.id).length}</TableCell>
-            <TableCell>{mEvents.filter(ev=>ev.maintenanceId===m.id && ev.status==="upcoming").length}</TableCell>
-            <TableCell>{mEvents.filter(ev=>ev.maintenanceId===m.id && ev.status==="complete").length}</TableCell>
-            <TableCell>{mEvents.filter(ev=>ev.maintenanceId===m.id && ev.status==="overdue").length}</TableCell>
+            <TableCell>{info.total}</TableCell>
+            <TableCell>{info.upcoming}</TableCell>
+            <TableCell>{info.complete}</TableCell>
+            <TableCell>{info.overdue}</TableCell>
           </TableRow>
         )}): (
           <TableRow>

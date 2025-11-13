@@ -10,7 +10,7 @@ import {
 import * as schema from "./Database/schema";
 import { db } from "./Database/db";
 import { generateEvents } from "./Middleware/EventManager";
-import { eq, and, desc, sql, not, ExtractTablesWithRelations, lt } from "drizzle-orm";
+import { eq, and, desc, sql, not, ExtractTablesWithRelations, lt, gte, lte } from "drizzle-orm";
 import type { NeonDatabase, NeonQueryResultHKT } from "drizzle-orm/neon-serverless";
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import jwt from "jsonwebtoken";
@@ -199,8 +199,90 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
     
     /* ============================================== Maintenance Events Methods ============================================== */
-    async getMaintenanceEvents(): Promise<MaintenanceEvent[]> {
-        return await db.select().from(maintenanceEvents);
+    async getMaintenanceEvents(status: string, start?: string, end?: string): Promise<MaintenanceEvent[]> {
+        let conditions = [];
+
+        if (start && end) {
+            conditions.push(and(gte(maintenanceEvents.start, start), lte(maintenanceEvents.start, end)));
+        }
+
+        if (status !== "any") {
+            conditions.push(eq(maintenanceEvents.status, status));
+        }
+        
+        let events = await db.select({
+            id: maintenanceEvents.id,
+            equipmentId: maintenanceEvents.equipmentId,
+            maintenanceId: maintenanceEvents.maintenanceId,
+            title: maintenanceEvents.title,
+            description: maintenanceEvents.description,
+            level: maintenanceEvents.level,
+            start: maintenanceEvents.start,
+            end: maintenanceEvents.end,
+            scheduledAt: maintenanceEvents.scheduledAt,
+            performedAt: maintenanceEvents.performedAt,
+            status: maintenanceEvents.status,
+            color: sql<string>`
+                CASE
+                    WHEN ${maintenanceEvents.status} = 'complete' THEN
+                        CASE ${maintenanceEvents.level}
+                            WHEN 'A' THEN 'oklch(43.2% 0.095 166.913)'
+                            WHEN 'B' THEN 'oklch(68.1% 0.162 75.834)'
+                            WHEN 'C' THEN 'oklch(42.4% 0.199 265.638)'
+                            WHEN 'D' THEN 'oklch(43.8% 0.218 303.724)'
+                            WHEN 'E' THEN '#CC3700'
+                            ELSE '#4D96FF'
+                        END
+                    WHEN ${maintenanceEvents.status} = 'incomplete' THEN '#FF6B6B'
+                    WHEN ${maintenanceEvents.start} >= CURRENT_DATE THEN
+                        CASE ${maintenanceEvents.level}
+                            WHEN 'A' THEN 'oklch(76.5% 0.177 163.223)'
+                            WHEN 'B' THEN 'oklch(85.2% 0.199 91.936)'
+                            WHEN 'C' THEN 'oklch(70.7% 0.165 254.624)'
+                            WHEN 'D' THEN 'oklch(71.4% 0.203 305.504)'
+                            WHEN 'E' THEN '#FF4500'
+                            ELSE '#4D96FF'
+                        END
+                    WHEN ${maintenanceEvents.start} < CURRENT_DATE
+                        AND CURRENT_DATE - ${maintenanceEvents.start} < 10 THEN '#FF8C00'
+                    ELSE '#FF6B6B' -- fallback incomplete
+                END
+            `.as("color")
+        }).from(maintenanceEvents).where(and(...conditions));
+
+        return events;
+    }
+
+    async getMaintenanceEventsInfo(): Promise<{total: number, upcoming: number, overdue: number, complete: number, incomplete: number}> {
+        const today = new Date().toISOString().slice(0, 10); 
+        
+        const upcomingEvents = (await db.select().from(maintenanceEvents).
+                            where(gte(maintenanceEvents.scheduledAt, today))).length;
+        const overdueEvents = (await db.select().from(maintenanceEvents).
+                            where(
+                                and(
+                                    not(
+                                        eq(maintenanceEvents.status, "incomplete")
+                                    ),
+                                    lte(maintenanceEvents.scheduledAt, today)
+                                )
+                            )).length;
+        const completeEvents = (await db.select().from(maintenanceEvents).
+                            where(
+                                eq(maintenanceEvents.status, "complete")
+                            )).length;
+        const incompleteEvents = (await db.select().from(maintenanceEvents).
+                            where(
+                                eq(maintenanceEvents.status, "incomplete")
+                            )).length;
+
+        return {
+            total: upcomingEvents+overdueEvents+completeEvents+incompleteEvents,
+            upcoming: upcomingEvents,
+            overdue: overdueEvents,
+            complete: completeEvents,
+            incomplete: incompleteEvents,
+        };
     }
     
     async getMaintenanceEvent(id: number): Promise<MaintenanceEvent | undefined> {
@@ -349,9 +431,8 @@ export class DatabaseStorage {
             "incomplete": 1
         };
 
-        const score = levelCoeffs[event.level]*statusCoeffs[event.status];
+        const score = event.status ? levelCoeffs[event.level]*statusCoeffs[event.status] : "no status yet";
 
-        console.log(levelCoeffs[event.level]+"*"+statusCoeffs[event.status])
         
         return await db.update(equipments).set({ healthIndex: sql`${equipments.healthIndex} - ${score}` }).where(eq(equipments.id, event.equipmentId));
     }

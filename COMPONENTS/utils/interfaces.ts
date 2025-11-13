@@ -39,7 +39,7 @@ interface IEquipment {
     department: string,
     equipmentImage: string,
     healthIndex: string | null,
-    notes: string,
+    notes: string | null,
     lastEvent: string,
     nextEvent: string,
 }

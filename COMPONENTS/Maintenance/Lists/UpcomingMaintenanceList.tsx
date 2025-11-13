@@ -5,26 +5,35 @@ import { Paper, Tab } from "@mui/material";
 import { useState } from "react";
 import GeneralMaintenanceList from "./GeneralMaintenanceList";
 import { differenceInDays } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
 
 
 const UpcomingMaintenanceList = ({
-    mEvents,
     equipments
 }: {
-    mEvents: IMaintenanceEvent[],
     equipments: IEquipment[]
 }) => {
     const [value, setValue] = useState("7");
+    
+    const today = new Date();
+    const latestDate = new Date(today);
+    latestDate.setDate(latestDate.getDate()+28);
+
+    const { data: events, isLoading: isLoadingEvents } = useQuery<IMaintenanceEvent[]>({
+        queryKey: [`/api/maintenance-events?status=upcoming&start=${today.toISOString().slice(0, 10)}&end=${latestDate.toISOString().slice(0, 10)}`]
+    });
+
+    if (!events || isLoadingEvents) return <h1>Loading...</h1>
 
     const handleValueChange = (event: React.SyntheticEvent, val: string) => {
         setValue(val);
     }
 
     
-    const mEvents_7 = mEvents.filter(ev => differenceInDays(new Date(ev.start), new Date()) <= 7);
-    const mEvents_14 = mEvents.filter(ev => differenceInDays(new Date(ev.start), new Date()) <= 14);
-    const mEvents_21 = mEvents.filter(ev => differenceInDays(new Date(ev.start), new Date()) <= 21);
-    const mEvents_28 = mEvents.filter(ev => differenceInDays(new Date(ev.start), new Date()) <= 28);
+    const mEvents_7 = events.filter(ev => differenceInDays(new Date(ev.start), new Date()) <= 7);
+    const mEvents_14 = events.filter(ev => differenceInDays(new Date(ev.start), new Date()) <= 14);
+    const mEvents_21 = events.filter(ev => differenceInDays(new Date(ev.start), new Date()) <= 21);
+    const mEvents_28 = events;
     
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>

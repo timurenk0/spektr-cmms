@@ -75,7 +75,8 @@ export async function generateEvents(
 
             if (eventEndDate > end) break;
 
-            let status = (new Date() <= eventStartDate) ? "upcoming" : differenceInDays(new Date(), eventStartDate) > 10 ? "incomplete" : "overdue";
+            const today = new Date();
+            const status = (today <= eventStartDate) ? "upcoming" : differenceInDays(today, eventStartDate) > 10 ? "incomplete" : "overdue";
 
             const event: InsertMaintenanceEvent = {
                 title: `${equipment.name} maintenance`,
@@ -83,7 +84,6 @@ export async function generateEvents(
                 equipmentId: equipment.id,
                 maintenanceId: maintenance.id,
                 level, status,
-                color: status !== "incomplete" ? getColor(level) : "oklch(44.4% 0.177 26.899)",
                 start: format(eventStartDate, "yyyy-MM-dd"),
                 end: format(eventEndDate, "yyyy-MM-dd"),
                 scheduledAt: format(eventStartDate, "yyyy-MM-dd")

@@ -76,7 +76,7 @@ export const equipments = pgTable(
     totalWorkingHours: integer("total_working_hours"),
     requirements: text("requirements").notNull(),
     location: text("location").notNull(),
-    department: text("department"),
+    department: text("department").notNull(),
     equipmentImage: text("equipment_image").notNull(),
     healthIndex: decimal("health_index"),
     notes: text("notes"),
@@ -137,9 +137,10 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   performedAt: date("performed_at")
 }, (table) => ({
     levelCheck: check("level_check", sql`level IN ('A', 'B', 'C', 'D', 'E')`),
-    statusCheck: check("status_check", sql`status IN ('complete', 'incomplete')`),
+    statusCheck: check("status_check", sql`status IN ('upcoming', 'overdue', 'incomplete', 'complete')`),
     maintenanceIdIdx: index("idx_maintenance_events_maintenance_id").on(table.maintenanceId),
     startIdx: index("idx_maintenance_events_start_date").on(table.start),
+    statusIdx: index("idx_maintenance_events_status").on(table.status),
     uniqueEquipmentStartLevel: unique("unique_equipment_start_level").on(table.equipmentId, table.start, table.level)
 }));
 
