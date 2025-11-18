@@ -160,7 +160,7 @@ export default function AddEquipmentForm(
             return data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/equipments"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/equipments?limit=10&page=1"] });
             queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
             toast.success(`Equipment ${equipmentId ? "updated" : "added"} successfully`, {
                 duration: 2000,
