@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Body from "@/COMPONENTS/Body";
 import { Toaster } from "react-hot-toast";
-import Providers from "@/COMPONENTS/utils/providers";
+import Providers from "./providers/SessionProvider";
+import QueryProvider from "./providers/QueryProvider";
 
 
 export const metadata: Metadata = {
@@ -15,30 +16,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  let initialUser = null;
-  try {
-    const response = await fetch("/api/auth/me", {
-      credentials: "include",
-      cache: "no-store"
-    });
-    if (response.ok) initialUser = await response.json();
-  } catch (error) {
-    console.error("Error", error)
-  }
-
   return (
     <html lang="en">
       <head>
       </head>
       <body>
-        <Providers initialUser={initialUser}>
+        <Providers>
+          <QueryProvider>
             <main className="flex h-screen overflow-hidden">
               <Body>
                 {children}
                 <Toaster />
               </Body>
             </main>
+          </QueryProvider>
         </Providers>
       </body>
     </html>

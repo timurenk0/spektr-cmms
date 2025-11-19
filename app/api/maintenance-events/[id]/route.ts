@@ -1,5 +1,5 @@
 import { insertMaintenanceEventSchema } from "@/BACKEND/Database/schema";
-import { validateUser } from "@/BACKEND/Middleware/AuthService";
+import { isAdmin } from "@/app/lib/authorize";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { differenceInDays } from "date-fns";
@@ -32,7 +32,7 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const user = await validateUser("admin");
+        const user = await isAdmin();
         
         const { id } = await params;
         const eventId = parseInt(id);

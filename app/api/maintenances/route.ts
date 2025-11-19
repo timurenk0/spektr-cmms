@@ -1,5 +1,5 @@
 import { insertMaintenanceSchema } from "@/BACKEND/Database/schema";
-import { validateUser } from "@/BACKEND/Middleware/AuthService";
+import { isAdmin } from "@/app/lib/authorize";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { NextRequest, NextResponse as res } from "next/server";
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         // Validate user.
-        const user = await validateUser("admin");
+        const user = await isAdmin();
 
         // Parse request body to JSON format.
         // Parse maintenance data from request body with DB schema for validation.

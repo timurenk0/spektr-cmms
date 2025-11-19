@@ -9,7 +9,7 @@ import {
 } from "./Database/schema";
 import * as schema from "./Database/schema";
 import { db } from "./Database/db";
-import { generateEvents } from "./Middleware/EventManager";
+import { generateEvents } from "./Utils/EventManager";
 import { eq, and, desc, sql, not, ExtractTablesWithRelations, lt, gte, lte, isNull } from "drizzle-orm";
 import type { NeonDatabase, NeonQueryResultHKT } from "drizzle-orm/neon-serverless";
 import type { PgTransaction } from "drizzle-orm/pg-core";

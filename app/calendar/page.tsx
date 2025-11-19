@@ -8,7 +8,6 @@ import tippy from "tippy.js";
 import { useCallback, useState } from "react";
 import React from "react";
 import { EventClickArg } from "@fullcalendar/core/index.js";
-import { useAuth } from "@/COMPONENTS/utils/authContext";
 import EventForm from "@/COMPONENTS/Calendar/EventForm";
 
 
@@ -30,15 +29,6 @@ const MyCalendar = () => {
     },
     []
   );
-  const { user, isLoading: isLoadingUser } = useAuth();
-
-
-  const isLoading = (!user || isLoadingUser);
-
-  if (isLoading) return (
-    <h1>Loading...</h1>
-  )
-
   return (
     <>
       <FullCalendar
@@ -75,7 +65,7 @@ const MyCalendar = () => {
             }}
       />
 
-      {(selectedEvent && user.role === "admin") && <EventForm event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
+      {(selectedEvent) && <EventForm event={selectedEvent} onClose={() => setSelectedEvent(null)} />}
     </>
   )
 }

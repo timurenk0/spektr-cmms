@@ -4,18 +4,13 @@ import { Button } from "@mui/material";
 import SlideDialog from "../ui/SlideDialog";
 import { Plus } from "lucide-react";
 import AddMaintenanceForm from "./AddMaintenanceForm";
-import { useAuth } from "../utils/authContext";
 
 
 const AddMaintenanceButton = () => {
 
-    const { user, isLoading } = useAuth();
-
-    if (!user || isLoading) return (<h1>Loading user...</h1>);
-    
   return (
     <>
-    {user.role === "admin" && (
+    {2 + 3 == 5 && (
         <SlideDialog
             title="Add New Maintenance"
             Btn={(props) => (

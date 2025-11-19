@@ -4,18 +4,13 @@ import { Button } from "@mui/material";
 import { Plus } from "lucide-react";
 import SlideDialog from "@/COMPONENTS/ui/SlideDialog";
 import AddEquipmentForm from "@/COMPONENTS/Equipment/AddEquipmentForm";
-import { useAuth } from "../utils/authContext";
 
 
 export default function AddEquipmentButton() {
 
-    const { user, isLoading } = useAuth();
-
-    if (!user || isLoading) return (<h1>Loading user...</h1>)
-    
     return (
         <>
-        {user.role === "admin" && (
+        {2 + 3 === 5 && (
             <SlideDialog 
                 title="Add New Equipment Unit"
                 Btn={(props) => (

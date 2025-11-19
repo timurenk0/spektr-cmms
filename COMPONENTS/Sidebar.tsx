@@ -3,52 +3,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import React from 'react'
 import { usePathname } from 'next/navigation'
-import { useAuth } from './utils/authContext'
-import { useMutation } from '@tanstack/react-query'
+import { signOut, useSession } from 'next-auth/react'
 import toast from 'react-hot-toast'
 
 const Sidebar = () => {
-
-    const pathName = usePathname();
-    const { user, setUser, isLoading } = useAuth();
-
-
-    const mutation = useMutation({
-        mutationFn: async () => {
-            const response = await fetch("/api/auth/logout", {
-                method: "POST",
-                credentials: "include"
-            });
-
-            const data = await response.json();
-            
-            if (!response.ok) {
-                const message = data.error || `Request failed: ${response.status} ${response.statusText}`;
-                throw new Error(message);
-            }
-        },
-        onSuccess: () => {
-            setUser(null);
-            toast.success("Logged out successfully", {
-                duration: 2000,
-                position: "bottom-right",
-                icon: "✅"
-            });
-        },
-        onError: (error) => {
-            toast.error(`Failed to logout: ${error.message}`, {
-                duration: 2000,
-                position: "bottom-right",
-                icon: "❌"
-            });
-        }
-    });
-
-    const handleLogout = () => {
-        mutation.mutate();
-    }
-
+    const { data: session, status: sessionStatus } = useSession();
     
+    const pathName = usePathname();
+
     const links = [
         {
             name: "Dashboard",
@@ -143,13 +105,13 @@ const Sidebar = () => {
                     </div>
                     <div>
                         <p className="text-sm font-medium">
-                            {isLoading ? "Fetching user..." : !user ? "No User" : user.username}
+                            {session?.user.username}
                         </p>
-                        <p className="text-xs text-gray-500">{isLoading ? "" : !user ? "" : user.role}</p>
+                        <p className="text-xs text-gray-500">{session?.user.role}</p>
                     </div>
                     
                 </Link>
-                <button className="text-red-600/75 p-1 rounded-2xl cursor-pointer hover:bg-gray-50" onClick={handleLogout}>
+                <button className="text-red-600/75 p-1 rounded-2xl cursor-pointer hover:bg-gray-50" onClick={() => signOut({ callbackUrl: "/login" })}>
                     <LogOut />
                 </button>
             </div>

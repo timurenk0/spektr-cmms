@@ -2,7 +2,7 @@ import { storage } from "@/BACKEND/storage";
 import { NextRequest, NextResponse as res } from "next/server";
 import { insertEquipmentSchema } from "@/BACKEND/Database/schema";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
-import { validateUser } from "@/BACKEND/Middleware/AuthService";
+import { isAdmin } from "@/app/lib/authorize";
 
 
 export async function GET(
@@ -26,7 +26,7 @@ export async function GET(
 export async function POST(req: NextRequest) {
     try {
         // Validate user.
-        const user = await validateUser("admin");
+        const user = await isAdmin();
                 
         // Parse request body to JSON format.
         // Parse equipment data from request body with DB schema for validation.

@@ -1,5 +1,5 @@
 import { insertDocumentSchema } from "@/BACKEND/Database/schema";
-import { validateUser } from "@/BACKEND/Middleware/AuthService";
+import { isAdmin } from "@/app/lib/authorize";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { NextRequest, NextResponse as res } from "next/server";
@@ -20,7 +20,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
     try {
-        const user = await validateUser("admin");
+        const user = await isAdmin();
 
         const body = await req.json();
         const documentValidatedData = insertDocumentSchema.parse(body);

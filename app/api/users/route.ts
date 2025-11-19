@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse as res } from "next/server";
 import { insertUserSchema } from "@/BACKEND/Database/schema";
 import { storage } from "@/BACKEND/storage";
-import { authService, authorize } from "@/BACKEND/Middleware/AuthService";
+import { isAdmin } from "@/app/lib/authorize";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 
 
@@ -17,11 +17,8 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
     try {
-        // Fetch user using authService helper function and verify user role.
         // Throw errors if user info is not found or user is unauthorized.
-        const user = await authService();
-        if (!user) return res.json({ error: "Unauthorized" }, { status: 401 });
-        if (!authorize(user, "admin")) return res.json({ error: "Forbidden" }, { status: 403 });
+        const user = isAdmin();
 
         // Pull user data from the request body.
         // Parse user data with DB schema for validation.

@@ -7,21 +7,14 @@ import theme from "@/theme";
 import { CssBaseline } from "@mui/material";
 import { useEffect, useState } from "react";
 import { redirect, usePathname } from "next/navigation";
-import { useAuth } from "./utils/authContext";
 
 
 const Body = ({children}: Readonly<{children: React.ReactNode}>) => {
     const [mounted, setMounted] = useState(false);
 
-    const { user, isLoading } = useAuth();
-
     const pathname = usePathname();
     const hideLayout = pathname === "/login";
 
-    if ((!isLoading && !user) && !hideLayout) {
-        redirect("/login")
-    }
-    
     let pageName = pathname.length > 1 ? pathname.slice(1, 2).toUpperCase() + pathname.slice(2).toLowerCase() : "Dashboard";
 
     if (pageName.includes("Equipment/")) {

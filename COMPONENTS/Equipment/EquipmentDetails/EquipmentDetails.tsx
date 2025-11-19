@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query"
 import Image from "next/image";
 import React, { useState } from "react";
-import { useAuth } from "../../utils/authContext";
 import { Button, Paper, Tab } from "@mui/material";
 import { Activity, ArrowBigDown, Calendar, ChevronLeft, Clock, Pencil, RotateCcw, Wrench } from "lucide-react";
 import Link from "next/link";
@@ -21,13 +20,11 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
     setActiveTab(val);
   }
 
-  const { user, isLoading: isLoadingUser } = useAuth();
-
   const { data: equipment, isLoading: isLoadingEquipment } = useQuery<IEquipment>({
       queryKey: [`/api/equipments/${equipmentId}`]
   });
 
-  const isLoading = (!equipment || isLoadingEquipment) || (!user || isLoadingUser);
+  const isLoading = (!equipment || isLoadingEquipment);
   if (isLoading) return (<h1>Loading...</h1>);
 
 
@@ -74,7 +71,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                         equipment.status === "out of service" && "bg-red-200 text-red-800"
                       }`}>
                         {equipment.status.slice(0, 1).toUpperCase()}{equipment.status.slice(1).toLowerCase()}
-                        { user.role === "admin" && (
+                        { 2 + 3 == 5 && (
                           <button
                           onClick={() => setStatusSelectionOpen(!statusSelectionOpen)}
                           className={`
@@ -204,10 +201,10 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
               <EquipmentOverview equipment={equipment} />
             </TabPanel>
             <TabPanel value="documents">
-              <EquipmentDocuments equipmentId={equipment.id} userRole={user.role} />
+              <EquipmentDocuments equipmentId={equipment.id} userRole={"admin"} />
             </TabPanel>
             <TabPanel value="photo">
-              <EquipmentPhotos equipmentId={equipment.id} userRole={user.role} />
+              <EquipmentPhotos equipmentId={equipment.id} userRole={"admin"} />
             </TabPanel>
             <TabPanel value="activity">
               <EquipmentActivity equipmentId={equipment.id} />

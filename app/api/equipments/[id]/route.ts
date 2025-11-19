@@ -1,5 +1,5 @@
 import { insertEquipmentSchema } from "@/BACKEND/Database/schema";
-import { validateUser } from "@/BACKEND/Middleware/AuthService";
+import { isAdmin } from "@/app/lib/authorize";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { NextRequest, NextResponse as res } from "next/server";
@@ -39,7 +39,7 @@ export async function PUT(
         if (isNaN(equipmentId)) return res.json({ error: "Invalid equipment ID" }, { status: 400 });
 
         // Validate user.
-        const user = await validateUser("admin");
+        const user = await isAdmin();
 
         // Fetch specified equipment by passed ID and check if it exists.
         const equipment = await storage.getEquipment(equipmentId);
@@ -68,7 +68,7 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const user = await validateUser("admin");
+        const user = await isAdmin();
 
         // Check wheter passed equipment ID is valid.
         const { id } = await params;
