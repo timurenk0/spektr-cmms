@@ -1,3 +1,4 @@
+import { TEquipment, TMaintenanceEvent } from '@/COMPONENTS/utils/types';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import Image from 'next/image';
 import React from 'react'
@@ -37,8 +38,8 @@ const GeneralMaintenanceList = ({
     equipments,
     complete
 }: {
-    mEvents: IMaintenanceEvent[],
-    equipments: IEquipment[],
+    mEvents: TMaintenanceEvent[],
+    equipments: TEquipment[],
     complete?: boolean
 }) => {
 

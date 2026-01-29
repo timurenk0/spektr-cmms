@@ -1,3 +1,4 @@
+import { TDocument } from '@/COMPONENTS/utils/types';
 import { format } from 'date-fns';
 import { FileText } from 'lucide-react'
 import Link from 'next/link'
@@ -5,7 +6,7 @@ import React from 'react'
 
 
 type Props = {
-    documents: IDocument[],
+    documents: TDocument[],
     userRole: string,
     deleteDocumentMutation: (documentId: number) => void;
 }

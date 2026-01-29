@@ -12,10 +12,12 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Button, FormControl, FormControlLabel, FormLabel, InputAdornment, InputLabel, MenuItem, Radio, RadioGroup, Select, TextField } from "@mui/material";
 import { EquipmentTypes } from "../utils/equipmentTypes";
+import { TEquipment } from "../utils/types";
 
 
 const formSchema = insertEquipmentSchema.extend({
     name: z.string().min(1, { error: "Equipment name is required" }).transform((val) => val.trim()),
+    tenantId: z.number().min(1, {error: "Tenant ID is required"}),
     manufacturer: z.string().min(1, { error: "Equipment manufacturer is required" }).transform((val) => val.trim()),
     model: z.string().min(1, { error: "Equipment model is required" }).transform((val) => val.trim()),
     assetId: z.string().min(1, { error: "Equipment asset ID is required" }).transform((val) => val.trim()),
@@ -80,7 +82,7 @@ export default function AddEquipmentForm(
         }
     };
 
-    const { data: equipment, isLoading: isLoadingEquipment } = useQuery<IEquipment>({
+    const { data: equipment, isLoading: isLoadingEquipment } = useQuery<TEquipment>({
         queryKey: [`/api/equipments/${equipmentId}`],
         enabled: !!equipmentId
     });
@@ -89,6 +91,7 @@ export default function AddEquipmentForm(
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: "",
+            tenantId: undefined,
             manufacturer: "",
             assetId: "",
             serialNumber: "",
@@ -206,6 +209,21 @@ export default function AddEquipmentForm(
                 fullWidth
                 required
                 {...form.register("name")}
+            />
+            <Controller
+                name="tenantId"
+                control={form.control}
+                defaultValue={undefined}
+                render={({ field }) => (
+                    <FormControl fullWidth>
+                        <InputLabel id="select-type" color="info" required sx={{ margin: "8px 0" }}>Select Type</InputLabel>
+                        <Select labelId="select-type" label="Select Type" {...field} color="info" required sx={{ margin: "8px 0" }}>
+                            {EquipmentTypes.map(type => (
+                                <MenuItem key={type.id} value={type.id}>{type.id}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                )}
             />
             <TextField
                 label="Manufacturer"
@@ -354,7 +372,7 @@ export default function AddEquipmentForm(
                  }}
                 color="info"
                 fullWidth
-                className="col-span-2"
+                margin="dense"
                 required={!equipmentId}
                 onChange={(e) => {
                     const file = (e.target as HTMLInputElement).files?.[0];

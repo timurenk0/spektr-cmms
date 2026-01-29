@@ -1,5 +1,6 @@
 import {
     users, type User, type InsertUser,
+    tenants, type Tenant, type InsertTenant,
     equipments, type Equipment, type InsertEquipment,
     maintenances, type Maintenance, type InsertMaintenance,
     maintenanceEvents, type MaintenanceEvent, type InsertMaintenanceEvent,
@@ -37,6 +38,10 @@ export class DatabaseStorage {
         return (await db.select({id: users.id, username: users.username, role: users.role}).from(users).where(eq(users.id, id)))[0];
     }
 
+    async getUserRoles(): Promise<string[]> {
+        return (await db.selectDistinct({ role: users.role }).from(users).where(not(eq(users.role, "admin")))).map(r=>r.role);
+    }
+
     async getUserByUsername(username: string): Promise<Pick<User, "id" | "username" | "role"> | undefined> {
         return (await db.select({id: users.id, username: users.username, role: users.role}).from(users).where(eq(users.username, username)))[0];
     }
@@ -71,6 +76,7 @@ export class DatabaseStorage {
                     id: user.id,
                     username: user.username,
                     role: user.role,
+                    tenantId: user.tenantId,
                     iat: Math.floor(Date.now() / 1000)
                 },
                 jwtSecret,
@@ -88,8 +94,26 @@ export class DatabaseStorage {
     }
     /* ======================================================================================================================== */
 
+    /* ================================================= Tenants Methods ====================================================== */
+    async getTenants(): Promise<Tenant[]> {
+        return await db.select().from(tenants);
+    }
+
+    async getTenant(id: number): Promise<Tenant | undefined> {
+        return (await db.select().from(tenants).where(eq(tenants.id, id)))[0];
+    }
+
+    async addTenant(insertTenant: InsertTenant): Promise<Tenant> {
+        const [tenant] = await db.insert(tenants).values(insertTenant).onConflictDoNothing({ target: tenants.name }).returning();
+        if (tenant) return tenant;
+        
+        const [existing] = await db.select().from(tenants).where(eq(tenants.name, insertTenant.name));
+        return existing;
+    }
+    /* ======================================================================================================================== */
+
     /* ================================================ Equipment Methods ===================================================== */
-    async getEquipments(concise?:string, limit?: number, page?: number): Promise<{equips: IEquipment[], totalCount: number}> {
+    async getEquipments(concise?:string, limit?: number, page?: number): Promise<{equips: Equipment[], totalCount: number}> {
         // Another format just for fun why not
         const data = await db.query.equipments.findMany({
             orderBy: equipments.id,
@@ -199,7 +223,7 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
     
     /* ============================================== Maintenance Events Methods ============================================== */
-    async getMaintenanceEvents(status: string, start?: string, end?: string): Promise<MaintenanceEvent[]> {
+    async getMaintenanceEvents(status: string, start?: string, end?: string): Promise<(MaintenanceEvent & { color: string })[]> {
         let conditions = [];
 
         if (start && end) {
@@ -212,6 +236,7 @@ export class DatabaseStorage {
         
         let events = await db.select({
             id: maintenanceEvents.id,
+            tenantId: maintenanceEvents.tenantId,
             equipmentId: maintenanceEvents.equipmentId,
             maintenanceId: maintenanceEvents.maintenanceId,
             title: maintenanceEvents.title,

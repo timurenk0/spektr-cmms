@@ -1,14 +1,18 @@
 "use client"
 
 
+import SlideDialog from "@/COMPONENTS/ui/SlideDialog"
+import { TTenant, TUser } from "@/COMPONENTS/utils/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { TabContext, TabList, TabPanel } from "@mui/lab"
 import { Button, FormControl, InputLabel, MenuItem, Paper, Select, Tab, TextField } from "@mui/material"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Plus } from "lucide-react"
+import { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import toast from "react-hot-toast"
 import z from "zod"
+import AddRoleForm from "./forms/AddRoleForm"
 
 
 const formSchema = z.object({
@@ -20,6 +24,9 @@ const formSchema = z.object({
     }),
     role: z.string().min(1, {
         error: "Role is required."
+    }),
+    tenant: z.string().min(1, {
+        error: "Company owner is required"
     })
 });
 type ProfileFormValues = z.infer<typeof formSchema>;
@@ -45,21 +52,32 @@ const Settings = () => {
         setValue(val)
     }
     
+    const { data: userRoles = [], isLoading: isLoadingUserRoles } = useQuery<string[]>({
+        queryKey: ["/api/users/roles"]
+    });
 
+    const { data: tenants = [], isLoading: isLoadingTenants } = useQuery<TTenant[]>({
+        queryKey: ["/api/tenants"]
+    });
+
+    
+    
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             username: "",
             password: "",
-            role: ""
+            role: "",
+            tenant: ""
         }
     });
-
+    
     const mutation = useMutation({
         mutationFn: async (values: ProfileFormValues) => {
             if (values.role.toLowerCase() === "admin") {
                 console.error("You think you are the smartest huh?");
-            }
+            };
+
             const response = await fetch("/api/users", {
                 method: "POST",
                 headers: {
@@ -69,7 +87,7 @@ const Settings = () => {
             });
 
             const data = await response.json().catch(() => null);
-
+            
             if (!response.ok) {
                 const message = data.error || `Request failed: ${response.status} ${response.statusText}`;
                 throw new Error(message);
@@ -79,6 +97,7 @@ const Settings = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/tenants"] });
             toast.success("User added successfully", {
                 duration: 2000,
                 position: "bottom-right",
@@ -87,6 +106,7 @@ const Settings = () => {
             form.reset();
         },
         onError: (error) => {
+            console.error(error);
             toast.error(`Failed to add user: ${error.message}`, {
                 duration: 2000,
                 position: "bottom-right",
@@ -96,12 +116,72 @@ const Settings = () => {
     });
     
     const onSubmit = (values: ProfileFormValues) => {
+        console.log("values", values)
         mutation.mutate(values);
+    };
+    
+    const addRole = (role: string) => {
+        const normalizedRole = role.trim().toLowerCase();
+        if (!normalizedRole) return;
+        
+        if (availableRoles.includes(normalizedRole)) {
+            toast.error("This user role already exists!", {
+                duration: 2000,
+                position: "bottom-right",
+                icon: "❕"
+            });
+        } else {
+            setAvailableRoles((prev) => [...prev, normalizedRole]);
+            form.setValue("role", normalizedRole);
+            toast.success("User role added successfully", {
+                duration: 2000,
+                position: "bottom-right",
+                icon: "✅"
+            });
+        }
     }
+    
+    const [availableRoles, setAvailableRoles] = useState<string[]>([]);
+    const [availableTenants, setAvailableTenants] = useState<string[]>([]);
+
+    useEffect(()=>{
+        if (userRoles.length > 0) {
+            setAvailableRoles(userRoles);
+        }
+        if (tenants.length > 0) {
+            setAvailableTenants(tenants.map(t=>t.name));
+        }
+    }, [userRoles, tenants]);
+    
+    const addTenant = (name: string) => {
+        const normalizedTenant = name.trim().toLowerCase();
+        if (!normalizedTenant) return;
+        
+        if (availableTenants.includes(normalizedTenant)) {
+            toast.error("This owner company already exists!", {
+                duration: 2000,
+                position: "bottom-right",
+                icon: "❕"
+            });
+        } else {
+            setAvailableTenants((prev) => [...prev, normalizedTenant]);
+            form.setValue("tenant", normalizedTenant);
+            toast.success("Owner company name added successfully", {
+                duration: 2000,
+                position: "bottom-right",
+                icon: "✅"
+            });
+        }
+    }
+    
+    const isLoading = (!userRoles || isLoadingUserRoles) || (!tenants || isLoadingTenants);
+    if (isLoading) return (<h1>Loading data...</h1>);
 
     
-  return (
-    <>
+    console.log(role);
+    
+    return (
+        <>
         <div className="mb-6">
             <h1 className="text-xl font-semibld">Settings</h1>
             <p className="text-sm text-gray-600">Manage system preferences</p>
@@ -123,7 +203,7 @@ const Settings = () => {
                 </TabPanel>
                 <TabPanel value="add user">
                     <form onSubmit={form.handleSubmit(onSubmit, (error) => console.error(error))}>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-4 gap-4 pb-10">
                             <TextField
                                 label="Username"
                                 color="info"
@@ -145,19 +225,68 @@ const Settings = () => {
                                 />
                                 <button type="button" className="underline text-blue-500 text-sm me-auto cursor-pointer" onClick={() => form.setValue("password", generatePassword())}>Generate Password</button>
                             </div>
-                            <Controller
-                                name="role"
-                                control={form.control}
-                                defaultValue="user"
-                                render={({ field }) => (
-                                    <FormControl fullWidth margin="dense">
-                                        <InputLabel id="select-role" color="info" required>Select Role</InputLabel>
-                                        <Select labelId="select-role" label="Select Role" {...field} color="info" required>
-                                            <MenuItem value={role}>{role}</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                )}
-                            />
+                            
+                            <div>
+                                <Controller
+                                    name="role"
+                                    control={form.control}
+                                    defaultValue="user"
+                                    render={({ field }) => (
+                                        <FormControl fullWidth margin="dense">
+                                            <InputLabel id="select-role" color="info" required>Select Role</InputLabel>
+                                            <Select labelId="select-role" label="Select Role" {...field} color="info" required>
+                                                {availableRoles.map((role, idx)=>(
+                                                    <MenuItem key={idx} value={role}>{role}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    )}
+                                />
+                                <SlideDialog
+                                    title="Add new role"
+                                    Btn={(props) => (
+                                        <Button color="info" {...props}><Plus size={16} />
+                                            <div className="text-xs">
+                                                Add new role
+                                            </div>
+                                        </Button>
+                                    )}
+                                    DialogForm={(props) => (
+                                        <AddRoleForm {...props} addNewRole={addRole} who="role" />
+                                    )}
+                                />
+                            </div>
+
+                            <div>
+                                <Controller
+                                    name="tenant"
+                                    control={form.control}
+                                    defaultValue={undefined}
+                                    render={({ field }) => (
+                                        <FormControl fullWidth margin="dense">
+                                            <InputLabel id="select-tenant" color="info" required>Select Company</InputLabel>
+                                            <Select labelId="select-tenant" label="Select Company" {...field} color="info" required>
+                                                {availableTenants.map((tenant, idx) => (
+                                                    <MenuItem key={idx} value={tenant}>{tenant}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    )}
+                                />
+                                <SlideDialog
+                                    title="Add owner company"
+                                    Btn={(props) => (
+                                        <Button color="info" {...props}><Plus size={16} />
+                                            <div className="text-xs">
+                                                Add new owner company
+                                            </div>
+                                        </Button>
+                                    )}
+                                    DialogForm={(props) => (
+                                        <AddRoleForm {...props} addNewRole={addTenant} who="owner company" />
+                                    )}
+                                />                                
+                            </div>
                         </div>
                         <div className="mt-4 flex justify-end">
                             <Button type="submit" disabled={mutation.isPending}>{mutation.isPending ? "Adding User..." : "Add User"}</Button>

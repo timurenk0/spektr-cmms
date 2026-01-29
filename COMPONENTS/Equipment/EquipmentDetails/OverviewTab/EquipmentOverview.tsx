@@ -1,7 +1,8 @@
+import { TEquipment } from '@/COMPONENTS/utils/types';
 import { Paper } from '@mui/material'
 import React from 'react'
 
-const EquipmentOverview = ({ equipment }: { equipment: IEquipment }) => {
+const EquipmentOverview = ({ equipment }: { equipment: TEquipment }) => {
   return (
     <>
         <div className="grid grid-cols-3 gap-6">

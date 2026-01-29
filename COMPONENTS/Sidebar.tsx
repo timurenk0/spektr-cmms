@@ -74,7 +74,7 @@ const Sidebar = () => {
 
 
   return (
-    <aside className='bg-white w-64 h-full shadow-md flex-shrink-0 fixed inset-y-0 left-0 z-20 lg:relative tranition-all duration-300'>
+    <aside className='bg-white w-64 h-full shadow-md shrink-0 fixed inset-y-0 left-0 z-20 lg:relative tranition-all duration-300'>
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
             <a href="/" className='flex flex-col items-center'>
                 <Image priority src="/spektr-logo.png" width={300} height={100} alt="SpektrGroup logo" className='h-10 mb-1' />

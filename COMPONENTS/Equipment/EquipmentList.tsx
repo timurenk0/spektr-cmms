@@ -8,6 +8,7 @@ import { EquipmentTypes } from "../utils/equipmentTypes";
 import EquipmentListEl from "./EquipmentListEl";
 import ListSkeleton from "../SKELETONS/ListSkeleteon";
 import { useAuth } from "../utils/authContext";
+import { TEquipment } from "../utils/types";
 
 const EquipmentList = () => {
   const [page, setPage] = useState(0);
@@ -32,7 +33,7 @@ const EquipmentList = () => {
   }
 
 
-  const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ equips: IEquipment[], totalCount: number }>({
+  const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ equips: TEquipment[], totalCount: number }>({
     queryKey: [`/api/equipments?limit=${rowsPerPage}&page=${page+1}`],
   });
 
@@ -146,7 +147,7 @@ const EquipmentList = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredEquipments.length > 0 ? filteredEquipments.map((equipment: IEquipment, idx: number) => (
+              {filteredEquipments.length > 0 ? filteredEquipments.map((equipment, idx) => (
                 <EquipmentListEl key={idx} equipment={equipment} userRole={user.role} />
               )): (
                 <TableRow>

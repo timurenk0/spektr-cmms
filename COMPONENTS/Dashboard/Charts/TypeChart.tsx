@@ -1,6 +1,7 @@
 "use client"
 
 
+import { TEquipment } from "@/COMPONENTS/utils/types";
 import { Button, Paper } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
@@ -22,7 +23,7 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 const TypeChart = () => {
     const [type, setType] = useState<string>("");
 
-    const { data: equipments, isLoading: isLoadingEquipment } = useQuery<{ equips: IEquipment[], count: number }>({
+    const { data: equipments, isLoading: isLoadingEquipment } = useQuery<{ equips: TEquipment[], count: number }>({
         queryKey: ["/api/equipments"]
     });
 
@@ -31,12 +32,12 @@ const TypeChart = () => {
 
 
 
-    const equipmentTypeCount = equipments.equips.reduce((acc: Record<string, number>, equipment: IEquipment) => {
+    const equipmentTypeCount = equipments.equips.reduce((acc: Record<string, number>, equipment: TEquipment) => {
         acc[equipment.type || "Uncategorized"] = (acc[equipment.type || "Uncategorized"] || 0) + 1;
         return acc;
     }, {});
 
-    const equipmentCategoryCount = equipments.equips.reduce((acc: Record<string, number>, equipment: IEquipment) => {
+    const equipmentCategoryCount = equipments.equips.reduce((acc: Record<string, number>, equipment: TEquipment) => {
         if (equipment.type === type) {
             acc[equipment.category] = (acc[equipment.category] || 0) + 1;
         }

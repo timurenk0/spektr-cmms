@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import AddEquipmentForm from "./AddEquipmentForm";
 import SlideDialog from "../ui/SlideDialog";
 import DeleteEquipmentForm from "./DeleteEquipmentForm";
+import { TEquipment } from "../utils/types";
 
 
 const getStatusBadge = (status: string) => {
@@ -36,7 +37,7 @@ const getStatusBadge = (status: string) => {
     }
 }
 
-const EquipmentListEl = ({ equipment, userRole }: { equipment: IEquipment, userRole: string }) => {
+const EquipmentListEl = ({ equipment, userRole }: { equipment: TEquipment, userRole: string }) => {
     const router = useRouter();
 
   return (

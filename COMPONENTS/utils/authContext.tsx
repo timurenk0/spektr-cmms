@@ -1,21 +1,22 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useState } from "react"
+import { TUser } from "./types";
 
 
 type AuthContextType = {
-    user: IUser | null,
+    user: TUser | null,
     isLoading: boolean,
-    setUser: React.Dispatch<React.SetStateAction<IUser | null>>
+    setUser: React.Dispatch<React.SetStateAction<TUser | null>>
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode; initialUser?: IUser }> = ({
+export const AuthProvider: React.FC<{ children: React.ReactNode; initialUser?: TUser }> = ({
     children,
     initialUser
 }) => {
-    const [user, setUser] = useState<IUser | null>(initialUser ?? null);
+    const [user, setUser] = useState<TUser | null>(initialUser ?? null);
     const [isLoading, setIsLoading] = useState(!initialUser);
 
     useEffect(() => {

@@ -10,6 +10,7 @@ import { Upload } from 'lucide-react'
 import SlideDialog from '@/COMPONENTS/ui/SlideDialog'
 import EquipmentDocumentsForm from './EquipmentDocumentsForm'
 import toast from 'react-hot-toast'
+import { TDocument } from '@/COMPONENTS/utils/types'
 
 
 const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, userRole: string }) => {
@@ -22,7 +23,7 @@ const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, us
     }
 
 
-    const { data: documents = [], isLoading: isLoadingDocuments } = useQuery<IDocument[]>({
+    const { data: documents = [], isLoading: isLoadingDocuments } = useQuery<TDocument[]>({
         queryKey: [`/api/equipments/${equipmentId}/documents`],
         enabled: !!equipmentId
     });

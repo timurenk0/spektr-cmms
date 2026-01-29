@@ -22,6 +22,7 @@ import { z } from "zod";
 // Activities table schema
 export const activities = pgTable("activities", {
     id: serial("id").primaryKey(),
+    tenantId: integer("tenant_id").notNull().references(() => tenants.id),
     userId: integer("user_id").notNull().references(() => users.id),
     equipmentId: integer("equipment_id"),
     username: text("username").notNull(),
@@ -44,9 +45,9 @@ export const components = pgTable("components", {
     equipmentId: integer("equipment_id").notNull().references(()=>equipments.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     manufacturer: text("manufacturer").notNull(),
-    partNumber: text("manufacturer").notNull(),
+    partNumber: text("partNumber").notNull(),
     stock: integer("recommended_stock").notNull(),
-    failImpact: text("manufacturer").notNull(),
+    failImpact: text("failImpact").notNull(),
     notes: text("manufacturer")
 });
 
@@ -124,15 +125,15 @@ export const maintenances = pgTable("maintenances", {
   dailyWorkingHours: integer("daily_working_hours").notNull(),
   serviceStartDate: date("service_start_date").notNull().defaultNow(),
   serviceEndDate: date("service_end_date").notNull().defaultNow(),
-  levelAHours: integer("level_a_hours"),
-  levelADuration: integer("level_a_duration"),
-  levelBDuration: integer("level_b_duration"),
-  levelBHours: integer("level_b_hours"),
-  levelCDuration: integer("level_c_duration"),
-  levelCHours: integer("level_c_hours"),
-  levelDDuration: integer("level_d_duration"),
-  levelDHours: integer("level_d_hours"),
-  createdAt: timestamp("created_at").defaultNow(),
+  levelAHours: integer("level_a_hours").notNull(),
+  levelADuration: integer("level_a_duration").notNull(),
+  levelBDuration: integer("level_b_duration").notNull(),
+  levelBHours: integer("level_b_hours").notNull(),
+  levelCDuration: integer("level_c_duration").notNull(),
+  levelCHours: integer("level_c_hours").notNull(),
+  levelDDuration: integer("level_d_duration").notNull(),
+  levelDHours: integer("level_d_hours").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 export const insertMaintenanceSchema = createInsertSchema(maintenances).omit({
   id: true,
@@ -153,14 +154,14 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   end: date("end_date").notNull(),
   scheduledAt: date("scheduledAt").notNull().defaultNow(),
   performedAt: date("performed_at")
-}, (table) => ({
-    levelCheck: check("level_check", sql`level IN ('A', 'B', 'C', 'D', 'E')`),
-    statusCheck: check("status_check", sql`status IN ('upcoming', 'overdue', 'incomplete', 'complete')`),
-    maintenanceIdIdx: index("idx_maintenance_events_maintenance_id").on(table.maintenanceId),
-    startIdx: index("idx_maintenance_events_start_date").on(table.start),
-    statusIdx: index("idx_maintenance_events_status").on(table.status),
-    uniqueEquipmentStartLevel: unique("unique_equipment_start_level").on(table.equipmentId, table.start, table.level)
-}));
+}, (table) => [ 
+    check("level_check", sql`level IN ('A', 'B', 'C', 'D', 'E')`),
+    check("status_check", sql`status IN ('upcoming', 'overdue', 'incomplete', 'complete')`),
+    index("idx_maintenance_events_maintenance_id").on(table.maintenanceId),
+    index("idx_maintenance_events_start_date").on(table.start),
+    index("idx_maintenance_events_status").on(table.status),
+    unique("unique_equipment_start_level").on(table.equipmentId, table.start, table.level)
+]);
 
 export const insertMaintenanceEventSchema = createInsertSchema(maintenanceEvents).omit({
     id: true
@@ -197,7 +198,7 @@ export const users = pgTable("users", {
   tenantId: integer("tenant_id").notNull().references(()=>tenants.id, { onDelete: "cascade" }),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  role: text("role").default("user"),
+  role: text("role").notNull().default("user"),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
@@ -236,11 +237,22 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 
 // Define table relations
 export const activitiesRelations = relations(activities, ({ one }) => ({
+    tenant: one(tenants, {
+        fields: [activities.tenantId],
+        references: [tenants.id]
+    }),
     user: one(users, {
         fields: [activities.userId],
         references: [users.id]
     })
 }));
+
+export const componentsRelations = relations(components, ({ one }) => ({
+    equipment: one(equipments, {
+        fields: [components.equipmentId],
+        references: [equipments.id]
+    })
+}))
 
 export const documentsRelations = relations(documents, ({ one }) => ({
     equipment: one(equipments, {
@@ -249,12 +261,17 @@ export const documentsRelations = relations(documents, ({ one }) => ({
     })
 }));
 
-export const equipmentRelations = relations(equipments, ({ many }) => ({
+export const equipmentRelations = relations(equipments, ({ one, many }) => ({
+    activities: many(activities),
+    components: many(components),
+    document: many(documents),
     maintenances: many(maintenances),
     maintenanceEvents: many(maintenanceEvents),
-    activities: many(activities),
-    document: many(documents),
-    photos: many(photos)
+    photos: many(photos),
+    tenant: one(tenants, {
+        fields: [equipments.tenantId],
+        references: [tenants.id]
+    })
 }));
 
 export const maintenanceRelations = relations(maintenances, ({ one, many }) => ({
@@ -284,6 +301,18 @@ export const photosRelations = relations(photos, ({ one }) => ({
     })
 }));
 
-export const userRelations = relations(users, ({ many }) => ({
+export const tenantRelations = relations(tenants, ({ many }) => ({
+    activities: many(activities),
+    equipments: many(equipments),
+    maintenances: many(maintenances),
+    maintenanceEvents: many(maintenanceEvents),
+    users: many(users),    
+}))
+
+export const userRelations = relations(users, ({ one, many }) => ({
+    tenant: one(tenants, {
+        fields: [users.tenantId],
+        references: [tenants.id]
+    }),
     activities: many(activities),
 }));

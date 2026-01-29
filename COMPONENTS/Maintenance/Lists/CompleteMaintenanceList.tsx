@@ -3,9 +3,10 @@
 import React from 'react'
 import GeneralMaintenanceList from './GeneralMaintenanceList'
 import { useQuery } from '@tanstack/react-query'
+import { TEquipment, TMaintenanceEvent } from '@/COMPONENTS/utils/types'
 
-const CompleteMaintenanceList = ({equipments}: { equipments: IEquipment[] }) => {
-    const { data: events, isLoading: isLoadingEvents } = useQuery<IMaintenanceEvent[]>({
+const CompleteMaintenanceList = ({equipments}: { equipments: TEquipment[] }) => {
+    const { data: events, isLoading: isLoadingEvents } = useQuery<TMaintenanceEvent[]>({
         queryKey: ["/api/maintenance-events?status=complete"]
     });
 

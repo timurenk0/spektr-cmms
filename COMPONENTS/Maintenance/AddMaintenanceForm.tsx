@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import z from "zod"
+import { TEquipment, TMaintenance } from "../utils/types";
 
 
 const formSchema = insertMaintenanceSchema.extend({
@@ -39,15 +40,15 @@ const AddMaintenanceForm = ({
   
   /* ======================================DATA FETCHING=========================================== */
 
-  const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{equips: IEquipment[], totalCount: number}>({
+  const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{equips: TEquipment[], totalCount: number}>({
     queryKey: ["/api/equipments?concise=true"]
   });
   
-  const { data: maintenances, isLoading: isLoadingMaintenances } = useQuery<IMaintenance[]>({
+  const { data: maintenances, isLoading: isLoadingMaintenances } = useQuery<TMaintenance[]>({
     queryKey: ["/api/maintenances"]
   });
   
-  const { data: maintenance, isLoading: isLoadingMaintenance } = useQuery<IMaintenance>({
+  const { data: maintenance, isLoading: isLoadingMaintenance } = useQuery<TMaintenance>({
     queryKey: [`/api/maintenances/${maintenanceId}`],
     enabled: !!maintenanceId
   })
@@ -137,7 +138,7 @@ const AddMaintenanceForm = ({
   if (isLoading) return "sosal?";
 
   const equipmentUnderMaintenance = maintenances.map(m => m.equipmentId);
-  const availableEquipment = equipments.equips.filter(eq => !equipmentUnderMaintenance.includes(eq.id) && eq.status !== "Out Of Service");
+  const availableEquipment = equipments.equips.filter(eq => !equipmentUnderMaintenance.includes(eq.id) && eq.status !== "out of service");
   
   return (
     <form className="space-y-4 px-1" onSubmit={form.handleSubmit(onSubmit, (error) => console.log(error))}>
@@ -150,7 +151,7 @@ const AddMaintenanceForm = ({
             <FormControl fullWidth>
               <InputLabel id="select-equipment" color="info" required sx={{ margin: "8px 0" }}>Select Equipment</InputLabel>
               <Select labelId="select-equipment" label="Select Equipment" {...field} color="info" required sx={{ margin: "8px 0" }}>
-                {availableEquipment.map((eq: IEquipment) => (
+                {availableEquipment.map((eq) => (
                   <MenuItem key={eq.id} value={eq.id}>{eq.name}</MenuItem>
                 ))}
               </Select>

@@ -5,10 +5,11 @@ import { Trash, Upload, ZoomIn } from 'lucide-react';
 import React from 'react'
 import Image from 'next/image';
 import EquipmentPhotoForm from './EquipmentPhotoForm';
+import { TPhoto } from '@/COMPONENTS/utils/types';
 
 const EquipmentPhotos = ({ equipmentId, userRole }: { equipmentId: number, userRole: string }) => {
 
-    const { data: photos = [], isLoading: isLoadingPhotos } = useQuery<IPhoto[]>({
+    const { data: photos = [], isLoading: isLoadingPhotos } = useQuery<TPhoto[]>({
         queryKey: [`/api/equipments/${equipmentId}/photos`],
         enabled: !!equipmentId
     });

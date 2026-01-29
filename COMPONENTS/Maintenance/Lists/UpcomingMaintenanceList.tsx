@@ -6,12 +6,13 @@ import { useState } from "react";
 import GeneralMaintenanceList from "./GeneralMaintenanceList";
 import { differenceInDays } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
+import { TEquipment, TMaintenanceEvent } from "@/COMPONENTS/utils/types";
 
 
 const UpcomingMaintenanceList = ({
     equipments
 }: {
-    equipments: IEquipment[]
+    equipments: TEquipment[]
 }) => {
     const [value, setValue] = useState("7");
     
@@ -19,7 +20,7 @@ const UpcomingMaintenanceList = ({
     const latestDate = new Date(today);
     latestDate.setDate(latestDate.getDate()+28);
 
-    const { data: events, isLoading: isLoadingEvents } = useQuery<IMaintenanceEvent[]>({
+    const { data: events, isLoading: isLoadingEvents } = useQuery<TMaintenanceEvent[]>({
         queryKey: [`/api/maintenance-events?status=upcoming&start=${today.toISOString().slice(0, 10)}&end=${latestDate.toISOString().slice(0, 10)}`]
     });
 

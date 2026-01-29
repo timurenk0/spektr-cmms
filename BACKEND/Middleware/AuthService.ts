@@ -6,7 +6,8 @@ import { NextResponse as res } from "next/server";
 export interface AuthUser {
     id: number,
     username: string,
-    role: string
+    role: string,
+    tenantId: number,
 };
 
 export async function authService(): Promise<AuthUser | null> {

@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { TActivity } from "../utils/types";
 
 
 
@@ -17,7 +18,7 @@ const getActivityColor = (action: string) => {
 
 const RecentActivities = ({ equipmentId } : { equipmentId?: number }) => {
     
-    const { data: activities=[], isLoading: isLoadingActivities } = useQuery<IActivity[]>({
+    const { data: activities=[], isLoading: isLoadingActivities } = useQuery<TActivity[]>({
         queryKey: equipmentId ? [`/api/activities?equipmentId=${equipmentId}`] : ["/api/activities"]
     });
 
@@ -36,10 +37,10 @@ const RecentActivities = ({ equipmentId } : { equipmentId?: number }) => {
             <div className="grid grid-cols-3 gap-6">
                 {activities.length > 0 ? activities.map(activity => (
                     <div key={activity.id} className="flex">
-                        <div className="flex-shrink-0 w-8">
+                        <div className="shrink-0 w-8">
                             <div className={`w-2 h-2 ${getActivityColor(activity.action)} rounded-full mt-2 mx-auto`}></div>
                         </div>
-                        <div className="flex-grow">
+                        <div className="grow">
                             <p className="text-sm">{activity.description}</p>
                             <p className="text-xs text-gray-500">
                                 {format(activity.createdAt, "MMM dd, yyyy | HH:mm:ss | ")}

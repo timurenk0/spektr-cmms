@@ -1,3 +1,4 @@
+import { TEquipment, TMaintenance } from "@/COMPONENTS/utils/types";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material"
 import Image from "next/image";
 
@@ -6,7 +7,7 @@ const AllMaintenanceList = ({
   info,
   equipments,
 }: {
-  maintenances: IMaintenance[],
+  maintenances: TMaintenance[],
   info: {
     total: number,
     upcoming: number,
@@ -14,7 +15,7 @@ const AllMaintenanceList = ({
     complete: number,
     incomplete: number
   },
-  equipments: IEquipment[],
+  equipments: TEquipment[],
 }) => {
 
   
@@ -36,7 +37,7 @@ const AllMaintenanceList = ({
           <TableRow key={m.id} sx={{"& .MuiTableCell-root": { textAlign: "center" }}}>
             <TableCell>
               <div className="flex items-center">
-                <div className="h-[128px] w-[128px] flex items-center">
+                <div className="h-32 w-32 flex items-center">
                   <Image src={eq.equipmentImage} className="max-h-full m-auto" alt="eq_image" width={128} height={128} />
                 </div>
                 <div className="ml-2 text-left">

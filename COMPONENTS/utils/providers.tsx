@@ -3,9 +3,10 @@
 import { QueryClient, QueryClientProvider, QueryFunctionContext } from "@tanstack/react-query";
 import { AuthProvider } from "./authContext";
 import { useState } from "react";
+import { TUser } from "./types";
 
 
-export default function Providers({ children, initialUser }: { children: React.ReactNode, initialUser?: IUser }) {
+export default function Providers({ children, initialUser }: { children: React.ReactNode, initialUser?: TUser }) {
     const defaultQueryFn = async ({ queryKey }: QueryFunctionContext) => {
         const res = await fetch(queryKey[0] as string);
         if (!res.ok) throw new Error("Fetch request failed");

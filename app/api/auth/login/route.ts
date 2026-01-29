@@ -13,6 +13,8 @@ export async function POST(req: NextRequest) {
 
         const user = await storage.loginUser(username, password);
 
+        console.log(user);
+
         // Set an authentication token for a session using cookies.
         (await cookies()).set("authToken", user.token,{
             httpOnly: true,

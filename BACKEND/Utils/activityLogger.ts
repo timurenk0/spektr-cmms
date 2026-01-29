@@ -7,6 +7,7 @@ export default async function activityLogger(user: AuthUser, action: string, tit
     const activityData = insertActivitySchema.parse({
         userId: user.id,
         username: user.username,
+        tenantId: user.tenantId,
         action: action.toLowerCase(),
         title,
         description,

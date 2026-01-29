@@ -12,6 +12,7 @@ import EquipmentOverview from "./OverviewTab/EquipmentOverview";
 import EquipmentDocuments from "./DocumentTab/EquipmentDocuments";
 import EquipmentPhotos from "./PhotoTab/EquipmentPhotos";
 import EquipmentActivity from "./ActivityTab/EquipmentActivity";
+import { TEquipment } from "@/COMPONENTS/utils/types";
 
 const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
   const [statusSelectionOpen, setStatusSelectionOpen] = useState(false);
@@ -23,7 +24,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
 
   const { user, isLoading: isLoadingUser } = useAuth();
 
-  const { data: equipment, isLoading: isLoadingEquipment } = useQuery<IEquipment>({
+  const { data: equipment, isLoading: isLoadingEquipment } = useQuery<TEquipment>({
       queryKey: [`/api/equipments/${equipmentId}`]
   });
 

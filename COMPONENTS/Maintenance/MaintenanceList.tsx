@@ -11,12 +11,13 @@ import GeneralMaintenanceList from "./Lists/GeneralMaintenanceList";
 import ListSkeleton from "../SKELETONS/ListSkeleteon";
 import CompleteMaintenanceList from "./Lists/CompleteMaintenanceList";
 import OverdueMaintenanceList from "./Lists/IncompleteMaintenanceList";
+import { TEquipment, TMaintenance } from "../utils/types";
 
 const MaintenanceList = () => {
   const [value, setValue] = useState("All");
 
   // Fetch data
-  const { data: maintenances, isLoading: isLoadingMaintenances } = useQuery<IMaintenance[]>({
+  const { data: maintenances, isLoading: isLoadingMaintenances } = useQuery<TMaintenance[]>({
     queryKey: ["/api/maintenances"]
   });
 
@@ -24,7 +25,7 @@ const MaintenanceList = () => {
     queryKey: ["/api/maintenance-events/info"]
   });
 
-  const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ equips: IEquipment[], totalCount: number }>({
+  const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ equips: TEquipment[], totalCount: number }>({
     queryKey: ["/api/equipments?concise=true"]
   });
 

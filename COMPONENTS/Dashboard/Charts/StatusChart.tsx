@@ -1,6 +1,7 @@
 "use client"
 
 
+import { TEquipment } from "@/COMPONENTS/utils/types";
 import { Paper } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -15,7 +16,7 @@ import {
 
 const StatusChart = () => {
 
-   const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ equips: IEquipment[], count: number }>({
+   const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ equips: TEquipment[], count: number }>({
     queryKey: ["/api/equipments"]
    });
 
