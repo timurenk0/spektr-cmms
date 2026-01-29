@@ -65,8 +65,7 @@ const SliderStatCard = ({ variant, slides }: SliderStatCardProps) => {
     <div className="relative w-full h-full">
         <div className="overflow-hidden">
             <div className="flex transition-transform duration-300 ease-in-out" style={{ transform: `translateX(-${currentSlide*100}%)` }}>
-
-                {slides.map((slide: {title: string, uniqueEquipmentCount: number, totalTasksCount: number}, idx: number) => (
+                {slides.map((slide, idx: number) => (
                     <div key={idx} className="min-w-full min-h-full">
                         <div className={`bg-white rounded-lg shadow-sm p-5 border-l-4 ${style.border}`}>
                             <div className="flex justify-between">

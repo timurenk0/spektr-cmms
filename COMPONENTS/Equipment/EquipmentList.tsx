@@ -33,7 +33,7 @@ const EquipmentList = () => {
 
 
   const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ equips: IEquipment[], totalCount: number }>({
-    queryKey: [`/api/equipments?limit=${rowsPerPage}&page=${page+1}`]
+    queryKey: [`/api/equipments?limit=${rowsPerPage}&page=${page+1}`],
   });
 
   const isLoading = (isLoadingEquipments || !equipments) || (isLoadingUser || !user);
@@ -65,7 +65,7 @@ const EquipmentList = () => {
   const equipmentLocations = [...(new Set(filteredEquipments.map(eq => eq.location)))];
   const equipmentStatuses = [...(new Set(filteredEquipments.map(eq => eq.status)))];
 
-  const removeFilters = () => {
+  const removeFilters = (): void => {
     setSearchQuery("");
     setTypeFilter("");
     setCategoryFilter("");
@@ -146,21 +146,29 @@ const EquipmentList = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredEquipments.map((equipment: IEquipment, idx: number) => (
+              {filteredEquipments.length > 0 ? filteredEquipments.map((equipment: IEquipment, idx: number) => (
                 <EquipmentListEl key={idx} equipment={equipment} userRole={user.role} />
-              ))}            
+              )): (
+                <TableRow>
+                  <TableCell colSpan={7}>
+                    <div className="italic">No equipment records yet...</div>
+                  </TableCell>
+                </TableRow>
+              )}            
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 50]}
-          component="div"
-          count={equipments.totalCount}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={hanldePageChange}
-          onRowsPerPageChange={handleRowsPerPageChange}
-        />
+        {filteredEquipments.length > 0 && (
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 50]}
+            component="div"
+            count={equipments.totalCount}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={hanldePageChange}
+            onRowsPerPageChange={handleRowsPerPageChange}
+          />
+        )}
       </Paper>
     </>
   )

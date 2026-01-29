@@ -18,6 +18,7 @@ import { z } from "zod";
 // Database tables schemas
 
 
+
 // Activities table schema
 export const activities = pgTable("activities", {
     id: serial("id").primaryKey(),
@@ -28,13 +29,29 @@ export const activities = pgTable("activities", {
     title: text("title").notNull(),
     description: text("description").notNull(),
     createdAt: timestamp("created_at").defaultNow()
-}, (table) => ({
-  actionCheck: check("action_check", sql`action IN ('add', 'delete', 'update')`)
-}));
+}, (table) => [
+  check("action_check", sql`action IN ('add', 'delete', 'update')`)
+]);
 
 export const insertActivitySchema = createInsertSchema(activities).omit({
     id: true,
     createdAt: true
+});
+
+// Components table schema
+export const components = pgTable("components", {
+    id: serial("id").primaryKey(),
+    equipmentId: integer("equipment_id").notNull().references(()=>equipments.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    manufacturer: text("manufacturer").notNull(),
+    partNumber: text("manufacturer").notNull(),
+    stock: integer("recommended_stock").notNull(),
+    failImpact: text("manufacturer").notNull(),
+    notes: text("manufacturer")
+});
+
+export const insertComponentSchema = createInsertSchema(components).omit({
+    id: true
 });
 
 // Documents table schema
@@ -48,9 +65,9 @@ export const documents = pgTable("documents", {
     category: text("category").notNull(),
     uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
     notes: text("notes")
-}, (table) => ({
-    categoryCheck: check("category_check", sql`category IN ('manual', 'maintenance', 'certificate', 'premob', 'fault', 'emergency', 'other')`)
-}));
+}, (table) => [
+    check("category_check", sql`category IN ('manual', 'maintenance', 'certificate', 'premob', 'fault', 'emergency', 'other')`)
+]);
 
 export const insertDocumentSchema = createInsertSchema(documents).omit({
     id: true,
@@ -62,6 +79,7 @@ export const equipments = pgTable(
   "equipments",
   {
     id: serial("id").primaryKey(),
+    tenantId: integer("tenant_id").notNull().references(()=>tenants.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     manufacturer: text("manufacturer").notNull(),
     model: text("model").notNull(),
@@ -81,16 +99,16 @@ export const equipments = pgTable(
     healthIndex: decimal("health_index"),
     notes: text("notes"),
   },
-  (table) => ({
-    requirementsCheck: check(
+  (table) => [
+    check(
       "requirements_check",
       sql`requirements IN ('calibration & testing', 'maintenance', 'both')`
     ),
-    statusCheck: check(
+    check(
       "status_check",
       sql`status IN ('operational', 'under repair', 'out of service')`
     ),
-  })
+    ]
 );
 
 export const insertEquipmentSchema = createInsertSchema(equipments).omit({
@@ -100,9 +118,8 @@ export const insertEquipmentSchema = createInsertSchema(equipments).omit({
 // Maintenance table schema
 export const maintenances = pgTable("maintenances", {
   id: serial("id").primaryKey(),
-  equipmentId: integer("equipment_id")
-    .notNull()
-    .references(() => equipments.id, { onDelete: "cascade" }),
+  equipmentId: integer("equipment_id").notNull().references(() => equipments.id, { onDelete: "cascade" }),
+  tenantId: integer("tenant_id").notNull().references(()=>tenants.id, { onDelete: "cascade" }),
   givenHealthIndex: integer("given_health_index").notNull().default(100),
   dailyWorkingHours: integer("daily_working_hours").notNull(),
   serviceStartDate: date("service_start_date").notNull().defaultNow(),
@@ -127,6 +144,7 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   id: serial("id").primaryKey(),
   equipmentId: integer("equipment_id").notNull().references(() => equipments.id, { onDelete: "cascade" }),
   maintenanceId: integer("maintenance_id").notNull().references(() => maintenances.id, { onDelete: "cascade" }),
+  tenantId: integer("tenant_id").notNull().references(()=>tenants.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description").notNull(),
   level: text("level").notNull(),
@@ -163,9 +181,20 @@ export const insertPhotoSchema = createInsertSchema(photos).omit({
     uploadedAt: true
 });
 
+// Tenant table schema
+export const tenants = pgTable("tenants", {
+    id: serial("id").primaryKey(),
+    name: text("name").notNull().unique()
+});
+
+export const insertTenantSchema = createInsertSchema(tenants).omit({
+    id: true
+});
+
 // User table scheme
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
+  tenantId: integer("tenant_id").notNull().references(()=>tenants.id, { onDelete: "cascade" }),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   role: text("role").default("user"),
@@ -180,11 +209,14 @@ export const insertUserSchema = createInsertSchema(users).omit({
 export type Activity = typeof activities.$inferSelect;
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 
-export type Equipment = typeof equipments.$inferSelect;
-export type InsertEquipment = z.infer<typeof insertEquipmentSchema>;
+export type Component = typeof components.$inferSelect;
+export type InsertComponent = z.infer<typeof insertComponentSchema>;
 
 export type Document = typeof documents.$inferSelect;
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+
+export type Equipment = typeof equipments.$inferSelect;
+export type InsertEquipment = z.infer<typeof insertEquipmentSchema>;
 
 export type Maintenance = typeof maintenances.$inferSelect;
 export type InsertMaintenance = z.infer<typeof insertMaintenanceSchema>;
@@ -194,6 +226,9 @@ export type InsertMaintenanceEvent = z.infer<typeof insertMaintenanceEventSchema
 
 export type Photo = typeof photos.$inferSelect;
 export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
+
+export type Tenant = typeof tenants.$inferSelect;
+export type InsertTenant = z.infer<typeof insertTenantSchema>;
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;

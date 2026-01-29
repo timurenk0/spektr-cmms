@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import AddEquipmentForm from "./AddEquipmentForm";
 import SlideDialog from "../ui/SlideDialog";
-import { useState } from "react";
 import DeleteEquipmentForm from "./DeleteEquipmentForm";
 
 
@@ -12,20 +11,26 @@ const getStatusBadge = (status: string) => {
     switch (status) {
         case "operational":
             return (
-                <div className="bg-green-600 text-white text-center py-3 rounded-[100px]">
+                <div className="bg-green-200 rounded-full border border-green-800 text-green-800 px-2 py-1 whitespace-nowrap">
                     Operational
                 </div>
             );
         case "under repair":
             return (
-                <div className="bg-amber-500 text-white text-center py-2 rounded-[100px]">
+                <div className="bg-amber-200 rounded-full border border-amber-800 text-amber-800 px-2 py-1 whitespace-nowrap">
                     Under Repair
                 </div>
             );
         case "out of service":
             return (
-                <div className="bg-gray-500 text-white text-center py-2 rounded-[100px]">
+                <div className="bg-gray-200 rounded-full border border-gray-800 text-gray-800 px-2 py-1 whitespace-nowrap">
                     Out of Service
+                </div>
+            );
+        default:
+            return (
+                <div className="bg-red-200 rounded-full border border-red-800 text-red-800 px-2 py-1 whitespace-nowrap">
+                    Invalid Status
                 </div>
             );
     }
@@ -34,53 +39,59 @@ const getStatusBadge = (status: string) => {
 const EquipmentListEl = ({ equipment, userRole }: { equipment: IEquipment, userRole: string }) => {
     const router = useRouter();
 
-    const [selectedEquipment, setSelectedEquipment] = useState<number | null>(null);
-    
   return (
         <TableRow sx={{ "& .MuiTableCell-root": { textAlign: "center", cursor: "pointer", padding: "0 32px" } }} hover onClick={() => router.push(`/equipment/${equipment.id}`)}>
             {/* Equipment image and name */}
             <TableCell>
                 <div className="flex items-center">
-                    <div className="h-[128px] w-[128px] overflow-hidden flex items-center">
+                    <div className="h-28 w-28 overflow-hidden flex items-center">
                         {/* add max-h-[128px] to image if you want the image to resize */}
-                        <Image className="max-w-[128px]" src={equipment.equipmentImage} width={128} height={128} alt="Equipment image" />
+                        <Image className="max-w-28" src={equipment.equipmentImage} width={112} height={112} alt="Equipment image" />
                     </div>
                     <div className="ml-2 flex-1 text-left">
-                        <div className="text-sm font-medium truncate" title={equipment.name}>
+                        <div className="text-xs font-medium truncate max-w-32" title={equipment.name}>
                             {equipment.name}
                         </div>
-                        <div className="text-gray-500 text-xs mt-1">
+                        <div className="text-gray-500 mt-1 truncate max-w-32" style={{ fontSize: "10px" }}>
                             model: {equipment.model}
                         </div>
                     </div>
                 </div>
             </TableCell>
-            <TableCell>{equipment.assetId}</TableCell>
-            <TableCell>{getStatusBadge(equipment.status)}</TableCell>
-            <TableCell>{equipment.location}</TableCell>
-            <TableCell>{equipment.lastEvent}</TableCell>
-            <TableCell>{equipment.nextEvent}</TableCell>
-            <TableCell>{equipment.healthIndex ?? "-"}%</TableCell>
+            <TableCell>
+                <div className="text-xs truncate max-w-32" title={equipment.assetId}>
+                    {equipment.assetId}
+                </div>
+            </TableCell>
+            <TableCell style={{ fontSize: "12px" }}>{getStatusBadge(equipment.status)}</TableCell>
+            <TableCell style={{ fontSize: "12px" }}>{equipment.location}</TableCell>
+            <TableCell style={{ fontSize: "12px" }}>{equipment.lastEvent}</TableCell>
+            <TableCell style={{ fontSize: "12px" }}>{equipment.nextEvent}</TableCell>
+            <TableCell style={{ fontSize: "12px" }}>{equipment.healthIndex ?? "-"}%</TableCell>
             {userRole === "admin" && (
                 <TableCell onClick={(e) => e.stopPropagation()}>
+                    <div className="flex gap-2">
+                    {/* Dialog window for equipment record editing */}
                     <SlideDialog
                         title="Edit Equipment Unit"
                         Btn={(props) => (
-                            <button {...props} className="mx-1"><Edit className="text-blue-400 hover:text-blue-800 cursor-pointer" /></button>
+                            <button {...props}><Edit size={20} className="text-blue-400 hover:text-blue-800 cursor-pointer" /></button>
                         )}
                         DialogForm={(props) => (
                             <AddEquipmentForm {...props} equipmentId={equipment.id} />
                         )}
                     />
+                    {/* Dialog window for equipment record deletion */}
                     <SlideDialog
                         title="Delete Equipment Unit"
                         Btn={(props) => (
-                            <button {...props} className="mx-1"><Trash className="text-red-400 hover:text-red-800 cursor-pointer" /></button>
+                            <button {...props}><Trash size={20} className="text-red-400 hover:text-red-800 cursor-pointer" /></button>
                         )}
                         DialogForm={(props) => (
                             <DeleteEquipmentForm {...props} equipmentId={equipment.id} equipmentName={equipment.name} />
                         )}
                     />
+                    </div>
                 </TableCell>
             )}
         </TableRow>
