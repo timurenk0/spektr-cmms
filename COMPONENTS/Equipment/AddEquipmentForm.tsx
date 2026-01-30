@@ -121,10 +121,11 @@ export default function AddEquipmentForm(
     useEffect(() => {
         if (equipment) {
             const equipmentLocation = equipment.location.split(/\s(.+)/);
+            const {healthIndex, ...equipmentData} = equipment;
             const formData = {
-                ...equipment,
+                ...equipmentData,
                 location: equipmentLocation[0],
-                projectId: equipment.location === "Base" ? "" : equipmentLocation[1]
+                projectId: equipmentData.location === "Base" ? "" : equipmentLocation[1]
             }
             form.reset(formData);
             setEquipmentImage(equipment.equipmentImage);
@@ -281,6 +282,14 @@ export default function AddEquipmentForm(
                     />
                 )}
             />
+            <TextField
+                label="Owning Department"
+                color="info"
+                margin="dense"
+                fullWidth
+                required
+                {...form.register("department")}
+                />
             <Controller
                 name="type"
                 control={form.control}
@@ -330,14 +339,6 @@ export default function AddEquipmentForm(
                 fullWidth
                 required
                 {...form.register("inServiceDate")}
-            />
-            <TextField
-                label="Owning Department"
-                color="info"
-                margin="dense"
-                fullWidth
-                required
-                {...form.register("department")}
             />
             <div>
                 <Controller
@@ -421,7 +422,9 @@ export default function AddEquipmentForm(
                 defaultValue=""
                 render={({ field }) => (
                     <FormControl className="col-span-2" fullWidth required>
-                        <FormLabel color="a">Requirements</FormLabel>
+                        <FormLabel>
+                            <div className="inline text-gray-500">Requirements</div>
+                        </FormLabel>
                         <RadioGroup {...field}>
                             {equipmentRequirements.map(req => (
                                 <FormControlLabel key={req} value={req.toLowerCase()} control={<Radio />} label={req} />

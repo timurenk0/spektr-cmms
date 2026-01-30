@@ -2,7 +2,7 @@
 
 
 import SlideDialog from "@/COMPONENTS/ui/SlideDialog"
-import { TTenant, TUser } from "@/COMPONENTS/utils/types"
+import { TTenant } from "@/COMPONENTS/utils/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { TabContext, TabList, TabPanel } from "@mui/lab"
 import { Button, FormControl, InputLabel, MenuItem, Paper, Select, Tab, TextField } from "@mui/material"
@@ -60,8 +60,15 @@ const Settings = () => {
         queryKey: ["/api/tenants"]
     });
 
-    
-    
+    useEffect(()=>{
+        if (userRoles.length > 0) {
+            setAvailableRoles(userRoles);
+        }
+        if (tenants.length > 0) {
+            setAvailableTenants(tenants.map(t=>t.name));
+        }
+    }, [userRoles, tenants]);
+
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -116,7 +123,6 @@ const Settings = () => {
     });
     
     const onSubmit = (values: ProfileFormValues) => {
-        console.log("values", values)
         mutation.mutate(values);
     };
     
@@ -144,15 +150,6 @@ const Settings = () => {
     const [availableRoles, setAvailableRoles] = useState<string[]>([]);
     const [availableTenants, setAvailableTenants] = useState<string[]>([]);
 
-    useEffect(()=>{
-        if (userRoles.length > 0) {
-            setAvailableRoles(userRoles);
-        }
-        if (tenants.length > 0) {
-            setAvailableTenants(tenants.map(t=>t.name));
-        }
-    }, [userRoles, tenants]);
-    
     const addTenant = (name: string) => {
         const normalizedTenant = name.trim().toLowerCase();
         if (!normalizedTenant) return;
