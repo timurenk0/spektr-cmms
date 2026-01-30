@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Button, FormControl, FormControlLabel, FormLabel, InputAdornment, InputLabel, MenuItem, Radio, RadioGroup, Select, TextField } from "@mui/material";
 import { EquipmentTypes } from "../utils/equipmentTypes";
-import { TEquipment } from "../utils/types";
+import { TEquipment, TTenant } from "../utils/types";
 
 
 const formSchema = insertEquipmentSchema.extend({
@@ -55,6 +55,10 @@ export default function AddEquipmentForm(
     const [eqLocation, setEqLocation] = useState<string>();
     const [projectId, setProjectId] = useState<string | null>();
 
+    const { data: tenants, isLoading: isLoadingTenants } = useQuery<TTenant[]>({
+        queryKey: ["/api/tenants"]
+    });
+
     const uploadImage = async (file: File) => {
         try {
             if (!file) throw new Error("No file selected");
@@ -91,7 +95,7 @@ export default function AddEquipmentForm(
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: "",
-            tenantId: undefined,
+            tenantId: 1,
             manufacturer: "",
             assetId: "",
             serialNumber: "",
@@ -194,7 +198,9 @@ export default function AddEquipmentForm(
         mutation.mutate(data);
     }
 
-    if (isLoadingEquipment) return (<h1>Loading equipment info...</h1>);
+
+    const isLoading = (isLoadingEquipment) || (!tenants || isLoadingTenants);
+    if (isLoading) return (<h1>Loading data...</h1>)
 
   return (
     <form
@@ -213,13 +219,13 @@ export default function AddEquipmentForm(
             <Controller
                 name="tenantId"
                 control={form.control}
-                defaultValue={undefined}
+                defaultValue={1}
                 render={({ field }) => (
                     <FormControl fullWidth>
-                        <InputLabel id="select-type" color="info" required sx={{ margin: "8px 0" }}>Select Type</InputLabel>
-                        <Select labelId="select-type" label="Select Type" {...field} color="info" required sx={{ margin: "8px 0" }}>
-                            {EquipmentTypes.map(type => (
-                                <MenuItem key={type.id} value={type.id}>{type.id}</MenuItem>
+                        <InputLabel id="select-tenant" color="info" required sx={{ margin: "8px 0" }}>Select Owner</InputLabel>
+                        <Select labelId="select-tenant" label="Select Type" {...field} color="info" required sx={{ margin: "8px 0" }}>
+                            {tenants.map(t => (
+                                <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
                             ))}
                         </Select>
                     </FormControl>

@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import z from "zod"
@@ -37,6 +37,7 @@ const AddMaintenanceForm = ({
   onClose: () => void
 }) => {
   const queryClient = useQueryClient();
+  const [selectedEq, setSelectedEq] = useState<number>();
   
   /* ======================================DATA FETCHING=========================================== */
 
@@ -62,6 +63,7 @@ const AddMaintenanceForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       equipmentId: undefined,
+      tenantId: undefined,
       dailyWorkingHours: 8,
       totalWorkingHours: 0,
       givenHealthIndex: 0,
@@ -127,18 +129,20 @@ const AddMaintenanceForm = ({
     }
   });
   
+  /* ============================================================================================== */
+  
+  
+  const isLoading = (isLoadingEquipments || !equipments) || (isLoadingMaintenances || !maintenances);
+  if (isLoading) return "sosal?";
+  
   const onSubmit = (values: MaintenanceFormValues) => {
     console.log(values);
     mutation.mutate(values);
   };
-  /* ============================================================================================== */
-
-
-  const isLoading = (isLoadingEquipments || !equipments) || (isLoadingMaintenances || !maintenances);
-  if (isLoading) return "sosal?";
 
   const equipmentUnderMaintenance = maintenances.map(m => m.equipmentId);
   const availableEquipment = equipments.equips.filter(eq => !equipmentUnderMaintenance.includes(eq.id) && eq.status !== "out of service");
+
   
   return (
     <form className="space-y-4 px-1" onSubmit={form.handleSubmit(onSubmit, (error) => console.log(error))}>
@@ -150,7 +154,23 @@ const AddMaintenanceForm = ({
           render={({ field }) => (
             <FormControl fullWidth>
               <InputLabel id="select-equipment" color="info" required sx={{ margin: "8px 0" }}>Select Equipment</InputLabel>
-              <Select labelId="select-equipment" label="Select Equipment" {...field} color="info" required sx={{ margin: "8px 0" }}>
+              <Select
+                labelId="select-equipment"
+                label="Select Equipment"
+                {...field}
+                color="info"
+                required
+                sx={{ margin: "8px 0" }}
+                onChange={(e) => {
+                    const equipmentId = Number(e.target.value);
+                    field.onChange(equipmentId);
+
+                    const tenantId = equipments.equips.find(eq=>eq.id===equipmentId)!.tenantId;
+
+                    if (tenantId) {
+                      form.setValue("tenantId", tenantId);
+                    }
+                  }}>
                 {availableEquipment.map((eq) => (
                   <MenuItem key={eq.id} value={eq.id}>{eq.name}</MenuItem>
                 ))}

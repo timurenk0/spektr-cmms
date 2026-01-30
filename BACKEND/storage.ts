@@ -121,6 +121,7 @@ export class DatabaseStorage {
             offset: (limit && page) ? (page-1)*limit : 0,
             columns: concise === "true" ? {
                 id: true,
+                tenantId: true,
                 name: true,
                 assetId: true,
                 equipmentImage: true,

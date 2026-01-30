@@ -9,7 +9,8 @@
 
 
 # ISSUES
-- Text size in equipment list
+- Equipment edit formData
+- Equipment form arrangement
 - Equipment photos section image size
 - Fix the buttons for slider stat cards
 - Change JWT_SECRET to something more serious

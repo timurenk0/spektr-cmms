@@ -29,8 +29,6 @@ export async function POST(req: NextRequest) {
         const validatedTenant = insertTenantSchema.parse({ name: body.tenant });
         const newTenant = await storage.addTenant(validatedTenant);
 
-        console.log(newTenant);
-
         // Parse user data with DB schema validation
         const validatedUser = insertUserSchema.parse({
             username: body.username,
@@ -39,19 +37,15 @@ export async function POST(req: NextRequest) {
             tenantId: newTenant.id
         });
 
-        console.log(validatedUser);
-
         // Check added user role and forbid the operation if it is "admin" role.
         if (validatedUser.role?.toLowerCase() === "admin") return res.json({ error: "Cannot create admin user" }, { status: 400 });
         if (await storage.getUserByUsername(validatedUser.username)) return res.json({ error: "This username is taken! Pick another one" }, { status: 409 });
 
         // Add validated user data to the DB.
         const newUser = await storage.addUser(validatedUser);
-        console.log(newUser)
 
         // Log the activity for added user using helper logger method.
-        const act = await activityLogger(user, "add", "User added", `User ${newUser.username} added to the database`);
-        console.log(act)
+        await activityLogger(user, "add", "User added", `User ${newUser.username} added to the database`);
         
         return res.json(newUser, { status: 201 });
     } catch (error) {

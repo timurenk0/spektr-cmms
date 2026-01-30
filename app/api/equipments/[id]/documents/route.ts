@@ -8,7 +8,6 @@ export async function GET(
 ) {
     try {
        const { id } = await params;
-       console.log(id);
        const equipmetnId = parseInt(id);
        if (isNaN(equipmetnId)) return res.json({ error: "Invalid equipment ID" }, { status: 400 });
        

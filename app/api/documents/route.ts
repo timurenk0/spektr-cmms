@@ -25,8 +25,6 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const documentValidatedData = insertDocumentSchema.parse(body);
 
-        console.log(documentValidatedData);
-
         const newDocument = await storage.addDocument(documentValidatedData);
         
         await activityLogger(user, "add", "Document uploaded", `Document uploaded for equipment ${newDocument.equipmentId}`, newDocument.equipmentId);

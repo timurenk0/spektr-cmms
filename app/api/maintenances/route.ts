@@ -29,6 +29,8 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const maintenanceValidatedData = insertMaintenanceSchema.parse(body);
 
+        console.log(maintenanceValidatedData);
+
 
         // Add validated maintenance data to the DB.
         const newMaintenance = await storage.addMaintenance(maintenanceValidatedData);

@@ -33,8 +33,6 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const equipmentValidatedData = insertEquipmentSchema.parse(body);
 
-        console.log(equipmentValidatedData);
-        
         // Add validated equipment data to the DB.
         const newEquipment = await storage.addEquipment(equipmentValidatedData);
         

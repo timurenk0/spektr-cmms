@@ -80,7 +80,7 @@ export async function generateEvents(
             const status = (today <= eventStartDate) ? "upcoming" : differenceInDays(today, eventStartDate) > 10 ? "incomplete" : "overdue";
 
             const event: InsertMaintenanceEvent = {
-                tenantId: equipment.tenantId,
+                tenantId: maintenance.tenantId,
                 title: `${equipment.name} maintenance`,
                 description: `${equipment.name} ${equipment.assetId} maintenance works level ${level}`,
                 equipmentId: equipment.id,
