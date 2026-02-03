@@ -33,6 +33,8 @@ export async function GET(
             search: sp.get("search") || undefined,
         }
         
+        console.log(filters);
+
         const equipments = await storage.getEquipments(
             user,
             concise ? "true" : undefined,

@@ -114,19 +114,19 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
 
     /* ================================================ Equipment Methods ===================================================== */
-    async getEquipments(user: AuthUser, concise?:string, limit?: number, page?: number, location?: string, status?: string, type?: string, category?: string, search?: string): Promise<{equips: Partial<Equipment>[], totalCount: number}> {
-        const lastMaintenance = sql`
+    async getEquipments(user: AuthUser, concise?:string, limit?: number, page?: number, location?: string, status?: string, type?: string, category?: string, search?: string): Promise<{equips: (Partial<Equipment> & { nextMaintenance: string, lastMaintenance: string })[], totalCount: number}> {
+        const lastMaintenance = sql<string>`
         (
-            SELECT m.id FROM maintenance_events m WHERE m.equipment_id = ${equipments.id} AND m.date < NOW()
-            ORDER BY m.date ASC
+            SELECT m.start_date FROM maintenance_events m WHERE m.equipment_id = ${equipments.id} AND m.start_date < NOW()
+            ORDER BY m.start_date ASC
             LIMIT 1
         )
         `;
 
-        const nextMaintenance = sql`
+        const nextMaintenance = sql<string>`
         (
-            SELECT m.id FROM maintenance_events m WHERE m.equipment_id = ${equipments.id} AND m.date > NOW()
-            ORDER BY m.date ASC
+            SELECT m.start_date FROM maintenance_events m WHERE m.equipment_id = ${equipments.id} AND m.start_date > NOW()
+            ORDER BY m.start_date ASC
             LIMIT 1
         )
         `;
@@ -161,12 +161,12 @@ export class DatabaseStorage {
                     assetId: equipments.assetId,
                     equipmentImage: equipments.equipmentImage,
                     status: equipments.status,
-                    // lastMaintenance,
-                    // nextMaintenance
+                    lastMaintenance,
+                    nextMaintenance
                 } : {
                     ...getTableColumns(equipments),
-                    // lastMaintenance,
-                    // nextMaintenance
+                    lastMaintenance,
+                    nextMaintenance
                 }
             )
             .from(equipments)
