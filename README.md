@@ -1,7 +1,7 @@
 # PRIORITY
 - Move equipment list filtering to backend (db queries)
+    - Deal with slow search ("Filtering equipment query chat")
 - Calendar events finish logic
-- Finish storage class methods (health index calculation)
 
 
 # FEATURES
@@ -9,8 +9,6 @@
 
 
 # ISSUES
-- Equipment edit formData
-- Equipment form arrangement
 - Equipment photos section image size
 - Fix the buttons for slider stat cards
 - Change JWT_SECRET to something more serious

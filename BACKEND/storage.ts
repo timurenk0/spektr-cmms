@@ -11,12 +11,13 @@ import {
 import * as schema from "./Database/schema";
 import { db } from "./Database/db";
 import { generateEvents } from "./Middleware/EventManager";
-import { eq, and, desc, sql, not, ExtractTablesWithRelations, lt, gte, lte, isNull } from "drizzle-orm";
+import { eq, and, desc, sql, not, ExtractTablesWithRelations, lt, gte, lte, isNull, ilike, or, getTableColumns } from "drizzle-orm";
 import type { NeonDatabase, NeonQueryResultHKT } from "drizzle-orm/neon-serverless";
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { differenceInCalendarMonths } from "date-fns";
+import { AuthUser } from "./Middleware/AuthService";
 
 
 type Schema = typeof schema;
@@ -113,41 +114,83 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
 
     /* ================================================ Equipment Methods ===================================================== */
-    async getEquipments(concise?:string, limit?: number, page?: number): Promise<{equips: Equipment[], totalCount: number}> {
-        // Another format just for fun why not
-        const data = await db.query.equipments.findMany({
-            orderBy: equipments.id,
-            limit: limit ? limit : -1,
-            offset: (limit && page) ? (page-1)*limit : 0,
-            columns: concise === "true" ? {
-                id: true,
-                tenantId: true,
-                name: true,
-                assetId: true,
-                equipmentImage: true,
-                status: true,
-            }: undefined
-        });
-        
-        const count = await db.select({ count: sql<number>`count(*)` }).from(equipments);
-
-        const equips = await Promise.all(
-            data.map(async (d) => {
-                const {lastEvent, nextEvent} = await this.getClosestMaintenanceEventsForEquipment(d.id);
-
-                return {
-                    ...d,
-                    lastEvent,
-                    nextEvent
-                }
-            })
+    async getEquipments(user: AuthUser, concise?:string, limit?: number, page?: number, location?: string, status?: string, type?: string, category?: string, search?: string): Promise<{equips: Partial<Equipment>[], totalCount: number}> {
+        const lastMaintenance = sql`
+        (
+            SELECT m.id FROM maintenance_events m WHERE m.equipment_id = ${equipments.id} AND m.date < NOW()
+            ORDER BY m.date ASC
+            LIMIT 1
         )
+        `;
 
-        return { equips, totalCount: count[0].count }
+        const nextMaintenance = sql`
+        (
+            SELECT m.id FROM maintenance_events m WHERE m.equipment_id = ${equipments.id} AND m.date > NOW()
+            ORDER BY m.date ASC
+            LIMIT 1
+        )
+        `;
+
+        const filters = [];
+
+        filters.push(eq(equipments.tenantId, user.tenantId))
+        if (location) filters.push(eq(equipments.location, location));
+        if (status) filters.push(eq(equipments.status, status));
+        if (type) filters.push(eq(equipments.type, type));
+        if (category) filters.push(eq(equipments.category, category));
+        if (search) {
+            filters.push(
+                or(
+                    ilike(equipments.name, `%${search}`),
+                    ilike(equipments.assetId, `%${search}`),
+                    ilike(equipments.serialNumber, `%${search}`),
+                    ilike(equipments.model, `%${search}`),
+                )
+            );
+        };
+
+        const whereClause = filters.length ? and(...filters) : undefined;
+
+
+        let query = db
+            .select(
+                concise === "true" ? {
+                    id: equipments.id,
+                    tenantId: equipments.tenantId,
+                    name: equipments.name,
+                    assetId: equipments.assetId,
+                    equipmentImage: equipments.equipmentImage,
+                    status: equipments.status,
+                    // lastMaintenance,
+                    // nextMaintenance
+                } : {
+                    ...getTableColumns(equipments),
+                    // lastMaintenance,
+                    // nextMaintenance
+                }
+            )
+            .from(equipments)
+            .where(whereClause)
+            .orderBy(equipments.id)
+            .offset(limit && page ? (page - 1) * limit : 0)
+            .$dynamic();
+        
+        if (limit !== undefined && limit > 0) {
+            query = query.limit(limit)
+        }
+        
+        const count = await db.select({ count: sql<number>`count(*)` }).from(equipments).where(whereClause);
+        const data = await query;
+
+        return { equips: data, totalCount: count[0].count }
     }
     
     async getEquipment(id: number): Promise<Equipment | undefined> {
         return (await db.select().from(equipments).where(eq(equipments.id, id)))[0];
+    }
+
+    async getEquipmentLocations(): Promise<string[]> {
+        return (await db.selectDistinct({ location: equipments.location }).from(equipments)).map(loc=>loc.location);
     }
     
     async addEquipment(insertEquipment: InsertEquipment): Promise<Equipment> {

@@ -15,11 +15,12 @@ const nextConfig: NextConfig = {
       }
     ]
   },
-  logging: {
+  logging: process.env.NODE_ENV === "development" ? {
     fetches: {
       fullUrl: true,
     },
-  }
+  }: undefined,
+  reactStrictMode: true
 };
 
 export default nextConfig;

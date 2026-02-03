@@ -9,13 +9,41 @@ export async function GET(
     req: NextRequest,
 ) {
     try {
-        const limit = parseInt(req.nextUrl.searchParams.get("limit") ?? "0");
-        const page = parseInt(req.nextUrl.searchParams.get("page") ?? "0");
-        const concise = (req.nextUrl.searchParams.get("concise") ?? "false");
-
-        if (isNaN(limit) || isNaN(page)) throw new Error("Invalid limit/page parameter");
+        const user = await validateUser();
+        const sp = req.nextUrl.searchParams;
         
-        const equipments = (concise || limit || page) ? await storage.getEquipments(concise, limit, page) : await storage.getEquipments();
+        const limit = sp.has("limit") ? Number(sp.get("limit")) : undefined;
+        const page = sp.has("page") ? Number(sp.get("page")) : undefined;
+
+        if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) {
+            throw new Error("limit value must be a positive integer");
+        }
+
+        if (page !== undefined && (!Number.isInteger(page) || page < 1)) {
+            throw new Error("page value must be a positive integer");
+        }
+
+        const concise = sp.get("concise") === "true";
+
+        const filters = {
+            location: sp.get("location") || undefined,
+            status: sp.get("status") || undefined,
+            type: sp.get("type") || undefined,
+            category: sp.get("category") || undefined,
+            search: sp.get("search") || undefined,
+        }
+        
+        const equipments = await storage.getEquipments(
+            user,
+            concise ? "true" : undefined,
+            limit, page,
+            filters.location,
+            filters.status,
+            filters.type,
+            filters.category,
+            filters.search
+        )
+
         return res.json(equipments, { status: 200 });
     } catch (error) {
         const msg = error instanceof Error ? error.message : "Unkown error";

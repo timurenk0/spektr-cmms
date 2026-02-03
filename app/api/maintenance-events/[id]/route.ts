@@ -70,13 +70,13 @@ export async function PUT(
     }
 }
 
-const getEventColor = (level: string) => {
-    const colors: Record<string, string> = {
-        A: "oklch(43.2% 0.095 166.913)",
-        B: "oklch(68.1% 0.162 75.834)",
-        C: "oklch(42.4% 0.199 265.638)",
-        D: "oklch(43.8% 0.218 303.724)",
-    }
+// const getEventColor = (level: string) => {
+//     const colors: Record<string, string> = {
+//         A: "oklch(43.2% 0.095 166.913)",
+//         B: "oklch(68.1% 0.162 75.834)",
+//         C: "oklch(42.4% 0.199 265.638)",
+//         D: "oklch(43.8% 0.218 303.724)",
+//     }
 
-    return colors[level];
-}
+//     return colors[level];
+// }
