@@ -141,10 +141,10 @@ export class DatabaseStorage {
         if (search) {
             filters.push(
                 or(
-                    ilike(equipments.name, `%${search}`),
-                    ilike(equipments.assetId, `%${search}`),
-                    ilike(equipments.serialNumber, `%${search}`),
-                    ilike(equipments.model, `%${search}`),
+                    ilike((sql`lower(${equipments.name})`), `%${search.toLowerCase()}`),
+                    ilike(sql`lower(${equipments.assetId})`, `%${search.toLowerCase()}`),
+                    ilike(sql`lower(${equipments.serialNumber})`, `%${search.toLowerCase()}`),
+                    ilike(sql`lower(${equipments.model})`, `%${search.toLowerCase()}`),
                 )
             );
         };

@@ -1,7 +1,7 @@
 "use client"
 
 
-import { Button, Card, CardActionArea, CardContent, FormControl, InputLabel, MenuItem, Paper, Select, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
+import { Button, Card, CardActionArea, CardContent, FormControl, Input, InputLabel, MenuItem, Paper, Select, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { EquipmentTypes } from "../utils/equipmentTypes";
@@ -28,7 +28,7 @@ const EquipmentList = () => {
   useEffect(() => {
     const id = setTimeout(() => {
       updateFilters("search", searchInput);
-    }, 100);
+    }, 500);
   
     return () => clearTimeout(id);
   }, [searchInput]);
@@ -125,7 +125,7 @@ const EquipmentList = () => {
       </div>
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
         <div className="grid grid-cols-1 md:grid-cols-3 p-2 gap-2">
-          <TextField size="small" label="Search Equipment" type="search" className="col-span-2" color="info" value={filters.search} onChange={(e) => updateFilters("search", e.target.value)} />
+          <TextField size="small" placeholder="Search Equipment" type="search" className="col-span-2" color="info" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
           <div className="flex gap-2">
             <FormControl size="small" fullWidth>
               <InputLabel id="location-filter" color="info">Select Location</InputLabel>

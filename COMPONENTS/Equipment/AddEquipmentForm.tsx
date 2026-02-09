@@ -264,6 +264,14 @@ export default function AddEquipmentForm(
                 required
                 {...form.register("assetId")}
             />
+            <TextField
+                label="Owning Department"
+                color="info"
+                margin="dense"
+                fullWidth
+                required
+                {...form.register("department")}
+                />
             <Controller
                 name="usefulLifeSpan"
                 control={form.control}
@@ -282,14 +290,6 @@ export default function AddEquipmentForm(
                     />
                 )}
             />
-            <TextField
-                label="Owning Department"
-                color="info"
-                margin="dense"
-                fullWidth
-                required
-                {...form.register("department")}
-                />
             <Controller
                 name="type"
                 control={form.control}

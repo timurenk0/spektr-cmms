@@ -35,7 +35,7 @@ export default function SlideDialog({ title, Btn, DialogForm }: { title: string,
         slots={{
           transition: Transition,
         }}
-        keepMounted
+        // keepMounted ( is being prefetches, doing unnecessary API calls for all the equipment units )
         onClose={handleClose}
         aria-describedby="alert-dialog-slide-description"
         fullWidth
