@@ -35,6 +35,34 @@ const getStatusBadge = (status: string) => {
                 </div>
             );
     }
+};
+
+const getHealthBadge = (healthIndex: number) => {
+    if (healthIndex < 30) {
+        return (
+            <div className="bg-red-200 text-red-600 font-bold px-2 py-1 rounded-full">
+                { healthIndex }%
+            </div>
+        )
+    } else if (healthIndex < 60) {
+        return (
+            <div className="bg-amber-200 text-amber-600 font-bold px-2 py-1 rounded-full">
+                { healthIndex }%
+            </div>
+        )
+    } else if (healthIndex < 85) {
+        return (
+            <div className="bg-yellow-200 text-amber-600 font-bold px-2 py-1 rounded-full">
+                { healthIndex }%
+            </div>
+        )
+    } else {
+        return (
+            <div className="bg-emerald-200 text-green-600 font-bold px-2 py-1 rounded-full">
+                { healthIndex }%
+            </div>
+        )
+    }
 }
 
 const EquipmentListEl = ({ equipment, userRole }: { equipment: TEquipment, userRole: string }) => {
@@ -68,7 +96,7 @@ const EquipmentListEl = ({ equipment, userRole }: { equipment: TEquipment, userR
             <TableCell style={{ fontSize: "12px" }}>{equipment.location}</TableCell>
             <TableCell style={{ fontSize: "12px" }}>{equipment.lastEvent}</TableCell>
             <TableCell style={{ fontSize: "12px" }}>{equipment.nextEvent}</TableCell>
-            <TableCell style={{ fontSize: "12px" }}>{equipment.healthIndex ?? "-"}%</TableCell>
+            <TableCell style={{ fontSize: "12px" }}>{equipment.healthIndex ? getHealthBadge(equipment.healthIndex) : <div className="bg-gray-200 text-gray-600 rounded-full px-2 py-1 text-bold">-</div>}</TableCell>
             {userRole === "admin" && (
                 <TableCell onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-2">
