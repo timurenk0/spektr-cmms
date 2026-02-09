@@ -86,7 +86,7 @@ export async function PATCH(
 
 
         // Log the activity for deleted equipment using helper logger method.
-        await activityLogger(user, "delete", "Equipment deleted", `Equipment ${equipment.name} | Reason: ${reason}`, equipmentId);       
+        await activityLogger(user, "delete", "Equipment deleted", `Equipment ${equipment.name} removed | Reason: ${reason}`, equipmentId);       
 
         // Delete specified equipment.
         await storage.deleteEquipment(equipmentId);
