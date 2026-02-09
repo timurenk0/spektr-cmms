@@ -99,4 +99,4 @@ const EquipmentListEl = ({ equipment, userRole }: { equipment: TEquipment, userR
   )
 }
 
-export default EquipmentListEl
+export default EquipmentListEl;

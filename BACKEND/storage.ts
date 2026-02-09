@@ -133,7 +133,7 @@ export class DatabaseStorage {
 
         const filters = [];
 
-        filters.push(eq(equipments.tenantId, user.tenantId))
+        filters.push(eq(equipments.tenantId, user.tenantId));
         if (location) filters.push(eq(equipments.location, location));
         if (status) filters.push(eq(equipments.status, status));
         if (type) filters.push(eq(equipments.type, type));
