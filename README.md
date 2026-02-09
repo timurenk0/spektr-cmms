@@ -6,6 +6,7 @@
 
 # FEATURES
 - Change the TabList in theme to "legacy" version
+- Consolidate photos and documents storage maybe???
 
 
 # ISSUES
