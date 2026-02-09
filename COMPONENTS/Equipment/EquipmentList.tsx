@@ -100,22 +100,22 @@ const EquipmentList = () => {
               <CardActionArea onClick={() => updateFilters("type", type.id)}>
                 <CardContent className="text-green-600 flex justify-center">
                   {type.icon}
-                  <p className="ms-2">{type.id}</p>
+                  <p className="ms-2 text-black">{type.id}</p>
                 </CardContent>
               </CardActionArea>
             </Card>
           ) : (
             type.id === filters.type && type.categories.map(category => (
-              <Card key={category} className={`w-full ${filters.category && "bg-green-500 text-white"}`}>
+              <Card key={category} className="w-full">
                 <CardActionArea
                   onClick={() => updateFilters("category", category)}
                   className="h-full"
                   sx={category === filters.category && {
-                    backgroundColor: "rgb(0, 160, 0)"
+                    backgroundColor: "rgb(0, 190, 0)",
                   }}
                 >
                   <CardContent className={`text-green-600 ${category === filters.category && "text-white"}`}>
-                    {category}
+                    <p className="text-black text-sm text-center">{category}</p>
                   </CardContent>
                 </CardActionArea>
               </Card>

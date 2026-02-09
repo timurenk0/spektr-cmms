@@ -5,7 +5,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { useAuth } from "../../utils/authContext";
 import { Button, Paper, Tab } from "@mui/material";
-import { Activity, ArrowBigDown, Calendar, ChevronLeft, Clock, Pencil, RotateCcw, Wrench } from "lucide-react";
+import { ArrowBigDown, Calendar, ChevronLeft, Clock, Pencil, RotateCcw, Wrench } from "lucide-react";
 import Link from "next/link";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import EquipmentOverview from "./OverviewTab/EquipmentOverview";
