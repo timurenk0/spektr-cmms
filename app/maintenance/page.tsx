@@ -5,10 +5,6 @@ import Link from "next/link";
 
 const Maintenance = () => {
     
-    const user = {
-        role: "admin"
-    }
-    
   return (
     <>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
@@ -23,9 +19,7 @@ const Maintenance = () => {
                     <Button variant="outlined">Go To Calendar</Button>
                 </Link>
                 
-                {user.role === "admin" && (
-                    <AddMaintenanceButton />
-                )}
+                <AddMaintenanceButton />
             </div>
 
         </div>

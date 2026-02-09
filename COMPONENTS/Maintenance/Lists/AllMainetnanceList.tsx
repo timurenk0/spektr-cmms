@@ -1,12 +1,17 @@
+import SlideDialog from "@/COMPONENTS/ui/SlideDialog";
 import { TEquipment, TMaintenance } from "@/COMPONENTS/utils/types";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material"
+import { Trash } from "lucide-react";
 import Image from "next/image";
+import { DeleteMaintenanceForm } from "../DeleteMaintenanceForm";
 
 const AllMaintenanceList = ({
+  userRole,
   maintenances,
   info,
   equipments,
 }: {
+  userRole: string,
   maintenances: TMaintenance[],
   info: {
     total: number,
@@ -28,6 +33,9 @@ const AllMaintenanceList = ({
           <TableCell>Upcoming</TableCell>
           <TableCell>Complete</TableCell>
           <TableCell>Overdue</TableCell>
+          { userRole === "admin" && (
+            <TableCell>Admin</TableCell>
+          )}
         </TableRow>
       </TableHead>
       <TableBody>
@@ -54,6 +62,21 @@ const AllMaintenanceList = ({
             <TableCell>{info.upcoming}</TableCell>
             <TableCell>{info.complete}</TableCell>
             <TableCell>{info.overdue}</TableCell>
+            { userRole === "admin" && (
+              <TableCell>
+                <div className="flex gap-2">
+                  <SlideDialog
+                    title="Delete Maintenance Record"
+                    Btn={(props) => (
+                      <button {...props}><Trash size={20} className="text-red-400 hover:text-red-800 cursor-pointer" /></button>
+                    )}
+                    DialogForm={(props) => (
+                      <DeleteMaintenanceForm {...props} maintenanceId={m.id} />
+                    )}
+                  />
+                </div>
+              </TableCell>
+            ) }
           </TableRow>
         )}): (
           <TableRow>

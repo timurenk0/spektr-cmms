@@ -7,14 +7,16 @@ import { useQuery } from "@tanstack/react-query"
 import { useState } from "react";
 import AllMaintenanceList from "./Lists/AllMainetnanceList";
 import UpcomingMaintenanceList from "./Lists/UpcomingMaintenanceList";
-import GeneralMaintenanceList from "./Lists/GeneralMaintenanceList";
 import ListSkeleton from "../SKELETONS/ListSkeleteon";
 import CompleteMaintenanceList from "./Lists/CompleteMaintenanceList";
 import OverdueMaintenanceList from "./Lists/IncompleteMaintenanceList";
 import { TEquipment, TMaintenance } from "../utils/types";
+import { useAuth } from "../utils/authContext";
 
 const MaintenanceList = () => {
   const [value, setValue] = useState("All");
+
+  const { user, isLoading: isLoadingUser } = useAuth();
 
   // Fetch data
   const { data: maintenances, isLoading: isLoadingMaintenances } = useQuery<TMaintenance[]>({
@@ -35,6 +37,7 @@ const MaintenanceList = () => {
   }
   
   const isLoading =
+    (isLoadingUser || !user) ||
     (isLoadingMaintenances || !maintenances) ||
     (isLoadingEquipments || !equipments) ||
     (isLoadingInfo || !info);
@@ -54,7 +57,7 @@ const MaintenanceList = () => {
           <Tab label={`Overdue (${info.overdue})`} value="Overdue"  />
         </TabList>
         <TabPanel value="All">
-          <AllMaintenanceList maintenances={maintenances} info={info} equipments={equipments.equips} />
+          <AllMaintenanceList userRole={user.role} maintenances={maintenances} info={info} equipments={equipments.equips} />
         </TabPanel>
         <TabPanel value="Upcoming">
           <UpcomingMaintenanceList equipments={equipments.equips} />
