@@ -6,6 +6,7 @@ import AddEquipmentForm from "./AddEquipmentForm";
 import SlideDialog from "../ui/SlideDialog";
 import DeleteEquipmentForm from "./DeleteEquipmentForm";
 import { TEquipment } from "../utils/types";
+import { HealthBadge } from "../ui/HealthBadgeFull";
 
 
 const getStatusBadge = (status: string) => {
@@ -37,30 +38,28 @@ const getStatusBadge = (status: string) => {
     }
 };
 
-const getHealthBadge = (healthIndex: number) => {
+const getHealthBadge = (healthIndex: number | null) => {
+    if (healthIndex == null) {
+        return (
+            <HealthBadge color="gray" value="-" />
+        )
+    }
+
     if (healthIndex < 30) {
         return (
-            <div className="bg-red-200 text-red-600 font-bold px-2 py-1 rounded-full">
-                { healthIndex }%
-            </div>
+            <HealthBadge color="red" value={healthIndex.toFixed(2)} />
         )
     } else if (healthIndex < 60) {
         return (
-            <div className="bg-amber-200 text-amber-600 font-bold px-2 py-1 rounded-full">
-                { healthIndex }%
-            </div>
+            <HealthBadge color="amber" value={healthIndex.toFixed(2)} />
         )
     } else if (healthIndex < 85) {
         return (
-            <div className="bg-yellow-200 text-amber-600 font-bold px-2 py-1 rounded-full">
-                { healthIndex }%
-            </div>
+            <HealthBadge color="yellow" value={healthIndex.toFixed(2)} />
         )
     } else {
         return (
-            <div className="bg-emerald-200 text-green-600 font-bold px-2 py-1 rounded-full">
-                { healthIndex }%
-            </div>
+            <HealthBadge color="green" value={healthIndex.toFixed(2)} />
         )
     }
 }

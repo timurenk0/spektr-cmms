@@ -13,6 +13,7 @@ import EquipmentDocuments from "./DocumentTab/EquipmentDocuments";
 import EquipmentPhotos from "./PhotoTab/EquipmentPhotos";
 import EquipmentActivity from "./ActivityTab/EquipmentActivity";
 import { TEquipment } from "@/COMPONENTS/utils/types";
+import { HealthBadgeFull } from "@/COMPONENTS/ui/HealthBadgeFull";
 
 
 const getDetailBadge = (text: string) => {
@@ -24,88 +25,27 @@ const getDetailBadge = (text: string) => {
 }
 
 const getHealthBadge = (healthIndex: number | null) => {
-  console.log(typeof healthIndex);
   if (healthIndex == null) {
     return (
-      <div className="flex items-center">
-        <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center mr-3">
-          <Activity className="h-5 w-5" />
-        </div>
-        <div>
-          <div className="text-sm font-bold text-gray-600">
-            -
-          </div>
-          <div className="text-xs text-gray-500">
-            Health Score
-          </div>
-        </div>
-      </div>
+      <HealthBadgeFull color="gray" value="-" />
     )
   }
 
   if (healthIndex < 30) {
     return (
-      <div className="flex items-center">
-        <div className="w-10 h-10 rounded-full bg-red-200 text-red-600 flex items-center justify-center mr-3">
-          <Activity className="h-5 w-5" />
-        </div>
-        <div>
-          <div className="text-sm font-bold text-red-600">
-            { healthIndex.toFixed(2) }%
-          </div>
-          <div className="text-xs text-gray-500">
-            Health Score
-          </div>
-        </div>
-      </div>
+      <HealthBadgeFull color="red" value={healthIndex.toFixed(2)} />
     )
   } else if (healthIndex < 60) {
     return (
-      <div className="flex items-center">
-        <div className="w-10 h-10 rounded-full bg-amber-200 text-amber-600 flex items-center justify-center mr-3">
-          <Activity className="h-5 w-5" />
-        </div>
-        <div>
-          <div className="text-sm font-bold text-amber-600">
-            { healthIndex.toFixed(2) }%
-          </div>
-          <div className="text-xs text-gray-500">
-            Health Score
-          </div>
-        </div>
-      </div>
+      <HealthBadgeFull color="amber" value={healthIndex.toFixed(2)} />
     )
   } else if (healthIndex < 85) {
     return (
-      <div className="flex items-center">
-        <div className="w-10 h-10 rounded-full bg-yellow-200 text-amber-600 flex items-center justify-center mr-3">
-          <Activity className="h-5 w-5" />
-        </div>
-        <div>
-          <div className="text-sm font-bold text-amber-600">
-            { healthIndex.toFixed(2) }%
-          </div>
-          <div className="text-xs text-gray-500">
-            Health Score
-          </div>
-        </div>
-      </div>
+      <HealthBadgeFull color="yellow" value={healthIndex.toFixed(2)} />
     )
   } else {
     return (
-      <div className="flex items-center">
-        <div className="w-10 h-10 rounded-full bg-emerald-200 text-green-600 flex items-center justify-center mr-3">
-          <Activity className="h-5 w-5" />
-        </div>
-        <div>
-          <div className="text-sm font-bold text-green-600">
-            { healthIndex.toFixed(2) }%
-          </div>
-          <div className="text-xs text-gray-500">
-            Health Score
-          </div>
-        </div>
-      </div>
+      <HealthBadgeFull color="green" value={healthIndex.toFixed(2)} />
     )
   }
 }
