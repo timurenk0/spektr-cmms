@@ -6,34 +6,27 @@ import AddEquipmentForm from "./AddEquipmentForm";
 import SlideDialog from "../ui/SlideDialog";
 import DeleteEquipmentForm from "./DeleteEquipmentForm";
 import { TEquipment } from "../utils/types";
-import { HealthBadge } from "../ui/HealthBadgeFull";
+import { HealthBadge } from "../ui/HealthBadge";
+import { StatusBadge } from "../ui/StatusBadge";
 
 
 const getStatusBadge = (status: string) => {
     switch (status) {
         case "operational":
             return (
-                <div className="bg-green-200 rounded-full border border-green-800 text-green-800 px-2 py-1 whitespace-nowrap">
-                    Operational
-                </div>
+                <StatusBadge color="green" status="Operational" />
             );
         case "under repair":
             return (
-                <div className="bg-amber-200 rounded-full border border-amber-800 text-amber-800 px-2 py-1 whitespace-nowrap">
-                    Under Repair
-                </div>
+                <StatusBadge color="amber" status="Under Repair" />
             );
         case "out of service":
             return (
-                <div className="bg-gray-200 rounded-full border border-gray-800 text-gray-800 px-2 py-1 whitespace-nowrap">
-                    Out of Service
-                </div>
+                <StatusBadge color="red" status="Out of Service" />
             );
         default:
             return (
-                <div className="bg-red-200 rounded-full border border-red-800 text-red-800 px-2 py-1 whitespace-nowrap">
-                    Invalid Status
-                </div>
+                <StatusBadge color="gray" status="Invalid Status (error)" />
             );
     }
 };

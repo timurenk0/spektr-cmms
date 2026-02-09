@@ -13,7 +13,7 @@ import EquipmentDocuments from "./DocumentTab/EquipmentDocuments";
 import EquipmentPhotos from "./PhotoTab/EquipmentPhotos";
 import EquipmentActivity from "./ActivityTab/EquipmentActivity";
 import { TEquipment } from "@/COMPONENTS/utils/types";
-import { HealthBadgeFull } from "@/COMPONENTS/ui/HealthBadgeFull";
+import { HealthBadgeFull } from "@/COMPONENTS/ui/HealthBadge";
 
 
 const getDetailBadge = (text: string) => {
