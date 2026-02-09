@@ -14,6 +14,102 @@ import EquipmentPhotos from "./PhotoTab/EquipmentPhotos";
 import EquipmentActivity from "./ActivityTab/EquipmentActivity";
 import { TEquipment } from "@/COMPONENTS/utils/types";
 
+
+const getDetailBadge = (text: string) => {
+  return (
+    <span className="px-2 py-1 bg-gray-200 text-gray-600 text-xs font-bold rounded-full">
+      { text }
+    </span>
+  )
+}
+
+const getHealthBadge = (healthIndex: number | null) => {
+  console.log(typeof healthIndex);
+  if (healthIndex == null) {
+    return (
+      <div className="flex items-center">
+        <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center mr-3">
+          <Activity className="h-5 w-5" />
+        </div>
+        <div>
+          <div className="text-sm font-bold text-gray-600">
+            -
+          </div>
+          <div className="text-xs text-gray-500">
+            Health Score
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (healthIndex < 30) {
+    return (
+      <div className="flex items-center">
+        <div className="w-10 h-10 rounded-full bg-red-200 text-red-600 flex items-center justify-center mr-3">
+          <Activity className="h-5 w-5" />
+        </div>
+        <div>
+          <div className="text-sm font-bold text-red-600">
+            { healthIndex.toFixed(2) }%
+          </div>
+          <div className="text-xs text-gray-500">
+            Health Score
+          </div>
+        </div>
+      </div>
+    )
+  } else if (healthIndex < 60) {
+    return (
+      <div className="flex items-center">
+        <div className="w-10 h-10 rounded-full bg-amber-200 text-amber-600 flex items-center justify-center mr-3">
+          <Activity className="h-5 w-5" />
+        </div>
+        <div>
+          <div className="text-sm font-bold text-amber-600">
+            { healthIndex.toFixed(2) }%
+          </div>
+          <div className="text-xs text-gray-500">
+            Health Score
+          </div>
+        </div>
+      </div>
+    )
+  } else if (healthIndex < 85) {
+    return (
+      <div className="flex items-center">
+        <div className="w-10 h-10 rounded-full bg-yellow-200 text-amber-600 flex items-center justify-center mr-3">
+          <Activity className="h-5 w-5" />
+        </div>
+        <div>
+          <div className="text-sm font-bold text-amber-600">
+            { healthIndex.toFixed(2) }%
+          </div>
+          <div className="text-xs text-gray-500">
+            Health Score
+          </div>
+        </div>
+      </div>
+    )
+  } else {
+    return (
+      <div className="flex items-center">
+        <div className="w-10 h-10 rounded-full bg-emerald-200 text-green-600 flex items-center justify-center mr-3">
+          <Activity className="h-5 w-5" />
+        </div>
+        <div>
+          <div className="text-sm font-bold text-green-600">
+            { healthIndex.toFixed(2) }%
+          </div>
+          <div className="text-xs text-gray-500">
+            Health Score
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
+
 const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
   const [statusSelectionOpen, setStatusSelectionOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
@@ -54,17 +150,17 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                 <div className="flex space-x-3 mt-2">
                   <div className="flex flex-col items-center">
                     <span className="text-xs text-gray-500 mb-1">Type</span>
-                    <span className="rounded-full border px-2.5 py-0.5 text-xs font-semibold">{equipment.type}</span>
+                    { getDetailBadge(equipment.type) }
                   </div>
 
                   <div className="flex flex-col items-center">
                     <span className="text-xs text-gray-500 mb-1">Location</span>
-                    <span className="rounded-full border px-2.5 py-0.5 text-xs font-semibold">{equipment.location}</span>
+                    { getDetailBadge(equipment.location) }
                   </div>
 
                   <div className="flex flex-col items-center">
                     <span className="text-xs text-gray-500 mb-1">Owning Dept.</span>
-                    <span className="rounded-full border px-2.5 py-0.5 text-xs font-semibold">{equipment.department}</span>
+                    { getDetailBadge(equipment.department) }
                   </div>
 
                   <div className="flex flex-col items-center relative">
@@ -82,7 +178,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                             ${equipment.status === "operational" ? "text-green-800 hover:text-green-400" :
                               equipment.status === "under repair" ? "text-amber-800 hover:bg-amber-600" :
                               "text-amber-800 hover:bg-amber-600"
-                          } h-[16px] w-[16px] ms-1 rounded-full cursor-pointer`}
+                          } h-4 w-4 ms-1 rounded-full cursor-pointer`}
                           >
                             <ArrowBigDown height={16} width={16} className="mt-1" />
                           </button>
@@ -125,7 +221,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                 <Calendar width={24} height={24} className="text-green-600" />
               </div>
               <div>
-                <div className="text-sm font-medium text-green-600">
+                <div className="text-sm font-bold text-green-600">
                   12
                 </div>
                 <div className="text-xs text-gray-500">Equipment Age</div>
@@ -138,7 +234,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <div className="text-sm font-medium text-blue-600">
+                  <div className="text-sm font-bold text-blue-600">
                     {equipment.totalWorkingHours || "N/A"}
                   </div>
                   {equipment.totalWorkingHours && (
@@ -160,7 +256,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                 <RotateCcw width={24} height={24} className="text-orange-600" />
               </div>
               <div>
-                <div className="text-sm font-medium text-orange-600">
+                <div className="text-sm font-bold text-orange-600">
                   {equipment.lastEvent}
                 </div>
                 <div className="text-xs text-gray-500">Last Maintenance</div>
@@ -172,24 +268,14 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                 <Wrench width={24} height={24} className="text-purple-600" />
               </div>
               <div>
-                <div className="text-sm font-meidum text-purple-600">
+                <div className="text-sm font-bold text-purple-600">
                   {equipment.nextEvent}
                 </div>
                 <div className="text-xs text-gray-500">Next Maintenance</div>
               </div>
             </div>
 
-            <div className="flex items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3`}>
-                <Activity width={24} height={24} />
-              </div>
-              <div className="relative">
-                <div className={`text-sm font-medium`}>
-                  {equipment.healthIndex ? `${equipment.healthIndex}%` : "N/A"}
-                </div>
-                <div className="text-xs text-gray-500">Health Score</div>
-              </div>
-            </div>
+            { getHealthBadge(equipment.healthIndex) }
           </div>
         </div>
 

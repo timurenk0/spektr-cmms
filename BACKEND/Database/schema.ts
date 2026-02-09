@@ -3,20 +3,20 @@ import {
   text,
   serial,
   integer,
-  decimal,
   date,
   timestamp,
   check,
   index,
   unique,
+  doublePrecision
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Database tables schemas
 
+// Database tables schemas
 
 
 // Activities table schema
@@ -97,7 +97,7 @@ export const equipments = pgTable(
     location: text("location").notNull(),
     department: text("department").notNull(),
     equipmentImage: text("equipment_image").notNull(),
-    healthIndex: decimal("health_index"),
+    healthIndex: doublePrecision("health_index"),
     notes: text("notes"),
   },
   (table) => [
