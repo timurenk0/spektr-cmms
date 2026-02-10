@@ -43,6 +43,7 @@ const EquipmentList = () => {
 
   const removeFilters = () => {
     setPage(0);
+    setSearchInput("");
     setFilters({
       search: "",
       type: "",
@@ -124,9 +125,9 @@ const EquipmentList = () => {
         ))}
       </div>
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
-        <div className="grid grid-cols-1 md:grid-cols-3 p-2 gap-2">
-          <TextField size="small" placeholder="Search Equipment" type="search" className="col-span-2" color="info" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
-          <div className="flex gap-2">
+       <div className="grid grid-cols-1 md:grid-cols-4 p-2 gap-1">
+          <TextField size="small" className="col-span-2" placeholder="Search Equipment" type="search" color="info" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
+          <div className="flex gap-2 col-span-2">
             <FormControl size="small" fullWidth>
               <InputLabel id="location-filter" color="info">Select Location</InputLabel>
               <Select labelId="location-filter" label="Select Location" color="info" value={filters.location} onChange={(e) => updateFilters("location", (e.target as HTMLInputElement).value)}>
@@ -143,14 +144,14 @@ const EquipmentList = () => {
                 ))}
               </Select>
             </FormControl>
-            <Button className="w-full text-nowrap" sx={{ fontSize: "12px" }} onClick={removeFilters}>Remove Filters</Button>
+            <Button className="w-full text-nowrap" sx={{ fontSize: "10px" }} onClick={removeFilters}>Remove Filters</Button>
           </div>
         </div>
         <TableContainer sx={{ maxHeight: "80vh" }}>
           <Table stickyHeader>
             <TableHead>
-              <TableRow sx={{ "& .MuiTableCell-root": { fontWeight: "bold", textAlign: "center" } }}>
-                <TableCell>Equipment</TableCell>
+              <TableRow sx={{ "& .MuiTableCell-root": { fontWeight: "bold", backgroundColor: "#ececec", color: "#666", textAlign: "center" } }}>
+                <TableCell>Equipment ({ equipments.totalCount })</TableCell>
                 <TableCell>Asset ID</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Location</TableCell>
