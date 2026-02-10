@@ -6,8 +6,8 @@ import AddEquipmentForm from "./AddEquipmentForm";
 import SlideDialog from "../ui/SlideDialog";
 import DeleteEquipmentForm from "./DeleteEquipmentForm";
 import { TEquipment } from "../utils/types";
-import { HealthBadge } from "../ui/HealthBadge";
-import { StatusBadge } from "../ui/StatusBadge";
+import { HealthBadge } from "../ui/badges/HealthBadge";
+import { StatusBadge } from "../ui/badges/StatusBadge";
 import { format } from "date-fns";
 
 

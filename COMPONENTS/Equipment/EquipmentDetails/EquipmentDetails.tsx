@@ -13,17 +13,10 @@ import EquipmentDocuments from "./DocumentTab/EquipmentDocuments";
 import EquipmentPhotos from "./PhotoTab/EquipmentPhotos";
 import EquipmentActivity from "./ActivityTab/EquipmentActivity";
 import { TEquipment } from "@/COMPONENTS/utils/types";
-import { HealthBadgeFull } from "@/COMPONENTS/ui/HealthBadge";
+import { HealthBadgeFull } from "@/COMPONENTS/ui/badges/HealthBadge";
 import { format } from "date-fns";
+import { DetailBadge } from "@/COMPONENTS/ui/badges/DetailBadge";
 
-
-const getDetailBadge = (text: string) => {
-  return (
-    <span className="px-2 py-1 bg-gray-200 text-gray-600 text-xs font-bold rounded-full">
-      { text }
-    </span>
-  )
-}
 
 const getHealthBadge = (healthIndex: number | null) => {
   if (healthIndex == null) {
@@ -92,17 +85,17 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                 <div className="flex space-x-3 mt-2">
                   <div className="flex flex-col items-center">
                     <span className="text-xs text-gray-500 mb-1">Type</span>
-                    { getDetailBadge(equipment.type) }
+                    <DetailBadge text={equipment.type} />
                   </div>
 
                   <div className="flex flex-col items-center">
                     <span className="text-xs text-gray-500 mb-1">Location</span>
-                    { getDetailBadge(equipment.location) }
+                    <DetailBadge text={equipment.location} />
                   </div>
 
                   <div className="flex flex-col items-center">
                     <span className="text-xs text-gray-500 mb-1">Owning Dept.</span>
-                    { getDetailBadge(equipment.department) }
+                    <DetailBadge text={equipment.department} />
                   </div>
 
                   <div className="flex flex-col items-center relative">
