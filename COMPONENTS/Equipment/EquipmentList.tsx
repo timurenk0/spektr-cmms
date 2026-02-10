@@ -144,7 +144,7 @@ const EquipmentList = () => {
                 ))}
               </Select>
             </FormControl>
-            <Button className="w-full text-nowrap" size="small" color="error" onClick={removeFilters}>Remove Filters</Button>
+            <Button className="text-nowrap" size="small" color="error" onClick={removeFilters}>Reset</Button>
           </div>
         </div>
         <TableContainer sx={{ maxHeight: "80vh" }}>
