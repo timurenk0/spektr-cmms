@@ -11,13 +11,12 @@ import {
 import * as schema from "./Database/schema";
 import { db } from "./Database/db";
 import { generateEvents } from "./Middleware/EventManager";
-import { eq, and, desc, sql, not, ExtractTablesWithRelations, lt, gte, lte, isNull, ilike, or, getTableColumns } from "drizzle-orm";
+import { eq, and, asc, desc, sql, not, ExtractTablesWithRelations, lt, gte, lte, isNull, ilike, or, getTableColumns, gt } from "drizzle-orm";
 import type { NeonDatabase, NeonQueryResultHKT } from "drizzle-orm/neon-serverless";
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { differenceInCalendarMonths } from "date-fns";
-import { AuthUser } from "./Middleware/AuthService";
 
 
 type Schema = typeof schema;
@@ -114,26 +113,10 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
 
     /* ================================================ Equipment Methods ===================================================== */
-    async getEquipments(user: AuthUser, concise?:string, limit?: number, page?: number, location?: string, status?: string, type?: string, category?: string, search?: string): Promise<{equips: (Partial<Equipment> & { nextMaintenance: string, lastMaintenance: string })[], totalCount: number}> {
-        const lastMaintenance = sql<string>`
-        (
-            SELECT m.start_date FROM maintenance_events m WHERE m.equipment_id = ${equipments.id} AND m.start_date < NOW()
-            ORDER BY m.start_date ASC
-            LIMIT 1
-        )
-        `;
-
-        const nextMaintenance = sql<string>`
-        (
-            SELECT m.start_date FROM maintenance_events m WHERE m.equipment_id = ${equipments.id} AND m.start_date > NOW()
-            ORDER BY m.start_date ASC
-            LIMIT 1
-        )
-        `;
-
+    async getEquipments(tenant: number, concise?:string, limit?: number, page?: number, location?: string, status?: string, type?: string, category?: string, search?: string): Promise<{equips: (Partial<Equipment> & { lastEvent: string | null, nextEvent: string | null })[], totalCount: number}> {
         const filters = [];
 
-        filters.push(eq(equipments.tenantId, user.tenantId));
+        filters.push(eq(equipments.tenantId, tenant));
         if (location) filters.push(eq(equipments.location, location));
         if (status) filters.push(eq(equipments.status, status));
         if (type) filters.push(eq(equipments.type, type));
@@ -151,6 +134,37 @@ export class DatabaseStorage {
 
         const whereClause = filters.length ? and(...filters) : undefined;
 
+        const lastEventSubquery = db
+            .select({
+                lastEvent: maintenanceEvents.start,
+            })
+            .from(maintenanceEvents)
+            .where(
+                and(
+                eq(maintenanceEvents.equipmentId, equipments.id),
+                lt(maintenanceEvents.start, sql`NOW()`),
+                ),
+            )
+            .orderBy(desc(maintenanceEvents.start))
+            .limit(1)
+            .as("last_event");
+
+
+        const nextEventSubquery = db
+            .select({
+                nextEvent: maintenanceEvents.start,
+            })
+            .from(maintenanceEvents)
+            .where(
+                and(
+                eq(maintenanceEvents.equipmentId, equipments.id),
+                gt(maintenanceEvents.start, sql`NOW()`),
+                ),
+            )
+            .orderBy(asc(maintenanceEvents.start))
+            .limit(1)
+            .as("next_event");
+
 
         let query = db
             .select(
@@ -161,16 +175,18 @@ export class DatabaseStorage {
                     assetId: equipments.assetId,
                     equipmentImage: equipments.equipmentImage,
                     status: equipments.status,
-                    lastMaintenance,
-                    nextMaintenance
+                    lastEvent: lastEventSubquery.lastEvent,
+                    nextEvent: nextEventSubquery.nextEvent,
                 } : {
                     ...getTableColumns(equipments),
-                    lastMaintenance,
-                    nextMaintenance
+                    lastEvent: lastEventSubquery.lastEvent,
+                    nextEvent: nextEventSubquery.nextEvent,
                 }
             )
             .from(equipments)
             .where(whereClause)
+            .leftJoinLateral(lastEventSubquery, sql`true`)
+            .leftJoinLateral(nextEventSubquery, sql`true`)
             .orderBy(equipments.id)
             .offset(limit && page ? (page - 1) * limit : 0)
             .$dynamic();
@@ -182,11 +198,12 @@ export class DatabaseStorage {
         const count = await db.select({ count: sql<number>`count(*)` }).from(equipments).where(whereClause);
         const data = await query;
 
+
         return { equips: data, totalCount: count[0].count }
     }
     
     async getEquipment(id: number): Promise<Equipment | undefined> {
-        return (await db.select().from(equipments).where(eq(equipments.id, id)))[0];
+        return (await db.select().from(equipments).where(eq(equipments.id, id)))[0]
     }
 
     async getEquipmentLocations(): Promise<string[]> {
@@ -359,15 +376,6 @@ export class DatabaseStorage {
         return await db.select().from(maintenanceEvents).where(eq(maintenanceEvents.equipmentId, id));
     }
 
-    async getClosestMaintenanceEventsForEquipment(id: number): Promise<{lastEvent: string, nextEvent: string}> {
-        const today = new Date().toISOString();
-        
-        const [prev] = await db.select().from(maintenanceEvents).where(and(eq(maintenanceEvents.equipmentId, id), sql`${maintenanceEvents.start} < ${today}`)).limit(1);
-        const [next] = await db.select().from(maintenanceEvents).where(and(eq(maintenanceEvents.equipmentId, id), and(sql`${maintenanceEvents.start} > ${today}`, eq(maintenanceEvents.status, "upcoming")))).limit(1);
-
-        return {lastEvent: prev?.scheduledAt ?? "N/A", nextEvent: next?.scheduledAt ?? "N/A"};
-    }
-    
     async addMaintenanceEvents(
             events: InsertMaintenanceEvent[],
             transaction?: Transaction

@@ -14,6 +14,7 @@ import EquipmentPhotos from "./PhotoTab/EquipmentPhotos";
 import EquipmentActivity from "./ActivityTab/EquipmentActivity";
 import { TEquipment } from "@/COMPONENTS/utils/types";
 import { HealthBadgeFull } from "@/COMPONENTS/ui/HealthBadge";
+import { format } from "date-fns";
 
 
 const getDetailBadge = (text: string) => {
@@ -67,6 +68,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
   const isLoading = (!equipment || isLoadingEquipment) || (!user || isLoadingUser);
   if (isLoading) return (<h1>Loading...</h1>);
 
+  console.log(equipment)
 
   return (
     <div>

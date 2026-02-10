@@ -36,7 +36,7 @@ export async function GET(
         console.log(filters);
 
         const equipments = await storage.getEquipments(
-            user,
+            user.tenantId,
             concise ? "true" : undefined,
             limit, page,
             filters.location,

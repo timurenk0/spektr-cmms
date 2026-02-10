@@ -19,9 +19,9 @@ export async function GET(
         const equipment = await storage.getEquipment(equipmentId);
         if (!equipment) return res.json({ error: "Specified equipment not found" }, { status: 404 });
         
-        const closestEvents = await storage.getClosestMaintenanceEventsForEquipment(equipmentId);
+        // const closestEvents = await storage.getClosestMaintenanceEventsForEquipment(equipmentId);
 
-        return res.json({...equipment, ...closestEvents}, { status: 200 });
+        return res.json(equipment , { status: 200 });
     } catch (error: unknown) {
         const msg = error instanceof Error ? error.message : "Unkown error";
         return res.json({ error: `Failed to fetch specified equipment" ${msg}` }, { status: 500 });
