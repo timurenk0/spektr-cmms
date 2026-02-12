@@ -192,7 +192,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
               </div>
               <div>
                 <div className="text-sm font-bold text-orange-600">
-                  {equipment.lastEvent}
+                  {equipment.lastEvent ?? "N/A"}
                 </div>
                 <div className="text-xs text-gray-500">Last Maintenance</div>
               </div>
@@ -204,7 +204,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
               </div>
               <div>
                 <div className="text-sm font-bold text-purple-600">
-                  {equipment.nextEvent}
+                  {equipment.nextEvent ?? "N/A"}
                 </div>
                 <div className="text-xs text-gray-500">Next Maintenance</div>
               </div>

@@ -113,7 +113,7 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
 
     /* ================================================ Equipment Methods ===================================================== */
-    async getEquipments(tenant: number, concise?:string, limit?: number, page?: number, location?: string, status?: string, type?: string, category?: string, search?: string): Promise<{equips: (Partial<Equipment> & { lastEvent: string | null, nextEvent: string | null })[], totalCount: number}> {
+    async getEquipments(tenant: number, concise?:string, limit?: number, page?: number, location?: string, status?: string, type?: string, category?: string, search?: string): Promise<{equips: (Partial<Equipment>)[], totalCount: number}> {
         const filters = [];
 
         filters.push(eq(equipments.tenantId, tenant));
@@ -203,7 +203,46 @@ export class DatabaseStorage {
     }
     
     async getEquipment(id: number): Promise<Equipment | undefined> {
-        return (await db.select().from(equipments).where(eq(equipments.id, id)))[0]
+        // return (await db.select().from(equipments).where(eq(equipments.id, id)))[0]
+        const lastEventSubquery = db
+                                        .select({ lastEvent: maintenanceEvents.start })
+                                        .from(maintenanceEvents)
+                                        .where(
+                                            and(
+                                                eq(maintenanceEvents.equipmentId, id),
+                                                lt(maintenanceEvents.start, sql`NOW()`)
+                                            )
+                                        )
+                                        .orderBy(desc(maintenanceEvents.start))
+                                        .limit(1)
+                                        .as("last_event")
+        
+        const nextEventSubquery = db
+                                        .select({ nextEvent: maintenanceEvents.start })
+                                        .from(maintenanceEvents)
+                                        .where(
+                                            and(
+                                                eq(maintenanceEvents.equipmentId, id),
+                                                gt(maintenanceEvents.start, sql`NOW()`)
+                                            )
+                                        )
+                                        .orderBy(asc(maintenanceEvents.start))
+                                        .limit(1)
+                                        .as("next_event")
+
+        return (
+            await db.select(
+                {
+                    ...getTableColumns(equipments),
+                    lastEvent: lastEventSubquery.lastEvent,
+                    nextEvent: nextEventSubquery.nextEvent,
+                }
+            )
+                    .from(equipments)
+                    .where(eq(equipments.id, id))
+                    .leftJoinLateral(lastEventSubquery, sql`true`)
+                    .leftJoinLateral(nextEventSubquery, sql`true`)
+        )[0];
     }
 
     async getEquipmentLocations(): Promise<string[]> {
