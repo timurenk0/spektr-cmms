@@ -64,7 +64,7 @@ const AllMaintenanceList = ({
             <TableCell>{info.overdue}</TableCell>
             { userRole === "admin" && (
               <TableCell>
-                <div className="flex gap-2">
+                <div className="flex justify-center">
                   <SlideDialog
                     title="Delete Maintenance Record"
                     Btn={(props) => (
