@@ -125,9 +125,14 @@ const EquipmentList = () => {
         ))}
       </div>
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
-       <div className="grid grid-cols-1 md:grid-cols-4 p-2 gap-1">
-          <TextField size="small" className="col-span-2" placeholder="Search Equipment" type="search" color="info" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
-          <div className="flex gap-2 col-span-2">
+       <div className="flex flex-col md:flex-row gap-2 p-2">
+          <div className="grow">
+            <TextField size="small" fullWidth placeholder="Search Equipment" type="search" color="info" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
+          </div>
+          <div className="grow flex gap-2">
+            <div className="border border-black/20 text-black/60 rounded-md p-2 text-md my-auto whitespace-nowrap">
+              Equipment Count: <span className="font-bold">{equipments.totalCount}</span>
+            </div>
             <FormControl size="small" fullWidth>
               <InputLabel id="location-filter" color="info">Select Location</InputLabel>
               <Select labelId="location-filter" label="Select Location" color="info" value={filters.location} onChange={(e) => updateFilters("location", (e.target as HTMLInputElement).value)}>
@@ -144,14 +149,14 @@ const EquipmentList = () => {
                 ))}
               </Select>
             </FormControl>
-            <Button className="text-nowrap" size="small" color="error" onClick={removeFilters}>Reset</Button>
           </div>
+          <Button className="text-nowrap" size="small" color="error" onClick={removeFilters}>Reset</Button>
         </div>
         <TableContainer sx={{ maxHeight: "80vh" }}>
           <Table stickyHeader>
             <TableHead>
               <TableRow sx={{ "& .MuiTableCell-root": { fontWeight: "bold", backgroundColor: "#ececec", color: "#666", textAlign: "center" } }}>
-                <TableCell>Equipment ({ equipments.totalCount })</TableCell>
+                <TableCell>Equipment</TableCell>
                 <TableCell>Asset ID</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Location</TableCell>
