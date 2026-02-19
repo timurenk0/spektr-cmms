@@ -1,4 +1,5 @@
 import { insertDocumentSchema } from "@/BACKEND/Database/schema";
+import { Gstorage } from "@/BACKEND/google-storage";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
@@ -8,6 +9,7 @@ import { NextRequest, NextResponse as res } from "next/server";
 export async function GET() {
     try {
         const documents = await storage.getDocuments();
+        await Gstorage.getDocuments();
 
         if (!documents || documents.length === 0) return res.json({ message: "No documents found" }, { status: 404 });
         

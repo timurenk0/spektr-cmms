@@ -54,7 +54,7 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
         
         const buffer = await file.arrayBuffer();
         
-        const response = await fetch("/api/upload/document", {
+        const response = await fetch(`/api/equipments/${equipmentId}/documents`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/pdf",
