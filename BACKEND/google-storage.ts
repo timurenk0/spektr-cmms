@@ -10,7 +10,7 @@ const publicURL = `https://storage.googleapis.com/${BUCKET_NAME}`;
 class GStorage {
 
     async getDocuments(): Promise<string[]> {
-        const [files] = await storage.bucket("cmms_documents").getFiles();
+        const [files] = await storage.bucket(BUCKET_NAME).getFiles();
 
         console.log("Files:");
         files.forEach(f => {
@@ -21,7 +21,8 @@ class GStorage {
 
     async uploadDocument(doc: File): Promise<string> {
         const buffer = Buffer.from(await doc.arrayBuffer());
-        console.log(buffer);
+        
+        // Generate document name using upload date
         const now = new Date();
         const date = `${now.getFullYear()}-${now.getMonth()}`;
         const filePath = `uploads/${date}/${doc.name}`;

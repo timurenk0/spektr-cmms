@@ -1,4 +1,5 @@
 # PRIORITY
+- Move Google Bucket document upload to storage for transaction (MUST upload both to Google and Neon)
 - Move equipment list filtering to backend (db queries)
     - Deal with slow search ("Filtering equipment query chat")
 - Calendar events finish logic
