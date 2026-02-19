@@ -61,8 +61,6 @@ export const documents = pgTable("documents", {
     equipmentId: integer("equipment_id").notNull().references(() => equipments.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
     fileUrl: text("file_url").notNull(),
-    fileType: text("file_type").notNull().default("pdf"),
-    fileName: text("file_name"),
     category: text("category").notNull(),
     uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
     notes: text("notes")
