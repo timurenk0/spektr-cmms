@@ -11,11 +11,9 @@ import toast from 'react-hot-toast';
 import z from 'zod';
 
 
-const formSchema = insertDocumentSchema.extend({
-  equipmentId: z.number(),
+const formSchema = z.object({
+  file: z.file().max(10_000_000).mime(["application/pdf"]),
   title: z.string().min(1, { error: "Document title required" }),
-  fileUrl: z.string().min(1, { error: "Document URL required" }),
-  fileName: z.string().min(1, { error: "Filename required" }),
   category: z.string().min(1, { error: "Document category required" }),
   notes: z.string().optional()
 });
@@ -40,52 +38,27 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
     const form = useForm<DocumentFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
+            file: undefined,
             title: "",
-            fileUrl: "",
-            fileName: "",
             category: "",
             notes: ""
         }
     });
 
     
-    const uploadDocument = async (file: File) => {
-        if (!file) throw new Error("No file selected!");
-        
-        const buffer = await file.arrayBuffer();
-        
-        const response = await fetch(`/api/equipments/${equipmentId}/documents`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/pdf",
-                "X-Filename": file.name
-                },
-                body: buffer,
-        });
-            
-        const data = await response.json().catch(() => null);
-
-        if (!response.ok) {
-            const message = data.error || `Request failed: ${response.status} ${response.statusText}`;
-            throw new Error(message); 
-        }
-        
-            
-        form.setValue("fileUrl", data);
-        form.setValue("fileName", file.name);
-        form.setValue("equipmentId", equipmentId);
-
-        return data; 
-    }
-
     const uploadMutation = useMutation({
         mutationFn: async (values: DocumentFormValues) => {
+            const formData = new FormData();
+
+            formData.append("file", values.file);
+            formData.append("equipmentId", equipmentId.toString());
+            formData.append("title", values.title);
+            formData.append("category", values.category);
+            formData.append("notes", values.notes ?? "");
+            
             const response = await fetch("/api/documents", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(values),
+                body: formData,
             });
 
             const data = await response.json();
@@ -135,46 +108,30 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
             required
             {...form.register("title")}
         />
-        <TextField
-            type="file"
-            slotProps={{
-                htmlInput: {
-                    accept: "application/pdf"
-                },
-                input: {
-                    endAdornment: <InputAdornment position='start'><FileIcon /></InputAdornment>
-                }
-            }}
-            color="info"
-            margin="dense"
-            fullWidth
-            required
-            onChange={(e) => {
-                const file = (e.target as HTMLInputElement).files?.[0];
-
-                if (!file) return;
-                
-                setIsUploading(true);
-                if (file) {
-                    try {
-                        toast.promise(uploadDocument(file).then((docUrl) => {
-                            form.setValue("fileUrl", docUrl);
-                        }).catch((error) => {
-                            const msg = error instanceof Error ? error.message : "Unknown error";
-                            throw new Error(`Failed to upload document: ${msg}`);
-                        }), {
-                            loading: "Uploading document",
-                            success: <b>Document uploaded!</b>,
-                            error: <b>Failed to upload ;(</b>
-                        })
-                    } catch (error) {
-                        return ;
-                    } finally {
-                        setIsUploading(false);
-                    }
-                    }
-                }
-            }
+        <Controller
+            name='file'
+            control={form.control}
+            render={({ field }) => (
+                <TextField
+                    type="file"
+                    color="info"
+                    margin="dense"
+                    fullWidth
+                    required
+                    slotProps={{
+                        htmlInput: {
+                            accept: "application/pdf",
+                            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                                const file = e.target.files?.[0];
+                                field.onChange(file);
+                            },
+                        },
+                        input: {
+                            endAdornment: <InputAdornment position='start'><FileIcon /></InputAdornment>
+                        }
+                    }}
+                />
+            )}
         />
         <Controller
             name="category"

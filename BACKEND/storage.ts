@@ -491,10 +491,6 @@ export class DatabaseStorage {
         return (await db.select().from(documents).where(eq(documents.id, id)))[0];
     }
     
-    async uploadDocument(insertDocument: InsertDocument): Promise<string> {
-        return ""
-    }
-
     async addDocument(insertDocument: InsertDocument): Promise<Document> {
         return (await db.insert(documents).values(insertDocument).returning())[0];
     }

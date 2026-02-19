@@ -9,7 +9,6 @@ import { NextRequest, NextResponse as res } from "next/server";
 export async function GET() {
     try {
         const documents = await storage.getDocuments();
-        await Gstorage.getDocuments();
 
         if (!documents || documents.length === 0) return res.json({ message: "No documents found" }, { status: 404 });
         
@@ -24,8 +23,35 @@ export async function POST(req: NextRequest) {
     try {
         const user = await validateUser("admin");
 
-        const body = await req.json();
-        const documentValidatedData = insertDocumentSchema.parse(body);
+        const body = await req.formData();
+
+        const file = body.get("file") as File | null;
+
+        if (!file) return res.json({ error: "Failed to upload file to Google Bucket Storage" }, { status: 500 });
+
+        const gcsDocument = await Gstorage.uploadDocument(file);
+
+        const rawEquipmentId = body.get("equipmentId");
+        if (!rawEquipmentId) return res.json({ error: "No equipment ID passed" }, { status: 400 });
+        const equipmentId = Number(rawEquipmentId);
+        if (isNaN(equipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
+        
+        const title = body.get("title");
+        if (!title) return res.json({ error: "No document title passed" }, { error: 400 });
+
+        const notes = body.get("notes");
+
+        const category = body.get("category");
+        if (!category) return res.json({ error: "No document category passed" }, { status: 400 });
+
+        const documentData = {
+            equipmentId,
+            title,
+            category,
+            notes,
+            fileUrl: gcsDocument    
+        };
+        const documentValidatedData = insertDocumentSchema.parse(documentData);
 
         const newDocument = await storage.addDocument(documentValidatedData);
         

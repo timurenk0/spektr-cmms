@@ -21,8 +21,9 @@ class GStorage {
 
     async uploadDocument(doc: File): Promise<string> {
         const buffer = Buffer.from(await doc.arrayBuffer());
+        console.log(buffer);
         const now = new Date();
-        const date = `${now.getFullYear}-${now.getMonth}`;
+        const date = `${now.getFullYear()}-${now.getMonth()}`;
         const filePath = `uploads/${date}/${doc.name}`;
 
         const gcsFile = bucket.file(filePath);
