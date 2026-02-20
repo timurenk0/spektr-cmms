@@ -124,6 +124,7 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
                             onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
                                 const file = e.target.files?.[0];
                                 field.onChange(file);
+                                console.log(file);
                             },
                         },
                         input: {

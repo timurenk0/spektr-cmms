@@ -1,4 +1,5 @@
-import { Storage } from "@google-cloud/storage";
+import { Bucket, Storage } from "@google-cloud/storage";
+import sharp from "sharp";
 
 const storage = new Storage({
     keyFilename: process.env.GCP_CREDENTIALS
@@ -27,7 +28,7 @@ class GStorage {
     async uploadDocument(doc: File): Promise<string> {
         const buffer = Buffer.from(await doc.arrayBuffer());
         
-        // Generate document name using upload date
+        // Generate document folder name using current date
         const now = new Date();
         const date = `${now.getFullYear()}-${now.getMonth().toString().padStart(2, "0")}`;
         const filePath = `docs/${date}/${doc.name}`;
@@ -44,17 +45,55 @@ class GStorage {
         return returnURL;
     }
 
+    async deleteDocument(url: string): Promise<void> {
+        try {
+            const filePath = url.split(BUCKET_NAME+"/")[1];
+            const file = await bucket.file(filePath).get();
+            await bucket.delete(file);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     async getPhotos(): Promise<string[]> {
         return [];
     }
 
-   
+    async uploadThumbPhoto(img: File): Promise<string> {
+        const buffer = Buffer.from(await img.arrayBuffer());
+
+        // Generate image folder name using current date
+        const now = new Date();
+        const date = `${now.getFullYear()}-${now.getMonth().toString().padStart(2, "0")}`;
+        const filePath = `thumbs/${date}/${img.name}`;
+
+        const gcsFile = bucket.file(filePath);
+
+        const optimized = await sharp(buffer)
+            .rotate()
+            .resize({
+                width: 200,
+                withoutEnlargement: true
+            })
+            .webp({ quality: 70 })
+            .toBuffer();
+
+        await gcsFile.save(optimized, {
+            contentType: img.type,
+            resumable: false
+        });
+        
+        const returnURL = publicURL+`/${filePath}`;
+        return returnURL;
+    }
+    
     /**
      * Uploads the desirable image to Google Storage. Automatically creates folders with date of upload for easier navigation and filetering.
      * @param img image file to upload to the Google Storage
      * @returns public URL to the stored image
      */
     async uploadPhoto(img: File): Promise<string> {
+        const buffer = Buffer.from(await img.arrayBuffer());
         return "";
     }
 

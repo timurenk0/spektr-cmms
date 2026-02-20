@@ -4,6 +4,7 @@ import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { NextRequest, NextResponse as res } from "next/server";
+import uploadAndAddDocument from "./helper";
 
 
 export async function GET() {
@@ -25,11 +26,9 @@ export async function POST(req: NextRequest) {
 
         const body = await req.formData();
 
+        // Fetch the form data
         const file = body.get("file") as File | null;
-
         if (!file) return res.json({ error: "Failed to upload file to Google Bucket Storage" }, { status: 500 });
-
-        const gcsDocument = await Gstorage.uploadDocument(file);
 
         const rawEquipmentId = body.get("equipmentId");
         if (!rawEquipmentId) return res.json({ error: "No equipment ID passed" }, { status: 400 });
@@ -37,29 +36,29 @@ export async function POST(req: NextRequest) {
         if (isNaN(equipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
         
         const title = body.get("title");
-        if (!title) return res.json({ error: "No document title passed" }, { error: 400 });
-
+        if (!title) return res.json({ error: "No document title passed" }, { status: 400 });
+        
         const notes = body.get("notes");
-
+        
         const category = body.get("category");
         if (!category) return res.json({ error: "No document category passed" }, { status: 400 });
-
+        
+        
         const documentData = {
             equipmentId,
             title,
             category,
             notes,
-            fileUrl: gcsDocument    
         };
-        const documentValidatedData = insertDocumentSchema.parse(documentData);
 
-        const newDocument = await storage.addDocument(documentValidatedData);
+        const newDocument = await uploadAndAddDocument(file, documentData);
+
         
         await activityLogger(user, "add", "Document uploaded", `Document uploaded for equipment ${newDocument.equipmentId}`, newDocument.equipmentId);
         
         return res.json(newDocument, { status: 201 });
     } catch (error) {
-        const msg = error instanceof Error ? [error.message, error.cause, error.stack] : "Unknown error";
+        const msg = error instanceof Error ? error.message : "Unknown error";
         return res.json({ error: `Failed to post document: ${msg}` }, { status: 500 });
     }
 }
