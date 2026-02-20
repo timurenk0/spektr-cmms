@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertEquipmentSchema } from "@/BACKEND/Database/schema"
 
 import toast from "react-hot-toast";
-import { ImageIcon } from "lucide-react";
+import { Image, ImageIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Button, FormControl, FormControlLabel, FormLabel, InputAdornment, InputLabel, MenuItem, Radio, RadioGroup, Select, TextField } from "@mui/material";
@@ -31,7 +31,8 @@ const formSchema = insertEquipmentSchema.extend({
     department: z.string().min(1, { error: "Department is required" }).transform((val) => val.trim()),
     requirements: z.string().min(1, { error: "Equipment requirements are required." }),
     usefulLifeSpan: z.number().min(1),
-    equipmentImage: z.string().transform((val) => val.trim()),
+    // equipmentImage: z.string().transform((val) => val.trim()),
+    image: z.file().max(10_000_000).mime(["image/jpeg", "image/png"]),
     notes: z.string().transform((val) => val.trim()).optional(),
 });
 type EquipmentFormValues = z.infer<typeof formSchema>;
@@ -62,13 +63,12 @@ export default function AddEquipmentForm(
     const uploadImage = async (file: File) => {
         try {
             if (!file) throw new Error("No file selected");
-            
-            const formData = new FormData();
-            formData.append("image", file);
 
-            const response = await fetch("/api/upload/image", {
+            const formData = new FormData();
+            
+            const response = await fetch("/api/photos", {
                 method: "POST",
-                body: formData
+                body: file
             });
 
             const data = await response.json();
@@ -188,14 +188,15 @@ export default function AddEquipmentForm(
     });
 
     // Removed usefulLifeSpan: values.usefulLifeSpan (no bugs for now but if shit happens look HERE)
-    const onSubmit = (values: EquipmentFormValues) => {
+    const onSubmit = async (values: EquipmentFormValues) => {
+        
+        const imageUrl = await uploadImage(values.image);
         const data = {
                 ...values,
                 location: (values.location === "Project" && projectId) ? values.location + " " + projectId : values.location,
-                equipmentImage: equipmentImage || values.equipmentImage,
+                equipmentImage: imageUrl || values.equipmentImage,
                 status: "operational"
             };
-
         mutation.mutate(data);
     }
 
@@ -367,38 +368,31 @@ export default function AddEquipmentForm(
                      />
                  )}
             </div>
-            <TextField
-                type="file"
-                slotProps={{ 
-                    htmlInput: { 
-                        accept: "image/*" 
-                    },
-                    input: { 
-                        endAdornment: <InputAdornment position="start"><ImageIcon /></InputAdornment>
-                    }
-                 }}
-                color="info"
-                fullWidth
-                margin="dense"
-                required={!equipmentId}
-                onChange={(e) => {
-                    const file = (e.target as HTMLInputElement).files?.[0];
-
-                    if (file) {
-                        toast.promise(uploadImage(file)
-                            .then((imageUrl) => {
-                                console.log(imageUrl);
-                                form.setValue("equipmentImage", imageUrl);
-                            }).catch((error) => {
-                                const msg = error instanceof Error ? error.message : "Unknown error";
-                                throw new Error(`Failed to upload photo: ${msg}`);
-                            }), {
-                            loading: "Uploading photo",
-                            success: <b>Photo uploaded!</b>,
-                            error: <b>Failed to upload ;(</b>
-                        })
-                    }
-                }}
+            <Controller
+                name="image"
+                control={form.control}
+                render={({ field }) => (
+                    <TextField
+                        type="file"
+                        color="info"  
+                        margin="dense"
+                        fullWidth
+                        required
+                        slotProps={{
+                            htmlInput: {
+                                accept: ["image/jpeg", "image/png"],
+                                onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                                    const file = e.target.files?.[0];
+                                    field.onChange(file);
+                                    console.log(file);
+                                }
+                            },
+                            input: {
+                                endAdornment: <InputAdornment position="start"><Image /></InputAdornment>
+                            }
+                        }}
+                    />
+                )}
             />
             {/* {equipmentImage && (
                 <div className="mt-2">
