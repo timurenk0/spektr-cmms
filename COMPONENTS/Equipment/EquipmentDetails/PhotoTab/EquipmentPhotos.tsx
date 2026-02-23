@@ -41,7 +41,7 @@ const EquipmentPhotos = ({ equipmentId, userRole }: { equipmentId: number, userR
             {photos.length > 0 ? photos.map(photo => (
                 <div key={photo.id} className="relative group max-w-[120px]">
                     <Image src={photo.imageUrl} width={120} height={120} alt="Equipment photo" />
-                    <div className="absolute inset-0 bg-black transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-40">
+                    <div className="absolute inset-0 bg-black transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-60">
                         <Button
                             variant='text'
                             size="small"

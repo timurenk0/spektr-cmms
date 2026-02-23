@@ -4,8 +4,8 @@ import { storage } from "@/BACKEND/storage";
 
 export default async function uploadAndAddDocument(
     file: File,
-    documentData: any
-): Promise<Document> {
+    documentData: Omit<Document, "fileUrl">
+): Promise<Document | undefined> {
     let fileUrl: string | null = null;
 
     try {
@@ -18,7 +18,7 @@ export default async function uploadAndAddDocument(
        return newDocument;
     } catch (error) {
         if (fileUrl) {
-            await Gstorage.deleteDocument(fileUrl)
+            await Gstorage.deleteObject(fileUrl)
                 .then(()=>{
                     console.log("Fallback successfully deleted the file")
                 })

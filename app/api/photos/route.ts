@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
                 return res.json({ equipmentImage: imageUrl }, { status: 201 });
             } catch (error) {
                 if (imageUrl) {
-                    await Gstorage.deleteDocument(imageUrl)
+                    await Gstorage.deleteObject(imageUrl)
                         .then(() => {
                             console.log("Fallback successfully deleted the photo");
                         })

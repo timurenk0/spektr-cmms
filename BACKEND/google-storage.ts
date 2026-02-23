@@ -45,7 +45,7 @@ class GStorage {
         return returnURL;
     }
 
-    async deleteDocument(url: string): Promise<void> {
+    async deleteObject(url: string): Promise<void> {
         try {
             const filePath = url.split(BUCKET_NAME+"/")[1];
             const file = await bucket.file(filePath).get();
@@ -59,6 +59,11 @@ class GStorage {
         return [];
     }
 
+    /**
+     * Uploads the desirable thumbnail image (resized & optimized) to Google Storage. Automatically creates folders with date of upload for easier navigation and filetering.
+     * @param img image file to upload to the Google Storage
+     * @returns public URL to the stored resized image
+     */
     async uploadThumbPhoto(img: File): Promise<string> {
         const buffer = Buffer.from(await img.arrayBuffer());
 
