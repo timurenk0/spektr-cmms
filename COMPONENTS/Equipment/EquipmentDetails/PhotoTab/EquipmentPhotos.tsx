@@ -1,13 +1,16 @@
+"use client"
+
 import SlideDialog from '@/COMPONENTS/ui/SlideDialog';
 import { Button } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { Trash, Upload, ZoomIn } from 'lucide-react';
-import React from 'react'
+import { Trash, Upload, X, ZoomIn } from 'lucide-react';
+import React, { useState } from 'react'
 import Image from 'next/image';
 import EquipmentPhotoForm from './EquipmentPhotoForm';
 import { TPhoto } from '@/COMPONENTS/utils/types';
 
 const EquipmentPhotos = ({ equipmentId, userRole }: { equipmentId: number, userRole: string }) => {
+    const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
 
     const { data: photos = [], isLoading: isLoadingPhotos } = useQuery<TPhoto[]>({
         queryKey: [`/api/equipments/${equipmentId}/photos`],
@@ -43,6 +46,7 @@ const EquipmentPhotos = ({ equipmentId, userRole }: { equipmentId: number, userR
                             variant='text'
                             size="small"
                             title='View fullscreen'
+                            onClick={() => setFullscreenImage(photo.imageUrl)}
                         >
                             <ZoomIn width={16} height={16} className='text-white' />
                         </Button>
@@ -59,6 +63,20 @@ const EquipmentPhotos = ({ equipmentId, userRole }: { equipmentId: number, userR
                 </div>
             )): "Nothing to see here yet..."}  
         </div>
+        {fullscreenImage && (
+            <div
+                className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 cursor-pointer"
+                onClick={() => setFullscreenImage(null)}
+            >
+                <Image
+                    src={fullscreenImage}
+                    alt="Fullscreen image"
+                    width={480}
+                    height={360}
+                    onClick={(e) => e.stopPropagation()}
+                />
+            </div>
+        )}
     </>
   )
 }
