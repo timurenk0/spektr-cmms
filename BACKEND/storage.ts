@@ -250,12 +250,7 @@ export class DatabaseStorage {
     }
     
     async addEquipment(insertEquipment: InsertEquipment): Promise<Equipment> {
-        try {
-            return (await db.insert(equipments).values(insertEquipment).returning())[0];
-        } catch (error: any) {
-            console.error("Failed to add equipment", error.stack, error.message, error);
-            throw error;
-        }
+        return (await db.insert(equipments).values(insertEquipment).returning())[0];
     }
     
     async updateEquipment(id: number, updateData: Partial<InsertEquipment>): Promise<Equipment | undefined> {
@@ -324,7 +319,7 @@ export class DatabaseStorage {
     
     /* ============================================== Maintenance Events Methods ============================================== */
     async getMaintenanceEvents(status: string, start?: string, end?: string): Promise<(MaintenanceEvent & { color: string })[]> {
-        let conditions = [];
+        const conditions = [];
 
         if (start && end) {
             conditions.push(and(gte(maintenanceEvents.start, start), lte(maintenanceEvents.start, end)));
@@ -334,7 +329,7 @@ export class DatabaseStorage {
             conditions.push(eq(maintenanceEvents.status, status));
         }
         
-        let events = await db.select({
+        const events = await db.select({
             id: maintenanceEvents.id,
             tenantId: maintenanceEvents.tenantId,
             equipmentId: maintenanceEvents.equipmentId,
@@ -505,7 +500,7 @@ export class DatabaseStorage {
         await db.select().from(photos).where(eq(photos.equipmentId, equipmentId)).orderBy(desc(photos.uploadedAt)) : 
         await db.select().from(photos).orderBy(desc(photos.uploadedAt));
     }
-    
+
     async getPhotosByEquipmentId(id: number): Promise<Photo[]> {
         return await db.select().from(photos).where(eq(photos.equipmentId, id));
     }
@@ -514,8 +509,11 @@ export class DatabaseStorage {
         return (await db.insert(photos).values(insertPhoto).returning())[0];
     }
     
-    async deletePhoto(id: number): Promise<void> {
+    async deletePhoto(id: number): Promise<string> {
+        const { url } = (await db.select({ url: photos.imageUrl }).from(photos).where(eq(photos.id, id)))[0];
         await db.delete(photos).where(eq(photos.id, id));
+
+        return url;
     }
     /* ======================================================================================================================== */
     
@@ -537,7 +535,7 @@ export class DatabaseStorage {
         const idealHealthIndex = 100 - differenceInCalendarMonths(Date(), dateOfManufacturing) * monthlyHealthDrop;
 
         
-        let trueHealthIndex = givenHealthIndex > idealHealthIndex ? idealHealthIndex : givenHealthIndex;
+        const trueHealthIndex = givenHealthIndex > idealHealthIndex ? idealHealthIndex : givenHealthIndex;
         console.log("Ideal | True", idealHealthIndex, trueHealthIndex);
 
         return trueHealthIndex;

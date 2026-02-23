@@ -6,8 +6,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Trash, Upload, X, ZoomIn } from 'lucide-react';
 import React, { useState } from 'react'
 import Image from 'next/image';
-import EquipmentPhotoForm from './EquipmentPhotoForm';
+import AddEquipmentPhotoForm from './AddEquipmentPhotoForm';
 import { TPhoto } from '@/COMPONENTS/utils/types';
+import DeleteEquipmentForm from '../../DeleteEquipmentForm';
+import DeleteEquipmentPhotoForm from './DeleteEquipmentPhotoForm';
 
 const EquipmentPhotos = ({ equipmentId, userRole }: { equipmentId: number, userRole: string }) => {
     const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
@@ -33,7 +35,7 @@ const EquipmentPhotos = ({ equipmentId, userRole }: { equipmentId: number, userR
                     </Button>
                 )}
                 DialogForm={(props) => (
-                    <EquipmentPhotoForm equipmentId={equipmentId} {...props} />
+                    <AddEquipmentPhotoForm equipmentId={equipmentId} {...props} />
                 )}
             />
         )}
@@ -48,16 +50,18 @@ const EquipmentPhotos = ({ equipmentId, userRole }: { equipmentId: number, userR
                             title='View fullscreen'
                             onClick={() => setFullscreenImage(photo.imageUrl)}
                         >
-                            <ZoomIn width={16} height={16} className='text-white' />
+                            <ZoomIn width={16} height={16} className='text-white hover:text-green-600' />
                         </Button>
                         {userRole === "admin" && (
-                            <Button
-                                variant='text'
-                                size='small'       
-                                title='Delete photo'
-                            >
-                                <Trash width={16} height={16} className='text-white' />
-                            </Button>
+                        <SlideDialog
+                            title="Delete Photo"
+                            Btn={(props) => (
+                            <Button variant='text' {...props}><Trash size={16} className='text-white hover:text-red-600' /></Button>
+                            )}
+                            DialogForm={(props) => (
+                                <DeleteEquipmentPhotoForm {...props} photoId={photo.id} />
+                            )}
+                        />
                         )}
                     </div>
                 </div>

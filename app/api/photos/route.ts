@@ -1,4 +1,3 @@
-import { insertPhotoSchema } from "@/BACKEND/Database/schema";
 import { Gstorage } from "@/BACKEND/google-storage";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
@@ -64,7 +63,15 @@ export async function POST(req: NextRequest) {
 
                 return res.json(newPhoto, { status: 201 });
             } catch (error) {
-                if (imageUrl) {}
+                if (imageUrl) {
+                    await Gstorage.deleteObject(imageUrl)
+                        .then(() => {
+                            console.log("Fallback successfully deleted the photo");
+                        })
+                        .catch(() => {
+                            throw new Error(`Fallback delete failed: ${error}`);
+                        })
+                }
             }
         }
     } catch (error: unknown) {

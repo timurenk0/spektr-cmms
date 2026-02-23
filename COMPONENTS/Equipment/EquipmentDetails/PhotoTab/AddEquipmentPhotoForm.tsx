@@ -19,7 +19,7 @@ const formSchema = z.object({
 type PhotoFormValues = z.infer<typeof formSchema>;
 
 
-const EquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, onClose: () => void }) => {
+const AddEquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, onClose: () => void }) => {
     const queryClient = useQueryClient();
 
     const form = useForm<PhotoFormValues>({
@@ -136,4 +136,4 @@ const EquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, onC
   )
 }
 
-export default EquipmentPhotoForm
+export default AddEquipmentPhotoForm
