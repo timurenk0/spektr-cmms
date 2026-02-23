@@ -1,8 +1,10 @@
 import { insertPhotoSchema } from "@/BACKEND/Database/schema";
+import { Gstorage } from "@/BACKEND/google-storage";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { NextRequest, NextResponse as res } from "next/server";
+import uploadAndAddPhoto from "./helper";
 
 
 export async function GET() {
@@ -22,14 +24,49 @@ export async function POST(req: NextRequest) {
     try {
         const user = await validateUser("admin");
 
-        const body = await req.json();
-        const photoValidatedData = insertPhotoSchema.parse(body);
+        const type = req.nextUrl.searchParams.get("type");
+        const body = await req.formData();
 
-        const newPhoto = await storage.addPhoto(photoValidatedData);
+        const { equipmentId, file, notes } = Object.fromEntries(body.entries()) as {
+            equipmentId?: string,
+            file: File,
+            notes: string
+        }
 
-        await activityLogger(user, "add", "Photo uploaded", `Photo uploaded for equipment ${photoValidatedData.equipmentId}`, newPhoto.equipmentId);
+        if (!file) return res.json({ error: "No file found" }, { status: 400 });
 
-        return res.json(newPhoto, { status: 201 });        
+        let imageUrl: string | null = null;
+        if (type && type === "thumb") {
+            try{                
+                imageUrl = await Gstorage.uploadThumbPhoto(file);
+                return res.json({ equipmentImage: imageUrl }, { status: 201 });
+            } catch (error) {
+                if (imageUrl) {
+                    await Gstorage.deleteDocument(imageUrl)
+                        .then(() => {
+                            console.log("Fallback successfully deleted the photo");
+                        })
+                        .catch(() => {
+                            throw new Error(`Fallback delete failed: ${error}`);
+                        })
+                }
+            }
+        } else {
+            if (!equipmentId) return res.json({ error: "No equipment ID found" }, { status: 400 });
+            const parsedEquipmentId = Number(equipmentId);
+            if (isNaN(parsedEquipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
+            try {
+                const documentData = {
+                    equipmentId: parsedEquipmentId,
+                    notes
+                }
+                const newPhoto = await uploadAndAddPhoto(file, documentData)
+
+                return res.json(newPhoto, { status: 201 });
+            } catch (error) {
+                if (imageUrl) {}
+            }
+        }
     } catch (error: unknown) {
         const msg = error instanceof Error ? [error.message, error.cause, error.stack] : "Unknown error";
         res.json({ error: `Failed to post photo: ${msg}` }, { status: 500 });

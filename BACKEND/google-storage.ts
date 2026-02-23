@@ -94,7 +94,21 @@ class GStorage {
      */
     async uploadPhoto(img: File): Promise<string> {
         const buffer = Buffer.from(await img.arrayBuffer());
-        return "";
+
+        // Generate photo fodler name using current date
+        const now = new Date();
+        const date = `${now.getFullYear()}-${now.getMonth().toString().padStart(2, "0")}`;
+        const filePath = `imgs/${date}/${img.name}`;
+
+        const gcsFile = bucket.file(filePath);
+
+        await gcsFile.save(buffer, {
+            contentType: img.type,
+            resumable: false
+        });
+
+        const returnURL = publicURL+`/${filePath}`;
+        return returnURL;
     }
 
 }

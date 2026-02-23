@@ -65,10 +65,12 @@ export default function AddEquipmentForm(
             if (!file) throw new Error("No file selected");
 
             const formData = new FormData();
+            formData.append("file", file);
+            formData.append("notes", "");
             
-            const response = await fetch("/api/photos", {
+            const response = await fetch("/api/photos?type=thumb", {
                 method: "POST",
-                body: file
+                body: formData 
             });
 
             const data = await response.json();
@@ -77,8 +79,8 @@ export default function AddEquipmentForm(
                 throw new Error(message);
             };
 
-            setEquipmentImage(data.url);
-            return data.url;            
+            setEquipmentImage(data.equipmentImage);
+            return data.equipmentImage;            
         } catch (error) {
             const msg = error instanceof Error ? error.message : "Unknown error";
             toast.error(`Failed to upload image: ${msg}`);
@@ -191,6 +193,7 @@ export default function AddEquipmentForm(
     const onSubmit = async (values: EquipmentFormValues) => {
         
         const imageUrl = await uploadImage(values.image);
+        if (!imageUrl) return;
         const data = {
                 ...values,
                 location: (values.location === "Project" && projectId) ? values.location + " " + projectId : values.location,
@@ -439,7 +442,7 @@ export default function AddEquipmentForm(
                 </Button>
                 <Button
                     type="submit"
-                    disabled={mutation.isPending || (!equipmentId && !equipmentImage)}
+                    disabled={mutation.isPending}
                 >
                     {mutation.isPending ? "Saving..." : equipmentId ? "Update Equipment" : "Add Equipment"}
                 </Button>

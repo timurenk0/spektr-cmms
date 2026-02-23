@@ -170,7 +170,6 @@ export const insertMaintenanceEventSchema = createInsertSchema(maintenanceEvents
 export const photos = pgTable("photos", {
     id: serial("id").primaryKey(),
     equipmentId: integer("equipment_id").notNull().references(() => equipments.id, { onDelete: "cascade" }),
-    title: text("title").notNull(),
     imageUrl: text("image_url").notNull(),
     uploadedAt: timestamp("uploaded_at").defaultNow(),
     notes: text("notes")

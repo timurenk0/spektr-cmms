@@ -5,17 +5,15 @@ import { insertPhotoSchema } from '@/BACKEND/Database/schema'
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, InputAdornment, TextField } from '@mui/material';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { FileIcon } from 'lucide-react';
+import { FileIcon, ImageIcon } from 'lucide-react';
 import React, { useState } from 'react'
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import z from 'zod'
 
 
-const formSchema = insertPhotoSchema.extend({
-    equipmentId: z.number(),
-    title: z.string().min(1, { error: "Photo title required" }),
-    imageUrl: z.string().min(1, { error: "Photo URL required" }),
+const formSchema = z.object({
+    file: z.file().max(10_000_000).mime(["image/png", "image/jpeg"]),
     notes: z.string().optional()
 });
 type PhotoFormValues = z.infer<typeof formSchema>;
@@ -23,67 +21,39 @@ type PhotoFormValues = z.infer<typeof formSchema>;
 
 const EquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, onClose: () => void }) => {
     const queryClient = useQueryClient();
-    const [isUploading, setIsUploading] = useState(false);
 
     const form = useForm<PhotoFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            title: "",
-            imageUrl: "",
+            file: undefined,
             notes: ""
         }
     });
   
-    const uploadImage = async (file: File) => {
-        try {
-            if (!file) throw new Error("No file selected");
-            
+    const mutation = useMutation({
+        mutationFn: async (values: PhotoFormValues) => {
             const formData = new FormData();
-            formData.append("image", file);
 
-            const response = await fetch("/api/upload/image", {
+            formData.append("equipmentId", String(equipmentId));
+            formData.append("file", values.file);
+            formData.append("notes", values.notes ?? "");
+
+            const response = await fetch("/api/photos", {
                 method: "POST",
                 body: formData
             });
 
             const data = await response.json();
+            
             if (!response.ok) {
                 const message = data.error || `Request failed: ${response.status} ${response.statusText}`;
                 throw new Error(message);
-            };
-
-            form.setValue("equipmentId", equipmentId);
-            return data.url;
-        } catch (error) {
-            const msg = error instanceof Error ? error.message : "Unknown error";
-            toast.error(`Failed to upload image: ${msg}`);
-            return;
-        }
-    };
-
-    const uploadMutation = useMutation({
-        mutationFn: async (values: PhotoFormValues) => {
-            const response = await fetch("/api/photos", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(values)
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                const message = data.error || `Request failed: ${response.status} ${response.statusText}`;
-                throw new Error(message);
-            };
-
+            }
 
             return data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["/api/photos"] });
-            queryClient.invalidateQueries({ queryKey: [`/api/equipments/${equipmentId}`] });
             toast.success("Photo uploaded successfully", {
                 duration: 2000,
                 position: "bottom-right",
@@ -101,12 +71,9 @@ const EquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, onC
             });
         }
     });
-    
+
     const onSubmit = (values: PhotoFormValues) => {
-        const data = {
-            ...values,
-        }
-        uploadMutation.mutate(data);
+        mutation.mutate(values);
     }
     
   return (
@@ -114,43 +81,31 @@ const EquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, onC
         onSubmit={form.handleSubmit(onSubmit, (error) => console.error(error))}
         className='space-y-4 px-1'
     >
-        <TextField
-            type='file'
-            slotProps={{
-                htmlInput: {
-                    accept: "image/png,image/jpeg,image/jpg,image/gif"
-                },
-                input: {
-                    endAdornment: <InputAdornment position='start'><FileIcon /></InputAdornment>
-                }
-            }}
-            color='info'
-            margin='dense'
-            fullWidth
-            required
-            onChange={(e) => {
-                const file = (e.target as HTMLInputElement).files?.[0];
-                if (!file) return;
-
-                setIsUploading(true);
-                try {
-                    toast.promise(uploadImage(file).then((photoUrl) => {
-                        form.setValue("imageUrl", photoUrl);
-                        form.setValue("title", file.name);
-                    }).catch((error) => {
-                        const msg = error instanceof Error ? error.message : "Unknown error";
-                        throw new Error(`Failed to uplaod image: ${msg}`);
-                    }), {
-                        loading: "Uploading image",
-                        success: <b>Image uploaded!</b>,
-                        error: <b>Failed to upload ;(</b>
-                    })
-                } catch (error) {
-                    return ;
-                } finally {
-                    setIsUploading(false);
-                }
-            }}
+        <Controller
+            name='file'
+            control={form.control}
+            render={({ field }) => (
+                <TextField
+                    type="file"
+                    color="info"
+                    margin="dense"
+                    fullWidth
+                    required
+                    slotProps={{
+                        htmlInput: {
+                            accept: ["image/png", "image/jpeg"],
+                            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                                const file = e.target.files?.[0];
+                                field.onChange(file);
+                                console.log(file);
+                            },
+                        },
+                        input: {
+                            endAdornment: <InputAdornment position='start'><ImageIcon /></InputAdornment>
+                        }
+                    }}
+                />
+            )}
         />
         <TextField
             label="Notes"
@@ -172,9 +127,9 @@ const EquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, onC
             </Button>
             <Button
                 type='submit'
-                disabled={uploadMutation.isPending || isUploading}
+                disabled={mutation.isPending}
             >
-                {uploadMutation.isPending ? "Uploading..." : "Upload Document"}
+                {mutation.isPending ? "Uploading..." : "Upload Document"}
             </Button>
         </div>
     </form>
