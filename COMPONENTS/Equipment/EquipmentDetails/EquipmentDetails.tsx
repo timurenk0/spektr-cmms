@@ -70,7 +70,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
           <div className="flex items-start justify-between">
             <div className="flex items-center">
               <div className="mr-6">
-                <Image src={equipment.equipmentImage} width={200} height={200} className="max-w-[200px] rounded-md object-cover border" alt="Equipment image" />
+                <Image src={equipment.equipmentImage} width={200} height={200} className="max-w-[200px] max-h-[200px] rounded-md object-cover border" alt="Equipment image" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold flex items-center">
