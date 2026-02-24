@@ -2,8 +2,9 @@ import SlideDialog from "@/COMPONENTS/ui/SlideDialog";
 import { TComponent } from "@/COMPONENTS/utils/types";
 import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import AddEquipmentComponentForm from "./AddEquipmentComponentForm";
+import DeleteEquipmentComponentForm from "./DeleteEquipmentComponentForm";
 
 const EquipmentComponents = ({
     equipmentId,
@@ -52,8 +53,25 @@ const EquipmentComponents = ({
                         </TableHead>
                         <TableBody>
                             {components.length > 0 ? components.map((comp, idx) => (
-                                <TableRow sx={{ "& .MuiTableCell-root": { textAlign: "center" } }}>
-                                    <TableCell className="border-r-2 border-gray-300">{idx+1}</TableCell>
+                                <TableRow key={comp.id} sx={{ "& .MuiTableCell-root": { textAlign: "center" } }}>
+                                    { userRole !== "admin" ? (
+                                        <TableCell className="border-r-2 border-gray-300">{idx+1}</TableCell>
+                                    ) : (
+                                        <TableCell className="group border-r-2 border-gray-300">
+                                            <span className="group-hover:hidden">{idx+1}</span>
+                                            <SlideDialog
+                                                title="Delete Component"
+                                                Btn={(props) => (
+                                                    <button {...props} className="hidden group-hover:inline-flex text-red-600 hover:text-red-800 cursor-pointer">
+                                                        <Trash size={16} />
+                                                    </button>
+                                                )}
+                                                DialogForm={(props) => (
+                                                    <DeleteEquipmentComponentForm {...props} componentId={comp.id} componentName={comp.name} />
+                                                )}
+                                            />
+                                        </TableCell>
+                                    )}
                                     <TableCell>{comp.name}</TableCell>
                                     <TableCell>{comp.manufacturer}</TableCell>
                                     <TableCell>{comp.partNumber}</TableCell>

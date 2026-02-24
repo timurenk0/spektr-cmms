@@ -483,6 +483,10 @@ export class DatabaseStorage {
     async addComponent(insertComponent: InsertComponent): Promise<Component> {
         return (await db.insert(components).values(insertComponent).returning())[0];
     }
+
+    async deleteComponent(id: number): Promise<void> {
+        await db.delete(components).where(eq(components.id, id));
+    }
     /* ======================================================================================================================== */
     
     
