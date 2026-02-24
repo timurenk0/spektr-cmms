@@ -1,12 +1,13 @@
 import {
-    users, type User, type InsertUser,
-    tenants, type Tenant, type InsertTenant,
+    activities, type Activity, type InsertActivity,
+    components, type Component, type InsertComponent,
+    documents, type Document, type InsertDocument,
     equipments, type Equipment, type InsertEquipment,
     maintenances, type Maintenance, type InsertMaintenance,
     maintenanceEvents, type MaintenanceEvent, type InsertMaintenanceEvent,
-    activities, type Activity, type InsertActivity,
-    documents, type Document, type InsertDocument,
     photos, type Photo, type InsertPhoto,
+    tenants, type Tenant, type InsertTenant,
+    users, type User, type InsertUser,
 } from "./Database/schema";
 import * as schema from "./Database/schema";
 import { db } from "./Database/db";
@@ -473,6 +474,17 @@ export class DatabaseStorage {
         return (await db.insert(activities).values(insertActivity).returning())[0];
     }
     /* ======================================================================================================================== */
+    
+    /* ================================================== Components Methods ================================================== */
+    async getComponents(): Promise<Component[]> {
+        return await db.select().from(components);
+    }
+
+    async addComponent(insertComponent: InsertComponent): Promise<Component> {
+        return (await db.insert(components).values(insertComponent).returning())[0];
+    }
+    /* ======================================================================================================================== */
+    
     
     /* =================================================== Document Methods =================================================== */
     async getDocuments(equipmentId?: number): Promise<Document[]> {

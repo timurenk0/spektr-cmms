@@ -16,6 +16,7 @@ import { TEquipment } from "@/COMPONENTS/utils/types";
 import { HealthBadgeFull } from "@/COMPONENTS/ui/badges/HealthBadge";
 import { format } from "date-fns";
 import { DetailBadge } from "@/COMPONENTS/ui/badges/DetailBadge";
+import EquipmentComponents from "./ComponentTab/EquipmentComponents";
 
 
 const getHealthBadge = (healthIndex: number | null) => {
@@ -220,6 +221,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
               <Tab label="Overview" value="overview" />
               <Tab label="Documents" value="documents" />
               <Tab label="Photos" value="photo" />
+              <Tab label="Crit. Components" value="components" />
               <Tab label="Activities" value="activity" />
             </TabList>
             <TabPanel value="overview">
@@ -230,6 +232,9 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
             </TabPanel>
             <TabPanel value="photo">
               <EquipmentPhotos equipmentId={equipment.id} userRole={user.role} />
+            </TabPanel>
+            <TabPanel value="components">
+              <EquipmentComponents equipmentId={equipment.id} userRole={user.role} />
             </TabPanel>
             <TabPanel value="activity">
               <EquipmentActivity equipmentId={equipment.id} />

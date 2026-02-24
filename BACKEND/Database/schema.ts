@@ -45,10 +45,10 @@ export const components = pgTable("components", {
     equipmentId: integer("equipment_id").notNull().references(()=>equipments.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     manufacturer: text("manufacturer").notNull(),
-    partNumber: text("partNumber").notNull(),
+    partNumber: text("part_number").notNull(),
     stock: integer("recommended_stock").notNull(),
-    failImpact: text("failImpact").notNull(),
-    notes: text("manufacturer")
+    failImpact: text("fail_impact").notNull(),
+    notes: text("notes")
 });
 
 export const insertComponentSchema = createInsertSchema(components).omit({

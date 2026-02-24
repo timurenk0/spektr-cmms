@@ -18,7 +18,7 @@ export type TComponent = {
     partNumber: string;
     stock: number;
     failImpact: string;
-    notest: string | null;
+    notes: string | null;
 }
 
 export type TDocument = {
