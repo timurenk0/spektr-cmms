@@ -45,11 +45,15 @@ class GStorage {
         return returnURL;
     }
 
+    /**
+     * Delets the specified document/photo by public URL stored in the database
+     * @param url Public URL of a document/photo stored in the database
+     */
     async deleteObject(url: string): Promise<void> {
         try {
             const filePath = url.split(BUCKET_NAME+"/")[1];
-            const file = await bucket.file(filePath).get();
-            await bucket.delete(file);
+            console.log(filePath);
+            await bucket.file(filePath).delete();
         } catch (error) {
             console.error(error);
         }

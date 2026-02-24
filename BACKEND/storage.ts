@@ -489,8 +489,9 @@ export class DatabaseStorage {
         return (await db.insert(documents).values(insertDocument).returning())[0];
     }
     
-    async deleteDocument(id: number): Promise<void> {
-        await db.delete(documents).where(eq(documents.id, id));
+    async deleteDocument(id: number): Promise<string> {
+        const { url } = (await db.delete(documents).where(eq(documents.id, id)).returning({ url: documents.fileUrl }))[0];
+        return url;
     }
     /* ======================================================================================================================== */
     
@@ -510,9 +511,7 @@ export class DatabaseStorage {
     }
     
     async deletePhoto(id: number): Promise<string> {
-        const { url } = (await db.select({ url: photos.imageUrl }).from(photos).where(eq(photos.id, id)))[0];
-        await db.delete(photos).where(eq(photos.id, id));
-
+        const { url } = (await db.delete(photos).where(eq(photos.id, id)).returning({ url: photos.imageUrl }))[0];
         return url;
     }
     /* ======================================================================================================================== */

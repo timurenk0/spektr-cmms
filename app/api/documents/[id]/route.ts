@@ -9,17 +9,16 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params;
-        const photoId = parseInt(id);
-        if (isNaN(photoId)) return res.json({ error: "Photo ID is not a number" }, { status: 400 });
+        const documentId = parseInt(id);
+        if (isNaN(documentId)) return res.json({ error: "Document ID is not a number" }, { status: 400 });
 
-        const imageUrl = await storage.deletePhoto(photoId);
+        const documentUrl = await storage.deleteDocument(documentId);
 
-        console.log("route url",imageUrl);
-        await Gstorage.deleteObject(imageUrl);
+        await Gstorage.deleteObject(documentUrl);
 
         return res.json(true, { status: 200 });
     } catch (error) {
         const msg = error instanceof Error ? error.message : "Unknown error";
-        return res.json({ error: `Failed to delete specified photo: ${msg}` }, { status: 500 });
+        return res.json({ error: `Failed to delete specified document: ${msg}` }, { status: 500 });
     }
 }

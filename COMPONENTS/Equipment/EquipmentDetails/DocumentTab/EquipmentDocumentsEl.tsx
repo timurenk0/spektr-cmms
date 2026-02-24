@@ -1,8 +1,11 @@
+import SlideDialog from '@/COMPONENTS/ui/SlideDialog';
 import { TDocument } from '@/COMPONENTS/utils/types';
+import { Button } from '@mui/material';
 import { format } from 'date-fns';
-import { FileText } from 'lucide-react'
+import { FileText, Trash } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
+import DeleteEquipmentDocumentForm from './DeleteEquipmentDocumentForm';
 
 
 type Props = {
@@ -28,6 +31,17 @@ const EquipmentDocumentsEl = ({ documents, userRole, deleteDocumentMutation }: P
                         {doc.notes}
                     </div>
                 </Link>
+                <SlideDialog
+                    title='Delete Document'
+                    Btn={(props) => (
+                        <button {...props} className='flex items-center px-3 rounded-md hover:bg-gray-100 hover:text-red-600'>
+                            <Trash size={16} />
+                        </button>
+                    )}
+                    DialogForm={(props) => (
+                        <DeleteEquipmentDocumentForm {...props} documentId={doc.id} documentName={doc.title} />
+                    )}
+                />
             </div>
         ))}
     </div>
