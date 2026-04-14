@@ -532,9 +532,54 @@ export class DatabaseStorage {
     }
     /* ======================================================================================================================== */
     
+    /* =============================================== Stats Methods ========================================================== */
+    async getDashboardCardStats(): Promise<any> {
+        const total = await db.execute(sql`
+            SELECT 
+            (SELECT COUNT(*) FROM maintenances) AS eq,
+            (SELECT COUNT(*) FROM maintenance_events) AS mt
+        `);
+
+        const overdue = await db.execute(sql`
+            SELECT
+            (SELECT COUNT(DISTINCT equipment_id) FROM maintenance_events WHERE start_date < now()) as oeq,
+            (SELECT COUNT(*) FROM maintenance_events WHERE start_date < now()) as omt
+        `);
+
+        const complete = await db.execute(sql`
+            SELECT
+            (SELECT COUNT(DISTINCT equipment_id) FROM maintenance_events WHERE status = 'complete') as ceq,
+            (SELECT COUNT(*) FROM maintenance_events WHERE status = 'complete') as cmt
+        `)
+
+        const upcoming = await db.execute(sql`
+            SELECT
+            (SELECT COUNT(DISTINCT equipment_id) FROM maintenance_events WHERE start_date > now()) as ueq,
+            (SELECT COUNT(*) FROM maintenance_events WHERE start_date > now()) as umt
+        `);
+
+        const emergency = await db.execute(sql`
+            SELECT
+            (SELECT COUNT(DISTINCT equipment_id) FROM maintenance_events WHERE level = 'E') as eeq,
+            (SELECT COUNT(*) FROM maintenance_events WHERE level > 'E') as emt
+        `);
+    
+        return {
+            eq: Number(total.rows[0].eq),
+            mt: Number(total.rows[0].mt),
+            oeq: Number(overdue.rows[0].oeq),
+            omt: Number(overdue.rows[0].omt),
+            ceq: Number(complete.rows[0].ceq),
+            cmt: Number(complete.rows[0].cmt),
+            ueq: Number(upcoming.rows[0].ueq),
+            umt: Number(upcoming.rows[0].umt),
+            eeq: Number(emergency.rows[0].eeq),
+            emt: Number(emergency.rows[0].emt)
+        }
+    }
+    /* ======================================================================================================================== */
     
     /* =========================================== Miscellaneous Methods ====================================================== */
-    
     async calculateHealthIndex(
         equipmentId: number,
         givenHealthIndex: number | undefined | null
@@ -576,6 +621,7 @@ export class DatabaseStorage {
         
         return await db.update(equipments).set({ healthIndex: sql`${equipments.healthIndex} - ${score}` }).where(eq(equipments.id, event.equipmentId));
     }
+    
     
     // async calculateHealthIndex(
     //     equipmentId: number,
