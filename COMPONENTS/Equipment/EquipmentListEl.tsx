@@ -61,8 +61,6 @@ const getHealthBadge = (healthIndex: number | null) => {
 const EquipmentListEl = ({ equipment, userRole }: { equipment: TEquipment, userRole: string }) => {
     const router = useRouter();
 
-    console.log(equipment)
-
   return (
         <TableRow sx={{ "& .MuiTableCell-root": { textAlign: "center", cursor: "pointer", padding: "0 32px" } }} hover onClick={() => router.push(`/equipment/${equipment.id}`)}>
             {/* Equipment image and name */}

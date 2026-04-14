@@ -72,7 +72,7 @@ const EquipmentList = () => {
 
 
   const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ equips: TEquipment[], totalCount: number }>({
-    queryKey: ["/api/equipments", page, rowsPerPage, filters],
+    queryKey: ["equipment-list", page, rowsPerPage, filters],
     queryFn: () => 
       fetch(`/api/equipments?${queryParams}`).then(res => res.json()),
     placeholderData: keepPreviousData,

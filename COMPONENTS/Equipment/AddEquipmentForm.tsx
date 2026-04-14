@@ -45,7 +45,15 @@ export default function AddEquipmentForm(
 
     // Fetch equipment for Equipment Update Form
     const { data: equipment, isLoading: isLoadingEquipment } = useQuery<TEquipment>({
-        queryKey: [`/api/equipments/${equipmentId}`],
+        queryKey: [`equipment-update`],
+        queryFn: async () => {
+            const res = await fetch(`/api/equipments/${equipmentId}`);
+            if (!res.ok) {
+                throw new Error("Failed to fetch specified equipment data");
+            }
+
+            return await res.json();
+        },
         enabled: !!equipmentId
     });
 
@@ -155,8 +163,8 @@ export default function AddEquipmentForm(
             return data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/equipments?limit=10&page=1"] });
-            queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
+            queryClient.invalidateQueries({ queryKey: ["equipment-update"] })
+            queryClient.invalidateQueries({ queryKey: ["equipment-list"] });
             toast.success(`Equipment ${equipmentId ? "updated" : "added"} successfully`, {
                 duration: 2000,
                 position: "bottom-right",
