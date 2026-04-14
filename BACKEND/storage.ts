@@ -581,7 +581,7 @@ export class DatabaseStorage {
         const emergency = await db.execute(sql`
             SELECT
             (SELECT COUNT(DISTINCT equipment_id) FROM maintenance_events WHERE level = 'E') as eeq,
-            (SELECT COUNT(*) FROM maintenance_events WHERE level > 'E') as emt
+            (SELECT COUNT(*) FROM maintenance_events WHERE level = 'E') as emt
         `);
     
         return {
@@ -608,6 +608,31 @@ export class DatabaseStorage {
             eeq: Number(emergency.rows[0].eeq),
             emt: Number(emergency.rows[0].emt)
         }
+    }
+
+    async getKPIs(): Promise<any> {
+        const msc = await db.execute(sql`
+            SELECT
+                COUNT(*) FILTER (WHERE start_date <= now()) AS total,
+                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete') AS complete
+            FROM maintenance_events;
+        `);
+        const pmp = await db.execute(sql`
+            SELECT
+                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete' AND level != 'E') as planned,
+                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete') as total
+            FROM maintenance_events;
+        `);
+        const tcm = await db.execute(sql`
+            SELECT
+                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete' AND performedAt - scheduledAt <= interval '2 days') as timely
+            FROM maintenance_events;
+        `)
+
+        return {
+            msc: Number(msc.rows[0].complete) / Number(msc.rows[0].total),
+            pmp: Number(pmp.rows[0].planned) / Number(pmp.rows[0].total)
+        };
     }
     /* ======================================================================================================================== */
     

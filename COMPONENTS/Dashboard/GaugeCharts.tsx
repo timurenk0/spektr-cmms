@@ -28,7 +28,6 @@ const CHARTINFO = [
         subtitle: "Target > 75%",
         value: 100,
         class: "ehi"
-
     },
 ]
 
