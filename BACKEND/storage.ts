@@ -548,14 +548,34 @@ export class DatabaseStorage {
 
         const complete = await db.execute(sql`
             SELECT
-            (SELECT COUNT(DISTINCT equipment_id) FROM maintenance_events WHERE status = 'complete') as ceq,
-            (SELECT COUNT(*) FROM maintenance_events WHERE status = 'complete') as cmt
-        `)
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week' AND status = 'complete') AS cmt1,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week' AND status = 'complete') AS ceq1,
+
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 week' AND status = 'complete') AS cmt2,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 week' AND status = 'complete') AS ceq2,
+
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 week' AND status = 'complete') AS cmt3,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 week' AND status = 'complete') AS ceq3,
+
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 week' AND status = 'complete') AS cmt4,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 week' AND status = 'complete') AS ceq4
+            FROM maintenance_events;
+        `);
 
         const upcoming = await db.execute(sql`
             SELECT
-            (SELECT COUNT(DISTINCT equipment_id) FROM maintenance_events WHERE start_date > now()) as ueq,
-            (SELECT COUNT(*) FROM maintenance_events WHERE start_date > now()) as umt
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week') AS umt1,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week') AS ueq1,
+
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 weeks') AS umt2,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 weeks') AS ueq2,
+
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 weeks') AS umt3,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 weeks') AS ueq3,
+
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 weeks') AS umt4,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 weeks') AS ueq4 
+            FROM maintenance_events;
         `);
 
         const emergency = await db.execute(sql`
@@ -569,10 +589,22 @@ export class DatabaseStorage {
             mt: Number(total.rows[0].mt),
             oeq: Number(overdue.rows[0].oeq),
             omt: Number(overdue.rows[0].omt),
-            ceq: Number(complete.rows[0].ceq),
-            cmt: Number(complete.rows[0].cmt),
-            ueq: Number(upcoming.rows[0].ueq),
-            umt: Number(upcoming.rows[0].umt),
+            ceq1: Number(complete.rows[0].ceq1),
+            cmt1: Number(complete.rows[0].cmt1),
+            ceq2: Number(complete.rows[0].ceq2),
+            cmt2: Number(complete.rows[0].cmt2),
+            ceq3: Number(complete.rows[0].ceq3),
+            cmt3: Number(complete.rows[0].cmt3),
+            ceq4: Number(complete.rows[0].ceq4),
+            cmt4: Number(complete.rows[0].cmt4),
+            ueq1: Number(upcoming.rows[0].ueq1),
+            umt1: Number(upcoming.rows[0].umt1),
+            ueq2: Number(upcoming.rows[0].ueq2),
+            umt2: Number(upcoming.rows[0].umt2),
+            ueq3: Number(upcoming.rows[0].ueq3),
+            umt3: Number(upcoming.rows[0].umt3),
+            ueq4: Number(upcoming.rows[0].ueq4),
+            umt4: Number(upcoming.rows[0].umt4),
             eeq: Number(emergency.rows[0].eeq),
             emt: Number(emergency.rows[0].emt)
         }

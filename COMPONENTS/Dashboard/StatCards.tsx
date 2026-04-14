@@ -45,17 +45,51 @@ const StatCards = () => {
       </div>
   )
 
-  const completeSlides = {
-      title: "oat",
-      uniqueEquipmentCount: data.ceq,
-      totalTasksCount: data.cmt,
-  };
+  const completeSlides = [
+    {
+      title: "1 week",
+      uniqueEquipmentCount: data.ceq1,
+      totalTasksCount: data.cmt1,
+    },
+    {
+      title: "2 weeks",
+      uniqueEquipmentCount: data.ceq2,
+      totalTasksCount: data.cmt2,
+    },
+    {
+      title: "3 weeks",
+      uniqueEquipmentCount: data.ceq3,
+      totalTasksCount: data.cmt3,
+    },
+    {
+      title: "4 weeks",
+      uniqueEquipmentCount: data.ceq4,
+      totalTasksCount: data.cmt4,
+    },
+  ]
   
-  const upcomingSlides = {
-      title: "oat",
-      uniqueEquipmentCount: data.ueq,
-      totalTasksCount: data.umt,
-    };
+  const upcomingSlides = [
+    {
+      title: "1 week",
+      uniqueEquipmentCount: data.ueq1,
+      totalTasksCount: data.umt1,
+    },
+    {
+      title: "2 weeks",
+      uniqueEquipmentCount: data.ueq2,
+      totalTasksCount: data.umt2,
+    },
+    {
+      title: "3 weeks",
+      uniqueEquipmentCount: data.ueq3,
+      totalTasksCount: data.umt3,
+    },
+    {
+      title: "4 weeks",
+      uniqueEquipmentCount: data.ueq4,
+      totalTasksCount: data.umt4,
+    },
+  ]
 
 
     
@@ -64,8 +98,8 @@ const StatCards = () => {
           <>
             <StatCard variant="total" value1={data.eq} value2={data.mt} />
             <StatCard variant="overdue" value1={data.oeq} value2={data.omt} />
-            <SliderStatCard variant="complete" slides={[completeSlides]} />
-            <SliderStatCard variant="upcoming" slides={[upcomingSlides]} />
+            <SliderStatCard variant="complete" slides={completeSlides} />
+            <SliderStatCard variant="upcoming" slides={upcomingSlides} />
             <StatCard variant="emergency" value1={data.eeq} value2={data.emt} />
           </>
     </div>
