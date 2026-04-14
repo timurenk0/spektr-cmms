@@ -26,10 +26,9 @@ export async function POST(req: NextRequest) {
         const type = req.nextUrl.searchParams.get("type");
         const body = await req.formData();
 
-        const { equipmentId, file, notes } = Object.fromEntries(body.entries()) as {
+        const { equipmentId, file } = Object.fromEntries(body.entries()) as {
             equipmentId?: string,
             file: File,
-            notes: string
         }
 
         if (!file) return res.json({ error: "No file found" }, { status: 400 });
@@ -57,7 +56,6 @@ export async function POST(req: NextRequest) {
             try {
                 const documentData = {
                     equipmentId: parsedEquipmentId,
-                    notes
                 }
                 const newPhoto = await uploadAndAddPhoto(file, documentData)
 

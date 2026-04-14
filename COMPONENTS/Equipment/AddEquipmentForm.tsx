@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertEquipmentSchema } from "@/BACKEND/Database/schema"
 
 import toast from "react-hot-toast";
-import { Image, ImageIcon } from "lucide-react";
+import { Image } from "lucide-react";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Button, FormControl, FormControlLabel, FormLabel, InputAdornment, InputLabel, MenuItem, Radio, RadioGroup, Select, TextField } from "@mui/material";
@@ -16,24 +16,8 @@ import { TEquipment, TTenant } from "../utils/types";
 
 
 const formSchema = insertEquipmentSchema.extend({
-    name: z.string().min(1, { error: "Equipment name is required" }).transform((val) => val.trim()),
-    tenantId: z.number().min(1, {error: "Tenant ID is required"}),
-    manufacturer: z.string().min(1, { error: "Equipment manufacturer is required" }).transform((val) => val.trim()),
-    model: z.string().min(1, { error: "Equipment model is required" }).transform((val) => val.trim()),
-    assetId: z.string().min(1, { error: "Equipment asset ID is required" }).transform((val) => val.trim()),
-    serialNumber: z.string().min(1, { error: "Equipment serial number is required" }).transform((val) => val.trim()),
-    type: z.string().min(1, { error: "Equipment type is required" }).transform((val) => val.trim()),
-    category: z.string().min(1, { error: "Equipment category is required" }).transform((val) => val.trim()),
-    dateOfManufacturing: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
-    inServiceDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
-    location: z.string().min(1, { error: "Location is required" }),
     projectId: z.string().optional(),
-    department: z.string().min(1, { error: "Department is required" }).transform((val) => val.trim()),
-    requirements: z.string().min(1, { error: "Equipment requirements are required." }),
-    usefulLifeSpan: z.number().min(1),
-    // equipmentImage: z.string().transform((val) => val.trim()),
-    image: z.file().max(10_000_000).mime(["image/jpeg", "image/png"]),
-    notes: z.string().transform((val) => val.trim()).optional(),
+    image: z.file().max(10_000_000).mime(["image/jpeg", "image/png"]).optional(),
 });
 type EquipmentFormValues = z.infer<typeof formSchema>;
 
@@ -52,21 +36,25 @@ export default function AddEquipmentForm(
     }
 ) {
     const queryClient = useQueryClient();
-    const [equipmentImage, setEquipmentImage] = useState<string>();
-    const [eqLocation, setEqLocation] = useState<string>();
-    const [projectId, setProjectId] = useState<string | null>();
+    const [equipmentImage, setEquipmentImage] = useState("");
+    const [eqLocation, setEqLocation] = useState("");
 
     const { data: tenants, isLoading: isLoadingTenants } = useQuery<TTenant[]>({
         queryKey: ["/api/tenants"]
     });
 
-    const uploadImage = async (file: File) => {
+    // Fetch equipment for Equipment Update Form
+    const { data: equipment, isLoading: isLoadingEquipment } = useQuery<TEquipment>({
+        queryKey: [`/api/equipments/${equipmentId}`],
+        enabled: !!equipmentId
+    });
+
+    const uploadImage = async (file: File | undefined) => {
         try {
             if (!file) throw new Error("No file selected");
 
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("notes", "");
             
             const response = await fetch("/api/photos?type=thumb", {
                 method: "POST",
@@ -88,10 +76,6 @@ export default function AddEquipmentForm(
         }
     };
 
-    const { data: equipment, isLoading: isLoadingEquipment } = useQuery<TEquipment>({
-        queryKey: [`/api/equipments/${equipmentId}`],
-        enabled: !!equipmentId
-    });
 
     const form = useForm<EquipmentFormValues>({
         resolver: zodResolver(formSchema),
@@ -112,7 +96,7 @@ export default function AddEquipmentForm(
             department: "",
             usefulLifeSpan: 180,
             equipmentImage: "",
-            notes: ""
+            notes: null
         }
     });
 
@@ -126,8 +110,10 @@ export default function AddEquipmentForm(
             const {healthIndex, ...equipmentData} = equipment;
             const formData = {
                 ...equipmentData,
+                image: undefined,
                 location: equipmentLocation[0],
-                projectId: equipmentData.location === "Base" ? "" : equipmentLocation[1]
+                projectId: equipmentData.location === "Base" ? "" : equipmentLocation[1],
+                notes: !equipmentData.notes ? null : equipmentData.notes
             }
             form.reset(formData);
             setEquipmentImage(equipment.equipmentImage);
@@ -146,7 +132,6 @@ export default function AddEquipmentForm(
         }
     }, [watchType, form]);
 
-    
     const mutation = useMutation({
         mutationFn: async (values: EquipmentFormValues) => {
             console.log(values);
@@ -191,12 +176,13 @@ export default function AddEquipmentForm(
 
     // Removed usefulLifeSpan: values.usefulLifeSpan (no bugs for now but if shit happens look HERE)
     const onSubmit = async (values: EquipmentFormValues) => {
+
         
-        const imageUrl = await uploadImage(values.image);
+        const imageUrl = values.equipmentImage || await uploadImage(values.image);
         if (!imageUrl) return;
         const data = {
                 ...values,
-                location: (values.location === "Project" && projectId) ? values.location + " " + projectId : values.location,
+                location: (values.location === "Project" && form.getValues("projectId")) ? values.location + " " + form.getValues("projectId") : values.location,
                 equipmentImage: imageUrl || values.equipmentImage,
                 status: "operational"
             };
@@ -380,7 +366,7 @@ export default function AddEquipmentForm(
                         color="info"  
                         margin="dense"
                         fullWidth
-                        required
+                        required={!equipmentImage || equipmentImage.length<1}
                         slotProps={{
                             htmlInput: {
                                 accept: ["image/jpeg", "image/png"],
