@@ -1,4 +1,9 @@
+"use client"
+
+import { useQuery } from "@tanstack/react-query"
 import GaugeChart from "./Charts/GaugeChart"
+import toast from "react-hot-toast"
+import { Skeleton } from "@mui/material"
 
 
 const CHARTINFO = [
@@ -32,11 +37,49 @@ const CHARTINFO = [
 ]
 
 const GaugeCharts = () => {
+    const { data, isLoading } = useQuery({
+        queryKey: ["dashboard-gauges"],
+        queryFn: async () => {
+            const res = await fetch("/api/stats/kpis", {
+                credentials: "include"
+            });
+            if (!res.ok) {
+                toast.error("Failed to retrieve KPI data");
+                throw new Error("Failed to fetch KPI endpoint");
+            }
+
+            return await res.json();
+        }
+    })
+
+
+    const loading = !data || isLoading;
+
+    if (loading) {
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                <Skeleton variant="rounded">
+                    <GaugeChart value={0} title="" subtitle="" statClass="" />
+                </Skeleton>
+                <Skeleton variant="rounded">
+                    <GaugeChart value={0} title="" subtitle="" statClass="" />
+                </Skeleton>
+                <Skeleton variant="rounded">
+                    <GaugeChart value={0} title="" subtitle="" statClass="" />
+                </Skeleton>
+                <Skeleton variant="rounded">
+                    <GaugeChart value={0} title="" subtitle="" statClass="" />
+                </Skeleton>
+            </div>
+        )
+    }
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        {CHARTINFO.map((ci, idx) => (
-            <GaugeChart key={idx} value={ci.value} title={ci.title} subtitle={ci.subtitle} colorClass={ci.class} statClass={ci.class} />
-        ))}
+        <GaugeChart value={data.msc} title="Maintenance Schedule Compliance (MSC)" subtitle="Target > 90%" statClass="msc" />
+        <GaugeChart value={data.pmp} title="Planned Maintenance Percentage (PMP)" subtitle="Target > 85%" statClass="pmp" />
+        <GaugeChart value={data.tcm} title="Timely Completed Maintenances (TCM)" subtitle="Target > 90%" statClass="tcm" />
+        <GaugeChart value={data.ehi} title="Equipment Health Index (EHI)" subtitle="Target > 75%" statClass="ehi" />
     </div>
   )
 }

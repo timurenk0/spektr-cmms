@@ -625,13 +625,24 @@ export class DatabaseStorage {
         `);
         const tcm = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete' AND performedAt - scheduledAt <= interval '2 days') as timely
+                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete' AND performed_at IS NOT NULL AND performed_at - scheduled_at <= 2) as timely,
+                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete') as total 
             FROM maintenance_events;
+        `);
+        const ehi = await db.execute(sql`
+            SELECT AVG(health_index) FROM equipments;
         `)
 
+        console.log(msc.rows[0]);
+        console.log(pmp.rows[0]);
+        console.log(tcm.rows[0]);
+        console.log(ehi.rows[0]);
+
         return {
-            msc: Number(msc.rows[0].complete) / Number(msc.rows[0].total),
-            pmp: Number(pmp.rows[0].planned) / Number(pmp.rows[0].total)
+            msc: 100*(Number(msc.rows[0].complete) / Number(msc.rows[0].total)),
+            pmp: 100*(Number(pmp.rows[0].planned) / Number(pmp.rows[0].total)),
+            tcm: 100*(Number(tcm.rows[0].timely) / Number(tcm.rows[0].total)),
+            ehi: Number(ehi.rows[0].avg)
         };
     }
     /* ======================================================================================================================== */

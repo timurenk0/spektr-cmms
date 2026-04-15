@@ -20,7 +20,6 @@ interface GaugeChartProps {
     value: number,
     title: string,
     subtitle: string,
-    colorClass: string,
     statClass: string
 }
 
@@ -28,7 +27,6 @@ const GaugeChart = ({
     value,
     title,
     subtitle,
-    colorClass,
     statClass
 } : GaugeChartProps) => {
 
@@ -64,8 +62,6 @@ const GaugeChart = ({
         }
     };
 
-    const gradientId = `gauge-gradient-${colorClass}`;
-    
   return (    
     <div className="bg-white p-4 rounded-lg shadow-sm relative">
         <div className="group absolute top-2 right-2">
@@ -86,13 +82,6 @@ const GaugeChart = ({
 
             <div className="relative mt-3 flex justify-center">
                 <svg width="200" height="120" viewBox="0 0 200 120">
-                    <defs>
-                        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor={getGaugeColor()} />
-                            <stop offset="100%" stopColor={`${getGaugeColor()}`} />
-                        </linearGradient>
-                    </defs>
-
                     <path
                         d="M 20 100 A 80 80 0 0 1 180 100"
                         fill="none"
@@ -105,7 +94,7 @@ const GaugeChart = ({
                     <path
                         d="M 20 100 A 80 80 0 0 1 180 100"
                         fill="none"
-                        stroke={`url(#${gradientId})`}
+                        stroke={getGaugeColor()}
                         strokeWidth="22"
                         strokeLinecap="round"
                         strokeDasharray={circumference}
