@@ -65,13 +65,21 @@ const Sidebar = () => {
             path: "/maintenance",
             icon: <CalendarCheck width={20} height={20} className='mr-3' />
         },
-        {
+    ]
+
+    const loading = (!user || isLoading);
+
+    if (loading) {
+        return (<h1>Loading...</h1>);
+    }
+
+    if (user.role === "admin") {
+        links.push({
             name: "Settings",
             path: "/settings",
             icon: <Settings width={20} height={20} className='mr-3' />
-        }
-    ]
-
+        })
+    }
 
   return (
     <aside className='bg-white w-64 h-full shadow-md shrink-0 fixed inset-y-0 left-0 z-20 lg:relative tranition-all duration-300'>
@@ -105,24 +113,24 @@ const Sidebar = () => {
                 </p>
                 {links.map((link) => (
                     <div key={link.path}>
-                    <Link href={link.path}>
-                        <div className={`flex items-center p-2 rounded-md mb-1 ${pathName === link.path ? "bg-gray-100 inset-shadow-md": ""}`}>
-                            {link.icon}
-                            <span>{link.name}</span>
-                        </div>
-                    </Link>
-                    {(link.name === "Equipment" && pathName.includes("/equipment/")) && (
-                        <div className='cursor-default mb-2'>
-                            <CornerDownRight width={16} height={16} className='inline ms-4' />
-                            <div className="inline ms-2 p-2 text-sm bg-gray-100 inset-shadow-md rounded-md">Equipment ID {pathName.slice(pathName.indexOf("/", 2)+1)}</div>
-                        </div>
-                    )}
-                    {(link.name === "Maintenance" && pathName.includes("/calendar")) && (
-                        <div className='cursor-default mb-2'>
-                            <CornerDownRight width={16} height={16} className='inline ms-4' />
-                            <div className="inline ms-2 p-2 text-sm bg-gray-100 inset-shadow-md rounded-md">Calendar</div>
-                        </div>
-                    )}
+                        <Link href={link.path}>
+                            <div className={`flex items-center p-2 rounded-md mb-1 ${pathName === link.path ? "bg-gray-100 inset-shadow-md": ""}`}>
+                                {link.icon}
+                                <span>{link.name}</span>
+                            </div>
+                        </Link>
+                        {(link.name === "Equipment" && pathName.includes("/equipment/")) && (
+                            <div className='cursor-default mb-2'>
+                                <CornerDownRight width={16} height={16} className='inline ms-4' />
+                                <div className="inline ms-2 p-2 text-sm bg-gray-100 inset-shadow-md rounded-md">Equipment ID {pathName.slice(pathName.indexOf("/", 2)+1)}</div>
+                            </div>
+                        )}
+                        {(link.name === "Maintenance" && pathName.includes("/calendar")) && (
+                            <div className='cursor-default mb-2'>
+                                <CornerDownRight width={16} height={16} className='inline ms-4' />
+                                <div className="inline ms-2 p-2 text-sm bg-gray-100 inset-shadow-md rounded-md">Calendar</div>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>

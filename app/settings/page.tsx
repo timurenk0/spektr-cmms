@@ -13,6 +13,7 @@ import { Controller, useForm } from "react-hook-form"
 import toast from "react-hot-toast"
 import z from "zod"
 import AddRoleForm from "./forms/AddRoleForm"
+import { useAuth } from "@/COMPONENTS/utils/authContext"
 
 
 const formSchema = z.object({
@@ -43,6 +44,12 @@ const generatePassword = (length = 8) => {
 
 const Settings = () => {
     const queryClient = useQueryClient();
+
+    const { user, isLoading } = useAuth();
+
+    if (user && user.role !== "admin") {
+        return <h1>Go fuck yourself</h1>
+    }
     
     const [value, setValue] = useState("personal");
     const [role, setRole] = useState("user");
@@ -171,8 +178,8 @@ const Settings = () => {
         }
     }
     
-    const isLoading = (!userRoles || isLoadingUserRoles) || (!tenants || isLoadingTenants);
-    if (isLoading) return (<h1>Loading data...</h1>);
+    const loading = (!userRoles || isLoadingUserRoles) || (!tenants || isLoadingTenants) || (!user || isLoading);
+    if (loading) return (<h1>Loading data...</h1>);
 
     
     console.log(role);
