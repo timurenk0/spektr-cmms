@@ -150,7 +150,7 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   status: text("status").notNull(),
   start: date("start_date").notNull(),
   end: date("end_date").notNull(),
-  scheduledAt: date("scheduledAt").notNull().defaultNow(),
+  scheduledAt: date("scheduled_at").notNull().defaultNow(),
   performedAt: date("performed_at")
 }, (table) => [ 
     check("level_check", sql`level IN ('A', 'B', 'C', 'D', 'E')`),
