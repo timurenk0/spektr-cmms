@@ -633,11 +633,6 @@ export class DatabaseStorage {
             SELECT AVG(health_index) FROM equipments;
         `)
 
-        console.log(msc.rows[0]);
-        console.log(pmp.rows[0]);
-        console.log(tcm.rows[0]);
-        console.log(ehi.rows[0]);
-
         return {
             msc: 100*(Number(msc.rows[0].complete) / Number(msc.rows[0].total)),
             pmp: 100*(Number(pmp.rows[0].planned) / Number(pmp.rows[0].total)),
