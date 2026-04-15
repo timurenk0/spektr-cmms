@@ -154,10 +154,6 @@ const Settings = () => {
         }
     }
     
-    if (user && user.role !== "admin") {
-        return <h1>Go fuck yourself</h1>
-    }
-
     const addTenant = (name: string) => {
         const normalizedTenant = name.trim().toLowerCase();
         if (!normalizedTenant) return;
@@ -195,7 +191,9 @@ const Settings = () => {
             <TabContext value={value}>
                 <TabList onChange={handleValueChange}>
                     <Tab label="Personal Info" value="personal" />
-                    <Tab label="Add User" value="add user" />
+                    { user && user.role === "admin" && (
+                        <Tab label="Add User" value="add user" />
+                    )}
                 </TabList>
                 <TabPanel value="personal">
                     <div className="grid grid-cols-2">
@@ -206,6 +204,7 @@ const Settings = () => {
                         </div>
                     </div>
                 </TabPanel>
+                { user && user.role === "admin" && (
                 <TabPanel value="add user">
                     <form onSubmit={form.handleSubmit(onSubmit, (error) => console.error(error))}>
                         <div className="grid grid-cols-4 gap-4 pb-10">
@@ -298,6 +297,7 @@ const Settings = () => {
                         </div>
                     </form>
                 </TabPanel>
+                )}
             </TabContext>
         </Paper>
     </>
