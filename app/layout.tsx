@@ -16,23 +16,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  let initialUser = null;
-  try {
-    const response = await fetch("/api/auth/me", {
-      credentials: "include",
-      cache: "no-store"
-    });
-    if (response.ok) initialUser = await response.json();
-  } catch (error) {
-    console.error("Error", error)
-  }
-
   return (
     <html lang="en">
       <head>
       </head>
       <body>
-        <Providers initialUser={initialUser}>
+        <Providers>
             <main className="flex h-screen overflow-hidden">
               <Body>
                 {children}
