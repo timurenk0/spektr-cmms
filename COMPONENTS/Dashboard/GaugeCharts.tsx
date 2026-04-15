@@ -6,36 +6,6 @@ import toast from "react-hot-toast"
 import { Skeleton } from "@mui/material"
 
 
-const CHARTINFO = [
-    {
-        title: "Maintenance Schedule Compliance (MSC)",
-        subtitle: "Target > 90%",
-        value: 100,
-        class: "msc"
-
-    },
-    {
-        title: "Planned Maintenance Percentage (PMP)",
-        subtitle: "Target > 85%",
-        value: 100,
-        class: "pmp"
-
-    },
-    {
-        title: "Timely Completed Maintenances (TCM)",
-        subtitle: "Target > 90%",
-        value: 100,
-        class: "tcm"
-
-    },
-    {
-        title: "Equipment Health Index (EHI)",
-        subtitle: "Target > 75%",
-        value: 100,
-        class: "ehi"
-    },
-]
-
 const GaugeCharts = () => {
     const { data, isLoading } = useQuery({
         queryKey: ["dashboard-gauges"],
