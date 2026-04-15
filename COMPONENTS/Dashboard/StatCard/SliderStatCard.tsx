@@ -22,7 +22,7 @@ interface variationProps {
     },
 }
 
-const VARIATIONS = {
+const VARIATIONS: Record<string, Record<string, string | React.ReactNode>> = {
     complete: {
         status: "Complete",
         border: "border-emerald-500",
@@ -60,6 +60,9 @@ const SliderStatCard = ({ variant, slides }: SliderStatCardProps) => {
     const handlePrev = () => {
         setCurrentSlide((next) => Math.max(next-1, 0));
     }
+
+
+    console.log(VARIATIONS[variant]);
     
   return (
     <div className="relative w-full h-full">
@@ -104,13 +107,15 @@ const SliderStatCard = ({ variant, slides }: SliderStatCardProps) => {
                 onClick={handlePrev} 
                 disabled={currentSlide === 0} 
                 className="disabled:opacity-50"
+                color={variant==="complete" ? "success" : "warning"}
             >
-                Previous
+                Prev
             </Button>
             <Button 
                 onClick={handleNext} 
                 disabled={currentSlide === slides.length - 1} 
                 className="disabled:opacity-50"
+                color={variant==="complete" ? "success" : "warning"}
             >
                 Next
             </Button>
