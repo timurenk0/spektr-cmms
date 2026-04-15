@@ -67,13 +67,8 @@ const Sidebar = () => {
         },
     ]
 
-    const loading = (!user || isLoading);
 
-    if (loading) {
-        return (<h1>Loading...</h1>);
-    }
-
-    if (user.role === "admin") {
+    if (user && user.role === "admin") {
         links.push({
             name: "Settings",
             path: "/settings",
