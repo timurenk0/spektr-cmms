@@ -17,7 +17,7 @@ export default async function uploadAndAddPhoto(
         return newPhoto;
     } catch (error) {
         if (imageUrl) {
-            await Gstorage.deleteDocument(imageUrl)
+            await Gstorage.deleteObject(imageUrl)
                 .then(() => {
                     console.log("Fallback successfully deleted the file");
                 })

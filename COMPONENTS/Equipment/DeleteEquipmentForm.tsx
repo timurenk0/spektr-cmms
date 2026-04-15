@@ -67,7 +67,7 @@ const DeleteEquipmentForm = (
         
   return (
     <div>
-        <p>Are you sure you want to delete the "{equipmentName}" equipment from the system? This action is <b>permanent</b>. If yes, input the reason of deletion:</p>
+        <p>Are you sure you want to delete the &quot;{equipmentName}&quot; equipment from the system? This action is <b>permanent</b>. If yes, input the reason of deletion:</p>
         <TextField
             color="info"
             label="Deletion reason"

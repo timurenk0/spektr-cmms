@@ -45,7 +45,7 @@ const StatusChart = () => {
                         cy="50%"
                         labelLine
                         label={({ name, value, percent }) => 
-                            `${value>0 ? name+":": ""} ${value>0?value+" | "+(percent*100).toFixed(0)+"%" : ""}`
+                            `${value>0 ? name+":": ""} ${value>0?value+" | "+(percent ? percent*100 : 0).toFixed(0)+"%" : ""}`
                     }
                     outerRadius={80}
                     fill="#8884d8"

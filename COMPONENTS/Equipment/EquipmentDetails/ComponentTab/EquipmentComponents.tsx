@@ -23,7 +23,7 @@ const EquipmentComponents = ({
     
     return (
         <>
-            <h1>Equipment's critical components and consumables</h1>
+            <h1>Equipment&apos;s critical components and consumables</h1>
             {userRole === "admin" && (
                 <SlideDialog
                     title="Add critical components and consumables"

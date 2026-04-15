@@ -47,9 +47,6 @@ const Settings = () => {
 
     const { user, isLoading } = useAuth();
 
-    if (user && user.role !== "admin") {
-        return <h1>Go fuck yourself</h1>
-    }
     
     const [value, setValue] = useState("personal");
     const [role, setRole] = useState("user");
@@ -64,7 +61,7 @@ const Settings = () => {
     const { data: userRoles = [], isLoading: isLoadingUserRoles } = useQuery<string[]>({
         queryKey: ["/api/users/roles"]
     });
-
+    
     const { data: tenants = [], isLoading: isLoadingTenants } = useQuery<TTenant[]>({
         queryKey: ["/api/tenants"]
     });
@@ -77,7 +74,7 @@ const Settings = () => {
             setAvailableTenants(tenants.map(t=>t.name));
         }
     }, [userRoles, tenants]);
-
+    
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -101,7 +98,7 @@ const Settings = () => {
                 },
                 body: JSON.stringify(values)
             });
-
+            
             const data = await response.json().catch(() => null);
             
             if (!response.ok) {
@@ -156,6 +153,9 @@ const Settings = () => {
         }
     }
     
+    if (user && user.role !== "admin") {
+        return <h1>Go fuck yourself</h1>
+    }
 
     const addTenant = (name: string) => {
         const normalizedTenant = name.trim().toLowerCase();

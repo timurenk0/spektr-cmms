@@ -7,9 +7,10 @@ import interactionPlugin from "@fullcalendar/interaction";
 import tippy from "tippy.js";
 import { useCallback, useState } from "react";
 import React from "react";
-import { EventClickArg } from "@fullcalendar/core/index.js";
+import { EventClickArg, EventInput, EventSourceFuncArg } from "@fullcalendar/core/index.js";
 import { useAuth } from "@/COMPONENTS/utils/authContext";
 import EventForm from "@/COMPONENTS/Calendar/EventForm";
+import { useQuery } from "@tanstack/react-query";
 
 
 
@@ -33,7 +34,7 @@ const MyCalendar = () => {
   const [selectedEvent, setSelectedEvent] = useState<EventClickArg["event"] | null>();
   
   const fetchEvents = useCallback(
-    async (fetchInfo: any, successCallback: (x: MEvent[]) => void, failureCallback: (x: Error | unknown) => void) => {
+    async (fetchInfo: EventSourceFuncArg, successCallback: (events: EventInput[]) => void, failureCallback: (error: Error) => void) => {
       try {
         const res = await fetch(`/api/maintenance-events?start=${fetchInfo.startStr.slice(0, 10)}&end=${fetchInfo.endStr.slice(0, 10)}`);
         const data = await res.json();
@@ -49,9 +50,9 @@ const MyCalendar = () => {
   const { user, isLoading: isLoadingUser } = useAuth();
 
 
-  const isLoading = (!user || isLoadingUser);
+  const loading = (!user || isLoadingUser);
 
-  if (isLoading) return (
+  if (loading) return (
     <h1>Loading...</h1>
   )
 

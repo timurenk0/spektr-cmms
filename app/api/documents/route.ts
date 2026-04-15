@@ -35,12 +35,12 @@ export async function POST(req: NextRequest) {
         const equipmentId = Number(rawEquipmentId);
         if (isNaN(equipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
         
-        const title = body.get("title");
+        const title = body.get("title")?.toString();
         if (!title) return res.json({ error: "No document title passed" }, { status: 400 });
         
         const notes = body.get("notes");
         
-        const category = body.get("category");
+        const category = body.get("category")?.toString();
         if (!category) return res.json({ error: "No document category passed" }, { status: 400 });
         
         
@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
 
         const newDocument = await uploadAndAddDocument(file, documentData);
 
+        if (!newDocument) return res.json({ error: "Failed to upload the document" }, { status: 500 });
         
         await activityLogger(user, "add", "Document uploaded", `Document uploaded for equipment ${newDocument.equipmentId}`, newDocument.equipmentId);
         

@@ -5,7 +5,7 @@ import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { NextRequest, NextResponse as res } from "next/server";
 
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
         const components = await storage.getComponents();
 
@@ -30,6 +30,6 @@ export async function POST(req: NextRequest) {
         return res.json(newComponent, { status: 201 });
     } catch (error) {
         const msg = error instanceof Error ? error.message : "Unknown error";
-        return res.json({ error: `Failed to add components: ${error}` }, { status: 500 });
+        return res.json({ error: `Failed to add components: ${msg}` }, { status: 500 });
     }
 }

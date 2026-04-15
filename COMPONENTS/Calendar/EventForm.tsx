@@ -11,7 +11,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & { children: React.ReactElement<any, any> },
+  props: TransitionProps & { children: React.ReactElement<unknown, React.JSXElementConstructor<React.ReactNode>> },
   ref: React.Ref<unknown>
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -87,7 +87,7 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
         </DialogTitle>
         <DialogContent className="flex flex-col gap-y-4">
           <DialogContentText>
-            Are you sure you want to edit "{event.extendedProps.description}" event? If you want to mark event <em>complete</em>, please choose the date of completion.
+            Are you sure you want to edit &quot;{event.extendedProps.description}&quot; event? If you want to mark event <em>complete</em>, please choose the date of completion.
           </DialogContentText>
           <TextField
             label="Completion Date"

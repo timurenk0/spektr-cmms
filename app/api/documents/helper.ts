@@ -1,10 +1,10 @@
-import { insertDocumentSchema, type Document, type InsertDocument } from "@/BACKEND/Database/schema";
+import { insertDocumentSchema, type Document } from "@/BACKEND/Database/schema";
 import { Gstorage } from "@/BACKEND/google-storage";
 import { storage } from "@/BACKEND/storage";
 
 export default async function uploadAndAddDocument(
     file: File,
-    documentData: Omit<Document, "fileUrl">
+    documentData: { equipmentId: number, title: string,  }
 ): Promise<Document | undefined> {
     let fileUrl: string | null = null;
 

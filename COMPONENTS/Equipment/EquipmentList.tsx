@@ -111,9 +111,7 @@ const EquipmentList = () => {
                 <CardActionArea
                   onClick={() => updateFilters("category", category)}
                   className="h-full"
-                  sx={category === filters.category && {
-                    backgroundColor: "rgb(0, 190, 0)",
-                  }}
+                  sx={{backgroundColor: `${category === filters.category && "rgb(0, 190, 0)"}`}}
                 >
                   <CardContent className={`text-green-600 ${category === filters.category && "text-white"}`}>
                     <p className="text-black text-sm text-center">{category}</p>

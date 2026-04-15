@@ -21,22 +21,6 @@ const theme = createTheme({
                 }
             }
         },
-        MuiTabs: {
-            styleOverrides: {
-                list: {
-                    variants: [
-                        {
-                            props: { variant: "legacy" },
-                            style: {
-                                display: "flex",
-                                justifyContent: "center",
-                                background: "rgba(213, 215, 217, .4)",
-                            }
-                        }
-                    ]
-                },
-            }
-        },
         MuiTab: {
             styleOverrides: {
                 root: {
