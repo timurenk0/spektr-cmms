@@ -13,11 +13,27 @@ import EventForm from "@/COMPONENTS/Calendar/EventForm";
 
 
 
+type MEvent = {
+  id: number,
+  tenantId: number,
+  equipmentId: number,
+  maintenanceId: number,
+  title: string,
+  description: string,
+  level: string,
+  start: string,
+  end: string,
+  scheduledAt: string,
+  performedAt: string | null,
+  status: string,
+  color: string
+}
+
 const MyCalendar = () => {
   const [selectedEvent, setSelectedEvent] = useState<EventClickArg["event"] | null>();
   
   const fetchEvents = useCallback(
-    async (fetchInfo: any, successCallback: (x: any) => void, failureCallback: (x: any) => void) => {
+    async (fetchInfo: any, successCallback: (x: MEvent[]) => void, failureCallback: (x: Error | unknown) => void) => {
       try {
         const res = await fetch(`/api/maintenance-events?start=${fetchInfo.startStr.slice(0, 10)}&end=${fetchInfo.endStr.slice(0, 10)}`);
         const data = await res.json();

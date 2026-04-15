@@ -54,6 +54,8 @@ const Settings = () => {
     const [value, setValue] = useState("personal");
     const [role, setRole] = useState("user");
     const [showPw, setShowPw] = useState(false);
+    const [availableRoles, setAvailableRoles] = useState<string[]>([]);
+    const [availableTenants, setAvailableTenants] = useState<string[]>([]);
     
     const handleValueChange = (event: React.SyntheticEvent, val: string) => {
         setValue(val)
@@ -154,8 +156,6 @@ const Settings = () => {
         }
     }
     
-    const [availableRoles, setAvailableRoles] = useState<string[]>([]);
-    const [availableTenants, setAvailableTenants] = useState<string[]>([]);
 
     const addTenant = (name: string) => {
         const normalizedTenant = name.trim().toLowerCase();
