@@ -8,7 +8,8 @@ import {
   check,
   index,
   unique,
-  doublePrecision
+  doublePrecision,
+  boolean
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
@@ -147,18 +148,17 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   level: text("level").notNull(),
-  status: text("status").notNull(),
+  isComplete: boolean("is_complete").notNull(),
   start: date("start_date").notNull(),
   end: date("end_date").notNull(),
   scheduledAt: date("scheduled_at").notNull().defaultNow(),
   performedAt: date("performed_at")
 }, (table) => [ 
     check("level_check", sql`level IN ('A', 'B', 'C', 'D', 'E')`),
-    check("status_check", sql`status IN ('upcoming', 'overdue', 'incomplete', 'complete')`),
     index("idx_maintenance_events_maintenance_id").on(table.maintenanceId),
     index("idx_me_tenant_equipment_id").on(table.tenantId, table.equipmentId, table.start),
     index("idx_maintenance_events_start_date").on(table.start),
-    index("idx_maintenance_events_status").on(table.status),
+    index("idx_maintenance_events_status").on(table.isComplete),
     unique("unique_equipment_start_level").on(table.equipmentId, table.start, table.level)
 ]);
 

@@ -29,7 +29,7 @@ export async function generateEvents(
     const end = endDate ? new Date(endDate) : new Date(maintenance.serviceEndDate);
     end.setHours(0, 0, 0, 0);
 
-    if (start > end || isNaN(start.getTime()) || isNaN(end.getTime())) throw new Error("Invalid datetime range/format");
+    if (start >= end || isNaN(start.getTime()) || isNaN(end.getTime())) throw new Error("Invalid datetime range/format");
 
     const dailyWorkingHours = maintenance.dailyWorkingHours;
     

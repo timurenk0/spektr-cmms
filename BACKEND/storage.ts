@@ -11,13 +11,13 @@ import {
 } from "./Database/schema";
 import * as schema from "./Database/schema";
 import { db } from "./Database/db";
-import { generateEvents } from "./Middleware/EventManager";
-import { eq, and, asc, desc, sql, not, ExtractTablesWithRelations, lt, gte, lte, isNull, ilike, or, getTableColumns, gt } from "drizzle-orm";
+import { eq, and, asc, desc, sql, not, ExtractTablesWithRelations, lt, gte, lte, ilike, or, getTableColumns, gt } from "drizzle-orm";
 import type { NeonDatabase, NeonQueryResultHKT } from "drizzle-orm/neon-serverless";
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { differenceInCalendarMonths } from "date-fns";
+import { createMaintenanceEvents } from "./Middleware/EventManager2";
 
 
 type Schema = typeof schema;
@@ -294,7 +294,9 @@ export class DatabaseStorage {
                 const [maintenance] = await tx.insert(maintenances).values(insertMaintenance).returning();
                 console.log(maintenance);
                 
-                const events = await generateEvents(maintenance, undefined, undefined);
+                const equipment = await this.getEquipment(maintenance.equipmentId);
+                if (!equipment) throw new Error("Invalid equipment ID");
+                const events = createMaintenanceEvents(maintenance, equipment, undefined, undefined);
                 await tx.insert(maintenanceEvents).values(events).returning();    
                 
                 return maintenance;
@@ -319,7 +321,7 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
     
     /* ============================================== Maintenance Events Methods ============================================== */
-    async getMaintenanceEvents(status: string, start?: string, end?: string): Promise<(MaintenanceEvent & { color: string })[]> {
+    async getMaintenanceEvents(status: "any" | "complete" | "incomplete", start?: string, end?: string): Promise<(MaintenanceEvent & { color: string, isOverdue: boolean })[]> {
         const conditions = [];
 
         if (start && end) {
@@ -327,9 +329,9 @@ export class DatabaseStorage {
         }
 
         if (status !== "any") {
-            conditions.push(eq(maintenanceEvents.status, status));
+            conditions.push(eq(maintenanceEvents.isComplete, status === "complete" ? true : false));
         }
-        
+
         const events = await db.select({
             id: maintenanceEvents.id,
             tenantId: maintenanceEvents.tenantId,
@@ -342,10 +344,13 @@ export class DatabaseStorage {
             end: maintenanceEvents.end,
             scheduledAt: maintenanceEvents.scheduledAt,
             performedAt: maintenanceEvents.performedAt,
-            status: maintenanceEvents.status,
+            isComplete: maintenanceEvents.isComplete,
+            isOverdue: sql<boolean>`
+                CURRENT_DATE - ${maintenanceEvents.start} > 3
+            `,
             color: sql<string>`
                 CASE
-                    WHEN ${maintenanceEvents.status} = 'complete' THEN
+                    WHEN ${maintenanceEvents.isComplete} = 'true' THEN
                         CASE ${maintenanceEvents.level}
                             WHEN 'A' THEN 'oklch(43.2% 0.095 166.913)'
                             WHEN 'B' THEN 'oklch(68.1% 0.162 75.834)'
@@ -354,7 +359,7 @@ export class DatabaseStorage {
                             WHEN 'E' THEN '#CC3700'
                             ELSE '#4D96FF'
                         END
-                    WHEN ${maintenanceEvents.status} = 'incomplete' THEN '#22222275'
+                    WHEN CURRENT_DATE - ${maintenanceEvents.start}  > 3 THEN '#22222275'
                     WHEN ${maintenanceEvents.start} >= CURRENT_DATE THEN
                         CASE ${maintenanceEvents.level}
                             WHEN 'A' THEN 'oklch(76.5% 0.177 163.223)'
@@ -375,23 +380,21 @@ export class DatabaseStorage {
         const today = new Date().toISOString().slice(0, 10); 
         
         const upcomingEvents = (await db.select().from(maintenanceEvents).
-                            where(gte(maintenanceEvents.scheduledAt, today))).length;
+                            where(gte(maintenanceEvents.start, today))).length;
+
         const overdueEvents = (await db.select().from(maintenanceEvents).
                             where(
-                                and(
-                                    not(
-                                        eq(maintenanceEvents.status, "incomplete")
-                                    ),
-                                    lte(maintenanceEvents.scheduledAt, today)
-                                )
+                                lte(maintenanceEvents.start, today)
                             )).length;
+
         const completeEvents = (await db.select().from(maintenanceEvents).
                             where(
-                                eq(maintenanceEvents.status, "complete")
+                                eq(maintenanceEvents.isComplete, true)
                             )).length;
+
         const incompleteEvents = (await db.select().from(maintenanceEvents).
                             where(
-                                eq(maintenanceEvents.status, "incomplete")
+                                eq(maintenanceEvents.isComplete, false)
                             )).length;
 
         return {
@@ -430,20 +433,6 @@ export class DatabaseStorage {
         return event;
     }
 
-    async updateIncompleteEvents(): Promise<{id: number}[]> {
-        const updatedEvents = await db.update(maintenanceEvents).set({ status: "incomplete" }).
-                        where(
-                            and(
-                                eq(maintenanceEvents.status, "overdue"),
-                                isNull(maintenanceEvents.performedAt),
-                                lt(maintenanceEvents.start, sql`CURRENT_DATE - INTERVAL '10 days'`)
-
-                            )
-                        ).returning({ id: maintenanceEvents.id });
-
-        return updatedEvents;
-    }
-            
     async moveEmergencyEvents(): Promise<MaintenanceEvent[]> {
         const events = await db
         .update(maintenanceEvents)
@@ -451,7 +440,7 @@ export class DatabaseStorage {
         .where(
         and(
             eq(maintenanceEvents.level, "E"),
-            eq(maintenanceEvents.status, "emergency"),
+            eq(maintenanceEvents.isComplete, false),
             not(eq(maintenanceEvents.end, sql`current_date`))
         )
         ).returning();
@@ -664,26 +653,26 @@ export class DatabaseStorage {
         return trueHealthIndex;
     }
 
-    async subtractPenaltyScore(
-        event: MaintenanceEvent
-    ) {
-        const levelCoeffs: Record<string, number> = {
-            "A": 1,
-            "B": 2,
-            "C": 3,
-            "D": 4,
-        };
-        const statusCoeffs: Record<string, number> = {
-            "complete": 0,
-            "overdue": 0.5,
-            "incomplete": 1
-        };
+    // async subtractPenaltyScore(
+    //     event: MaintenanceEvent
+    // ) {
+    //     const levelCoeffs: Record<string, number> = {
+    //         "A": 1,
+    //         "B": 2,
+    //         "C": 3,
+    //         "D": 4,
+    //     };
+    //     const statusCoeffs: Record<string, number> = {
+    //         "complete": 0,
+    //         "overdue": 0.5,
+    //         "incomplete": 1
+    //     };
 
-        const score = event.status ? levelCoeffs[event.level]*statusCoeffs[event.status] : "no status yet";
+    //     const score = event.status ? levelCoeffs[event.level]*statusCoeffs[event.status] : "no status yet";
 
         
-        return await db.update(equipments).set({ healthIndex: sql`${equipments.healthIndex} - ${score}` }).where(eq(equipments.id, event.equipmentId));
-    }
+    //     return await db.update(equipments).set({ healthIndex: sql`${equipments.healthIndex} - ${score}` }).where(eq(equipments.id, event.equipmentId));
+    // }
     
     
     // async calculateHealthIndex(
