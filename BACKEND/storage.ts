@@ -384,7 +384,7 @@ export class DatabaseStorage {
 
         const overdueEvents = (await db.select().from(maintenanceEvents).
                             where(
-                                lte(maintenanceEvents.start, today)
+                                lt(maintenanceEvents.start, today)
                             )).length;
 
         const completeEvents = (await db.select().from(maintenanceEvents).
@@ -398,7 +398,7 @@ export class DatabaseStorage {
                             )).length;
 
         return {
-            total: upcomingEvents+overdueEvents+completeEvents+incompleteEvents,
+            total: upcomingEvents+overdueEvents,
             upcoming: upcomingEvents,
             overdue: overdueEvents,
             complete: completeEvents,
@@ -537,17 +537,17 @@ export class DatabaseStorage {
 
         const complete = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week' AND status = 'complete') AS cmt1,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week' AND status = 'complete') AS ceq1,
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week' AND is_complete = 'true') AS cmt1,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week' AND is_complete = 'true') AS ceq1,
 
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 week' AND status = 'complete') AS cmt2,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 week' AND status = 'complete') AS ceq2,
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 week' AND is_complete = 'true') AS cmt2,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 week' AND is_complete = 'true') AS ceq2,
 
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 week' AND status = 'complete') AS cmt3,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 week' AND status = 'complete') AS ceq3,
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 week' AND is_complete = 'true') AS cmt3,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 week' AND is_complete = 'true') AS ceq3,
 
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 week' AND status = 'complete') AS cmt4,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 week' AND status = 'complete') AS ceq4
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 week' AND is_complete = 'true') AS cmt4,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 week' AND is_complete = 'true') AS ceq4
             FROM maintenance_events;
         `);
 
@@ -603,19 +603,19 @@ export class DatabaseStorage {
         const msc = await db.execute(sql`
             SELECT
                 COUNT(*) FILTER (WHERE start_date <= now()) AS total,
-                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete') AS complete
+                COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true') AS complete
             FROM maintenance_events;
         `);
         const pmp = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete' AND level != 'E') as planned,
-                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete') as total
+                COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true' AND level != 'E') as planned,
+                COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true') as total
             FROM maintenance_events;
         `);
         const tcm = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete' AND performed_at IS NOT NULL AND performed_at - scheduled_at <= 2) as timely,
-                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete') as total 
+                COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true' AND performed_at IS NOT NULL AND performed_at - scheduled_at <= 2) as timely,
+                COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true') as total 
             FROM maintenance_events;
         `);
         const ehi = await db.execute(sql`
@@ -623,10 +623,10 @@ export class DatabaseStorage {
         `)
 
         return {
-            msc: 100*(Number(msc.rows[0].complete) / Number(msc.rows[0].total)),
-            pmp: 100*(Number(pmp.rows[0].planned) / Number(pmp.rows[0].total)),
-            tcm: 100*(Number(tcm.rows[0].timely) / Number(tcm.rows[0].total)),
-            ehi: Number(ehi.rows[0].avg)
+            msc: (100*(Number(msc.rows[0].complete) / Number(msc.rows[0].total))) || 0,
+            pmp: (100*(Number(pmp.rows[0].planned) / Number(pmp.rows[0].total))) || 0,
+            tcm: (100*(Number(tcm.rows[0].timely) / Number(tcm.rows[0].total))) || 0,
+            ehi: Number(ehi.rows[0].avg) || 0
         };
     }
     /* ======================================================================================================================== */
