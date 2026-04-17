@@ -76,14 +76,21 @@ export async function PATCH(
         if (isNaN(equipmentId)) return res.json({ error: "Invalid equipment ID" }, { status: 400 });
 
         const body = await req.json();
-        const { reason } = body;
-
+        console.log(body)
+        const { status, reason } = body;
+        
         // Validate user.
         
         // Fetch specified equipment by ID and check if it exists.
         const equipment = await storage.getEquipment(equipmentId);
         if (!equipment) return res.json({ error: "Specified equipment not found" }, { status: 404 });
-
+        
+        if (status && !reason) {
+            const newEquipment = await storage.updateEquipment(equipmentId, { status });
+            if (!newEquipment) return res.json({ error: "Failed to update equipment status" }, { status: 500 })
+            await activityLogger(user, "update", "Equipment status updated", `Equipment ${equipment.name} status updated to ${status}`, equipmentId);
+            return res.json(true, { status: 200 });
+        }
 
         // Log the activity for deleted equipment using helper logger method.
         await activityLogger(user, "delete", "Equipment deleted", `Equipment ${equipment.name} removed | Reason: ${reason}`, equipmentId);       

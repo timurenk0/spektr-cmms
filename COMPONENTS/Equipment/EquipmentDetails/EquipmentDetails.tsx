@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import Image from "next/image";
 import React, { useState } from "react";
 import { useAuth } from "../../utils/authContext";
@@ -17,6 +17,7 @@ import { HealthBadgeFull } from "@/COMPONENTS/ui/badges/HealthBadge";
 import { DetailBadge } from "@/COMPONENTS/ui/badges/DetailBadge";
 import EquipmentComponents from "./ComponentTab/EquipmentComponents";
 import { format } from "date-fns";
+import toast from "react-hot-toast";
 
 
 const getHealthBadge = (healthIndex: number | null) => {
@@ -46,6 +47,7 @@ const getHealthBadge = (healthIndex: number | null) => {
 }
 
 const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
+  const queryClient = useQueryClient();
   const [statusSelectionOpen, setStatusSelectionOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -56,9 +58,52 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
   const { user, isLoading: isLoadingUser } = useAuth();
 
   const { data: equipment, isLoading: isLoadingEquipment } = useQuery<TEquipment>({
-      queryKey: [`/api/equipments/${equipmentId}`]
+      queryKey: [`equipment`, equipmentId],
+      queryFn: async () => {
+        const res = await fetch(`/api/equipments/${equipmentId}`, {
+          method: "GET",
+          credentials: "include"
+        });
+        if (!res.ok) {
+          throw new Error("Failed to fetch equipment unit");
+        }
+
+        return await res.json()
+      }
   });
 
+  const updateStatus = useMutation({
+    mutationFn: async (status: string) => {
+      if (status === equipment?.status) {
+        toast.error("Can't update equipment status to the same status value");
+        throw new Error("Same status update rejected");
+      }
+
+      const res = await fetch(`/api/equipments/${equipmentId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          status
+        }),
+        credentials: "include"
+      });
+      if (!res.ok) {
+        throw new Error("Failed to update equipment status");
+      }
+
+      return await res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
+      toast.success(`Updated equipment status to ${data}`);
+      return; 
+    },
+    onError: (err) => {
+      toast.error("Failed to update equipment status");
+      console.error(err);
+      return; 
+    }
+  });
+  
   const isLoading = (!equipment || isLoadingEquipment) || (!user || isLoadingUser);
   if (isLoading) return (<h1>Loading...</h1>);
 
@@ -101,8 +146,8 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                           onClick={() => setStatusSelectionOpen(!statusSelectionOpen)}
                           className={`
                             ${equipment.status === "operational" ? "text-green-800 hover:text-green-400" :
-                              equipment.status === "under repair" ? "text-amber-800 hover:bg-amber-600" :
-                              "text-amber-800 hover:bg-amber-600"
+                              equipment.status === "under repair" ? "text-amber-800 hover:text-amber-600" :
+                              "text-amber-800 hover:text-amber-600"
                           } h-4 w-4 ms-1 rounded-full cursor-pointer`}
                           >
                             <ArrowBigDown height={16} width={16} className="mt-1" />
@@ -117,13 +162,20 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                           <ul className="py-1">
                             <li
                             className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => updateStatus.mutate("operational")}
                             >
                               Operational
                             </li>
-                            <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                            <li
+                            className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => updateStatus.mutate("under repair")}
+                            >
                               Under Repair
                             </li>
-                            <li className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                            <li
+                            className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => updateStatus.mutate("out of service")}
+                            >
                               Out of Service
                             </li>
                           </ul>
