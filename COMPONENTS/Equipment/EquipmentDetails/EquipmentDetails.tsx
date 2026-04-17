@@ -84,20 +84,9 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                   {equipment.manufacturer}{" "}{equipment.model}
                 </div>
                 <div className="flex space-x-3 mt-2">
-                  <div className="flex flex-col items-center">
-                    <span className="text-xs text-gray-500 mb-1">Type</span>
-                    <DetailBadge text={equipment.type} />
-                  </div>
-
-                  <div className="flex flex-col items-center">
-                    <span className="text-xs text-gray-500 mb-1">Location</span>
-                    <DetailBadge text={equipment.location} />
-                  </div>
-
-                  <div className="flex flex-col items-center">
-                    <span className="text-xs text-gray-500 mb-1">Owning Dept.</span>
-                    <DetailBadge text={equipment.department} />
-                  </div>
+                  <DetailBadge name="Type" text={equipment.type} />
+                  <DetailBadge name="Location" text={equipment.location} />
+                  <DetailBadge name="Owning Dept." text={equipment.department} />
 
                   <div className="flex flex-col items-center relative">
                     <span className="text-xs text-gray-500 mb-1">Status</span>
