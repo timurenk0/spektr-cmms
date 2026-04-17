@@ -37,6 +37,8 @@ export function createMaintenanceEvents(
     const daily = maintenance.dailyWorkingHours;
 
     for (let [k, v] of Object.entries(levels)) {
+        if (v.duration === 0 || v.hours === 0) continue;
+        
         const dayInterval = v.hours / daily;
 
         const day = 1000 * 3600 * 24;

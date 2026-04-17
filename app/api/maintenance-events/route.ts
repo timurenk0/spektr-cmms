@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
         const user = await validateUser("admin");
         
         const body = req.json();
+        console.log(body);
         const newMaintenanceEvent = insertMaintenanceEventSchema.parse(body);
 
         await activityLogger(user, "add", "Maintenance events added", `Maintenance events for equipment ${newMaintenanceEvent.equipmentId} added to the database`, newMaintenanceEvent.equipmentId)

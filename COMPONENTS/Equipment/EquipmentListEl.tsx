@@ -9,6 +9,7 @@ import { TEquipment } from "../utils/types";
 import { HealthBadge } from "../ui/badges/HealthBadge";
 import { StatusBadge } from "../ui/badges/StatusBadge";
 import { format } from "date-fns";
+import { useState } from "react";
 
 
 const getStatusBadge = (status: string) => {
@@ -60,6 +61,7 @@ const getHealthBadge = (healthIndex: number | null) => {
 
 const EquipmentListEl = ({ equipment, userRole }: { equipment: TEquipment, userRole: string }) => {
     const router = useRouter();
+    const [imgSrc, setImgSrc] = useState(equipment.equipmentImage);
 
   return (
         <TableRow sx={{ "& .MuiTableCell-root": { textAlign: "center", cursor: "pointer", padding: "0 32px" } }} hover onClick={() => router.push(`/equipment/${equipment.id}`)}>
@@ -68,7 +70,7 @@ const EquipmentListEl = ({ equipment, userRole }: { equipment: TEquipment, userR
                 <div className="flex items-center">
                     <div className="h-28 w-28 overflow-hidden flex items-center">
                         {/* add max-h-[128px] to image if you want the image to resize */}
-                        <Image className="max-w-28" src={equipment.equipmentImage} width={112} height={112} alt="Equipment image" />
+                        <Image className="max-w-28" src={imgSrc || "/window.svg"} width={112} height={112} alt="Equipment image" onError={() => setImgSrc("/window.svg")} />
                     </div>
                     <div className="ml-2 flex-1 text-left">
                         <div className="text-xs font-medium truncate max-w-32" title={equipment.name}>
