@@ -17,7 +17,7 @@ import type { PgTransaction } from "drizzle-orm/pg-core";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { differenceInCalendarMonths } from "date-fns";
-import { createMaintenanceEvents } from "./Middleware/EventManager2";
+import { createMaintenanceEvents } from "./Middleware/EventManager";
 
 
 type Schema = typeof schema;
