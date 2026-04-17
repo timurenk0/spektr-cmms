@@ -89,7 +89,7 @@ const EquipmentListEl = ({ equipment, userRole }: { equipment: TEquipment, userR
             </TableCell>
             <TableCell style={{ fontSize: "12px" }}>{getStatusBadge(equipment.status)}</TableCell>
             <TableCell style={{ fontSize: "12px" }}>{equipment.location}</TableCell>
-            <TableCell style={{ fontSize: "12px" }}>{equipment.lastEvent ? format(equipment.lastEvent, "dd MM, yyyy") : "N/A"}</TableCell>
+            <TableCell style={{ fontSize: "12px" }}>{equipment.lastEvent ? format(equipment.lastEvent, "MMM dd, yyyy") : "N/A"}</TableCell>
             <TableCell style={{ fontSize: "12px" }}>{equipment.nextEvent ? format(equipment.nextEvent, "MMM dd, yyyy") : "N/A"}</TableCell>
             <TableCell style={{ fontSize: "12px" }}>{equipment.healthIndex ? getHealthBadge(equipment.healthIndex) : <div className="bg-gray-200 text-gray-600 rounded-full px-2 py-1 text-bold">-</div>}</TableCell>
             {userRole === "admin" && (
