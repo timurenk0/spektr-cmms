@@ -14,9 +14,9 @@ import EquipmentPhotos from "./PhotoTab/EquipmentPhotos";
 import EquipmentActivity from "./ActivityTab/EquipmentActivity";
 import { TEquipment } from "@/COMPONENTS/utils/types";
 import { HealthBadgeFull } from "@/COMPONENTS/ui/badges/HealthBadge";
-import { format } from "date-fns";
 import { DetailBadge } from "@/COMPONENTS/ui/badges/DetailBadge";
 import EquipmentComponents from "./ComponentTab/EquipmentComponents";
+import { format } from "date-fns";
 
 
 const getHealthBadge = (healthIndex: number | null) => {
@@ -182,7 +182,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
               </div>
               <div>
                 <div className="text-sm font-bold text-orange-600">
-                  {equipment.lastEvent ?? "N/A"}
+                  {equipment.lastEvent ? format(equipment.lastEvent, "MMM d, yyyy") : "N/A"}
                 </div>
                 <div className="text-xs text-gray-500">Last Maintenance</div>
               </div>
@@ -194,7 +194,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
               </div>
               <div>
                 <div className="text-sm font-bold text-purple-600">
-                  {equipment.nextEvent ?? "N/A"}
+                  {equipment.nextEvent ? format(equipment.nextEvent, "MMM d, yyyy") : "N/A"}
                 </div>
                 <div className="text-xs text-gray-500">Next Maintenance</div>
               </div>
