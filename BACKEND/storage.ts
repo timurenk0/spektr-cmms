@@ -473,6 +473,13 @@ export class DatabaseStorage {
         return (await db.insert(components).values(insertComponent).returning())[0];
     }
 
+    async addComponentsBulk(insertComponents: InsertComponent[]): Promise<Component[]> {
+        return db.transaction(async (tx) => {
+            const insertedComponents = await tx.insert(components).values(insertComponents).returning();
+            return insertedComponents;
+        });
+    }
+
     async deleteComponent(id: number): Promise<void> {
         await db.delete(components).where(eq(components.id, id));
     }

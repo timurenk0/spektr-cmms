@@ -41,9 +41,7 @@ const DeleteEquipmentForm = (
                 }
             },
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ["/api/equipments"] });
-                queryClient.invalidateQueries({ queryKey: ["/api/maintenances"] });
-                queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
+                queryClient.invalidateQueries({ queryKey: ["equipments"] });
                 toast.success("Equipment deleted successfully", {
                     duration: 2000,
                     position: "bottom-right",
