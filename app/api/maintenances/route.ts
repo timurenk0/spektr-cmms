@@ -27,7 +27,13 @@ export async function POST(req: NextRequest) {
         // Parse request body to JSON format.
         // Parse maintenance data from request body with DB schema for validation.
         const body = await req.json();
-        const maintenanceValidatedData = insertMaintenanceSchema.parse(body);
+        const equipment = await storage.getEquipment(body.equipmentId);
+        if (!equipment) return res.json({ error: "No equipment found" }, { status: 404 });
+        const data = {
+            ...body,
+            tenantId: equipment.tenantId
+        }
+        const maintenanceValidatedData = insertMaintenanceSchema.parse(data);
 
         console.log(maintenanceValidatedData);
 

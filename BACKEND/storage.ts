@@ -117,7 +117,9 @@ export class DatabaseStorage {
     async getEquipments(tenant: number, concise?:string, limit?: number, page?: number, location?: string, status?: string, type?: string, category?: string, search?: string): Promise<{equips: (Partial<Equipment>)[], totalCount: number}> {
         const filters = [];
 
-        filters.push(eq(equipments.tenantId, tenant));
+        if (tenant !== 1) {
+            filters.push(eq(equipments.tenantId, tenant));
+        }
         if (location) filters.push(eq(equipments.location, location));
         if (status) filters.push(eq(equipments.status, status));
         if (type) filters.push(eq(equipments.type, type));
