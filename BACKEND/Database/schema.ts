@@ -148,7 +148,7 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   level: text("level").notNull(),
-  isComplete: boolean("is_complete").notNull(),
+  isComplete: boolean("is_complete").notNull().default(false),
   start: date("start_date").notNull(),
   end: date("end_date").notNull(),
   scheduledAt: date("scheduled_at").notNull().defaultNow(),
