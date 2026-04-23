@@ -48,11 +48,11 @@ export function createMaintenanceEvents(
         while (eventEnd <= end) {
             let closestDate = Object.keys(eventMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime()).findLast(e => e <= eventStart.toISOString().slice(0, 10) && eventMap[e].level > k);
 
-            while (closestDate && (eventStart.getTime() - new Date(closestDate).getTime())/day < dayInterval) {
+            if (closestDate && (eventStart.getTime() - new Date(closestDate).getTime())/day < dayInterval) {
                 eventStart = new Date(new Date(closestDate).getTime() + (day * dayInterval)); 
                 eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
 
-                closestDate = Object.keys(eventMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime()).findLast(e => e <= eventStart.toISOString().slice(0, 10) && eventMap[e].level > k);
+                continue;
             }
             if (eventEnd > end) {
                 continue;
