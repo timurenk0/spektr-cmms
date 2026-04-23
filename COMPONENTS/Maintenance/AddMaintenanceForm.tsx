@@ -12,20 +12,10 @@ import z from "zod"
 import { TEquipment, TMaintenance } from "../utils/types";
 
 
-const formSchema = insertMaintenanceSchema.extend({
-  levelAHours: z.number().min(0).optional(),
-  levelADuration: z.number().min(0).optional(),
-  levelBHours: z.number().min(0).optional(),
-  levelBDuration: z.number().min(0).optional(),
-  levelCHours: z.number().min(0).optional(),
-  levelCDuration: z.number().min(0).optional(),
-  levelDHours: z.number().min(0).optional(),
-  levelDDuration: z.number().min(0).optional(),
-  dailyWorkingHours: z.number().min(1).max(24),
-  totalWorkingHours: z.number().min(1),
-  givenHealthIndex: z.number().min(1).max(100),
-  serviceStartDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
-  serviceEndDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+const formSchema = insertMaintenanceSchema.omit({
+  tenantId: true,
+}).extend({
+  totalWorkingHours: z.number().min(0, { error: "Total working hours value is required." })
 });
 type MaintenanceFormValues = z.infer<typeof formSchema>;
 
@@ -33,7 +23,7 @@ const AddMaintenanceForm = ({
   maintenanceId,
   onClose
 }: {
-  maintenanceId: number,
+  maintenanceId?: number,
   onClose: () => void
 }) => {
   const queryClient = useQueryClient();
@@ -63,7 +53,6 @@ const AddMaintenanceForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       equipmentId: undefined,
-      tenantId: undefined,
       dailyWorkingHours: 8,
       totalWorkingHours: 0,
       givenHealthIndex: 0,
@@ -149,8 +138,8 @@ const AddMaintenanceForm = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Controller
           name="equipmentId"
+          defaultValue={availableEquipment[0].id}
           control={form.control}
-          defaultValue={0}
           render={({ field }) => (
             <FormControl fullWidth>
               <InputLabel id="select-equipment" color="info" required sx={{ margin: "8px 0" }}>Select Equipment</InputLabel>
@@ -161,16 +150,7 @@ const AddMaintenanceForm = ({
                 color="info"
                 required
                 sx={{ margin: "8px 0" }}
-                onChange={(e) => {
-                    const equipmentId = Number(e.target.value);
-                    field.onChange(equipmentId);
-
-                    const tenantId = equipments.equips.find(eq=>eq.id===equipmentId)!.tenantId;
-
-                    if (tenantId) {
-                      form.setValue("tenantId", tenantId);
-                    }
-                  }}>
+                >
                 {availableEquipment.map((eq) => (
                   <MenuItem key={eq.id} value={eq.id}>{eq.name}</MenuItem>
                 ))}

@@ -159,7 +159,7 @@ export const maintenanceEvents = pgTable("maintenance_events", {
     index("idx_me_tenant_equipment_id").on(table.tenantId, table.equipmentId, table.start),
     index("idx_maintenance_events_start_date").on(table.start),
     index("idx_maintenance_events_status").on(table.isComplete),
-    unique("unique_equipment_start_level").on(table.equipmentId, table.start, table.level)
+    unique("unique_equipment_start_level").on(table.equipmentId, table.start)
 ]);
 
 export const insertMaintenanceEventSchema = createInsertSchema(maintenanceEvents).omit({
