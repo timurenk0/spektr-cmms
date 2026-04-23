@@ -59,22 +59,53 @@ const Settings = () => {
         setValue(val)
     }
     
-    const { data: userRoles = [], isLoading: isLoadingUserRoles } = useQuery<string[]>({
-        queryKey: ["/api/users/roles"]
+    const { data: userRoles, isLoading: isLoadingUserRoles } = useQuery<string[]>({
+        queryKey: ["roles"],
+        queryFn: async () => {
+            const res = await fetch("/api/users/roles", {
+                method: "GET",
+                credentials: "include"
+            });
+            if (!res.ok) {
+                toast.error("Failed to get user roles");
+                throw new Error("Failed to fetch user roles");
+            }
+            const data = await res.json();
+            console.log(data);
+            setAvailableRoles(data)
+
+            return data;
+        }
     });
     
-    const { data: tenants = [], isLoading: isLoadingTenants } = useQuery<TTenant[]>({
-        queryKey: ["/api/tenants"]
+    const { data: tenants, isLoading: isLoadingTenants } = useQuery<TTenant[]>({
+        queryKey: ["tenants"],
+        queryFn: async () => {
+            const res = await fetch("/api/tenants", {
+                method: "GET",
+                credentials: "include"
+            });
+            if (!res.ok) {
+                toast.error("Failed to get tenants");
+                throw new Error("Failed to fetch tenants");
+            }
+
+            const data = await res.json();
+            console.log(data.map((t: TTenant) => t.name));
+            setAvailableTenants(data.map((t: TTenant) => t.name));
+
+            return data;
+        }
     });
 
-    useEffect(()=>{
-        if (userRoles.length > 0) {
-            setAvailableRoles(userRoles);
-        }
-        if (tenants.length > 0) {
-            setAvailableTenants(tenants.map(t=>t.name));
-        }
-    }, [userRoles, tenants]);
+    // useEffect(()=>{
+    //     if (userRoles.length > 0) {
+    //         setAvailableRoles(userRoles);
+    //     }
+    //     if (tenants.length > 0) {
+    //         setAvailableTenants(tenants.map(t=>t.name));
+    //     }
+    // }, [userRoles, tenants]);
     
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(formSchema),
@@ -132,6 +163,9 @@ const Settings = () => {
     const onSubmit = (values: ProfileFormValues) => {
         mutation.mutate(values);
     };
+
+    const loading = (!userRoles || isLoadingUserRoles) || (!tenants || isLoadingTenants) || (!user || isLoading);
+    if (loading) return (<h1>Loading data...</h1>);
     
     const addRole = (role: string) => {
         const normalizedRole = role.trim().toLowerCase();
@@ -175,8 +209,6 @@ const Settings = () => {
         }
     }
     
-    const loading = (!userRoles || isLoadingUserRoles) || (!tenants || isLoadingTenants) || (!user || isLoading);
-    if (loading) return (<h1>Loading data...</h1>);
 
     
     console.log(role);
