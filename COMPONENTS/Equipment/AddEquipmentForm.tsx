@@ -7,12 +7,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertEquipmentSchema } from "@/BACKEND/Database/schema"
 
 import toast from "react-hot-toast";
-import { Image } from "lucide-react";
+import Image from "next/image"
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Button, FormControl, FormControlLabel, FormLabel, InputAdornment, InputLabel, MenuItem, Radio, RadioGroup, Select, TextField } from "@mui/material";
 import { EquipmentTypes } from "../utils/equipmentTypes";
 import { TEquipment, TTenant } from "../utils/types";
+import { ImageIcon } from "lucide-react";
 
 
 const formSchema = insertEquipmentSchema.extend({
@@ -37,6 +38,7 @@ export default function AddEquipmentForm(
 ) {
     const queryClient = useQueryClient();
     const [equipmentImage, setEquipmentImage] = useState("");
+    const [localEquipmentImage, setLocalEquipmentImage] = useState("");
     const [eqLocation, setEqLocation] = useState("");
 
     const { data: tenants, isLoading: isLoadingTenants } = useQuery<TTenant[]>({
@@ -380,23 +382,29 @@ export default function AddEquipmentForm(
                                 accept: ["image/jpeg", "image/png"],
                                 onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
                                     const file = e.target.files?.[0];
+                                    if (!file) throw new Error("No file selected")
                                     field.onChange(file);
+                                    const reader = new FileReader();
+                                    reader.readAsDataURL(file);
+                                    
+                                    reader.addEventListener("load", () => {setLocalEquipmentImage(String(reader.result))})
+                                    
                                     console.log(file);
                                 }
                             },
                             input: {
-                                endAdornment: <InputAdornment position="start"><Image /></InputAdornment>
+                                endAdornment: <InputAdornment position="start"><ImageIcon /></InputAdornment>
                             }
                         }}
                     />
                 )}
             />
-            {/* {equipmentImage && (
+            {localEquipmentImage && (
                 <div className="mt-2">
                     <p className="text-sm">Image preview:</p>
-                    <Image src={equipmentImage} width={32} height={32} alt="equipment_image_preview" className="w-32 h-32 object-cover rounded-md mt-1" />
+                    <Image src={localEquipmentImage} width={32} height={32} alt="equipment_image_preview" className="w-auto h-auto max-w-64 max-h-64 rounded-md mt-1" />
                 </div>
-            )} */}
+            )}
             <TextField
                 label="Notes"
                 color="info"
