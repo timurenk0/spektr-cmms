@@ -98,6 +98,7 @@ export const equipments = pgTable(
     equipmentImage: text("equipment_image").notNull(),
     healthIndex: doublePrecision("health_index"),
     notes: text("notes"),
+    uploadedAt: timestamp("uploaded_at").notNull().defaultNow()
   },
   (table) => [
     check(
@@ -112,7 +113,8 @@ export const equipments = pgTable(
 );
 
 export const insertEquipmentSchema = createInsertSchema(equipments).omit({
-  id: true,
+    id: true,
+    uploadedAt: true
 });
 
 // Maintenance table schema

@@ -1,5 +1,6 @@
 import { TEquipment } from '@/COMPONENTS/utils/types';
 import { Paper } from '@mui/material'
+import { format } from 'date-fns';
 import React from 'react'
 
 const EquipmentOverview = ({ equipment }: { equipment: TEquipment }) => {
@@ -17,7 +18,7 @@ const EquipmentOverview = ({ equipment }: { equipment: TEquipment }) => {
             </div>
             <div>
                 <div className="text-sm text-gray-500">Date of Manufacture</div>
-                <div>{equipment.dateOfManufacturing}</div>
+                <div>{format(equipment.dateOfManufacturing, "MMM dd, yyyy")}</div>
             </div>
 
             {/* Row 2 */}
@@ -31,7 +32,7 @@ const EquipmentOverview = ({ equipment }: { equipment: TEquipment }) => {
             </div>
             <div>
                 <div className="text-sm text-gray-500">Date Put in Service</div>
-                <div>{equipment.inServiceDate}</div>
+                <div>{format(equipment.inServiceDate, "MMM dd, yyyy")}</div>
             </div>
 
             {/* Row 3 */}
@@ -44,8 +45,8 @@ const EquipmentOverview = ({ equipment }: { equipment: TEquipment }) => {
                 <div>{equipment.status}</div>
             </div>
             <div>
-                <div className="text-sm text-gray-500">Some date in the future</div>
-                <div>blah blah</div>
+                <div className="text-sm text-gray-500">Uploaded At</div>
+                <div>{format(equipment.uploadedAt, "MMM dd, yyyy | hh:mm:ss")}</div>
             </div>
         </div>
 

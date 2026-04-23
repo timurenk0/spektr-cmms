@@ -54,6 +54,7 @@ export type TEquipment = {
     equipmentImage: string;
     healthIndex: number | null;
     notes: string | null;
+    uploadedAt: string;
     lastEvent: string | null;
     nextEvent: string | null;
 }
