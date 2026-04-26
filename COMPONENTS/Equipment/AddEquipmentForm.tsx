@@ -105,6 +105,7 @@ export default function AddEquipmentForm(
             requirements: "",
             department: "",
             usefulLifeSpan: 180,
+            totalWorkingHours: null,
             equipmentImage: "",
             notes: null
         }
@@ -415,6 +416,25 @@ export default function AddEquipmentForm(
                 rows={4}
                 {...form.register("notes")}
              />
+            <Controller
+                name="totalWorkingHours"
+                control={form.control}
+                defaultValue={null}
+                render={({ field }) => (
+                    <TextField
+                        type="number"
+                        label="Total Working Hours (if applicable)"
+                        color="info"
+                        margin="dense"
+                        fullWidth
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(value === "" ? null : Number(value))
+                        }}
+                    />
+                )}
+            />
              <Controller
                 name="requirements"
                 control={form.control}
@@ -432,6 +452,7 @@ export default function AddEquipmentForm(
                     </FormControl>
                 )}
               />
+              
 
               <div className="col-span-2 flex justify-end gap-x-2">
                 <Button
