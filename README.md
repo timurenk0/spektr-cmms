@@ -14,3 +14,4 @@
 # ISSUES
 - Change JWT_SECRET to something more serious
 - Error messages on frontend
+- Try to rewrite maintenance events fetching info using TanStack

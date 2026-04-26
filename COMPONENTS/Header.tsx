@@ -35,6 +35,9 @@ const Header = ({ title } : HeaderProps) => {
                     <div className="bg-purple-200 px-2 rounded-lg">
                         <p>Level D Event</p>
                     </div>
+                    <div className="bg-pink-200 px-2 rounded-lg">
+                        <p>Level I Event</p>
+                    </div>
                     <div className="police-tape px-2 rounded-lg">
                         <p>Level E Event</p>
                     </div>
