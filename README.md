@@ -1,6 +1,7 @@
 # PRIORITY
 - Finish component deletion endpoint
 - Add user role check on each delete endpoint
+- Fix status badge in equipment details for non-admin users
 
 
 
