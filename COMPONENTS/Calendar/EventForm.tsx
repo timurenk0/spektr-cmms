@@ -55,7 +55,7 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
         icon: "✅"
       });
       onClose();
-      window.location.reload();
+      // window.location.reload();
     },
     onError: (error) => {
       console.error(error.cause, error.stack);

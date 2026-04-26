@@ -80,7 +80,7 @@ const MyCalendar = () => {
                 ">
                   <strong>${info.event.title}</strong><br/>
                   <em><small>${info.event.extendedProps.description}</small></em><br/>
-                  <small>Complete: ${info.event.extendedProps.isComplete === "true" ? "✅" : "❌"}</small>
+                  <small>Complete: ${info.event.extendedProps.isComplete ? "✅" : "❌"}</small>
                 </div>
                 `,
                 allowHTML: true,
@@ -88,7 +88,7 @@ const MyCalendar = () => {
               })
             }}
             eventClick={(e) => {
-              (e.event._def.extendedProps.isComplete === "true" || e.event._def.extendedProps.isOverdue)  ? console.log("Incomplete event") : setSelectedEvent(e.event);
+              (e.event._def.extendedProps.isComplete || e.event._def.extendedProps.isOverdue)  ? console.log("Incomplete event") : setSelectedEvent(e.event);
             }}
       />
 

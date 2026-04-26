@@ -14,8 +14,6 @@ import { TEquipment, TMaintenance } from "../utils/types";
 
 const formSchema = insertMaintenanceSchema.omit({
   tenantId: true,
-}).extend({
-  totalWorkingHours: z.number().min(0, { error: "Total working hours value is required." })
 });
 type MaintenanceFormValues = z.infer<typeof formSchema>;
 
@@ -27,10 +25,9 @@ const AddMaintenanceForm = ({
   onClose: () => void
 }) => {
   const queryClient = useQueryClient();
-  const [selectedEq, setSelectedEq] = useState<number>();
   
   /* ======================================DATA FETCHING=========================================== */
-
+  
   const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{equips: TEquipment[], totalCount: number}>({
     queryKey: ["/api/equipments?concise=true"]
   });
@@ -45,16 +42,16 @@ const AddMaintenanceForm = ({
   })
   /* ============================================================================================== */
 
-
+  const [ isHours, setIsHours ] = useState<number | null>(equipments ? equipments.equips[0].totalWorkingHours : null);
+  
   /* =====================================FORM SUBMISSION========================================== */
-
+  
   // Resolve form using schema and assign default values
   const form = useForm<MaintenanceFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       equipmentId: undefined,
       dailyWorkingHours: 8,
-      totalWorkingHours: 0,
       givenHealthIndex: 0,
       levelAHours: 0,
       levelADuration: 0,
@@ -64,11 +61,13 @@ const AddMaintenanceForm = ({
       levelCDuration: 0,
       levelDHours: 0,
       levelDDuration: 0,
+      levelIMonths: 0,
+      levelIDuration: 0,
       serviceStartDate: format(new Date(), "yyyy-MM-dd"),
       serviceEndDate: format(new Date(), "yyyy-MM-dd")
     }
   });
-
+  
   // Populate form if maintenance ID is passed (edit mode)
   useEffect(() => {
     if (maintenance) {
@@ -150,6 +149,14 @@ const AddMaintenanceForm = ({
                 color="info"
                 required
                 sx={{ margin: "8px 0" }}
+                onChange={(e) => {
+                  field.onChange(e)
+                  
+                  const eq = availableEquipment.find(eq => eq.id === e.target.value);
+                  if (!eq) throw new Error("No equipment found");
+
+                  setIsHours(eq.totalWorkingHours)
+                }}
                 >
                 {availableEquipment.map((eq) => (
                   <MenuItem key={eq.id} value={eq.id}>{eq.name}</MenuItem>
@@ -176,72 +183,228 @@ const AddMaintenanceForm = ({
             />
           )}
          />
-         <TextField
-            type="date"
-            label="Service Start Date"
-            color="info"
-            margin="dense"
-            fullWidth
-            required
-            {...form.register("serviceStartDate")}
-        />
-         <TextField
-            type="date"
-            label="Service End Date"
-            color="info"
-            margin="dense"
-            fullWidth
-            required
-            {...form.register("serviceEndDate")}
-        />
-        <Controller
-          name="totalWorkingHours"
-          control={form.control}
-          defaultValue={0}
-          render={({ field }) => (
-            <TextField
-                type="number"
-                label="Total Working Hours"
-                color="info"
-                margin="dense"
-                slotProps={{ htmlInput: { min: 0 } }}
-                fullWidth
-                required
-                {...field}
-                onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-          )}
-         />
-         <Controller
-          name="dailyWorkingHours"
-          control={form.control}
-          defaultValue={1}
-          render={({ field }) => (
-            <TextField
-               type="number"
-               label="Daily Working Hours"
-               color="info"
-               margin="dense"
-               slotProps={{ htmlInput: { min: 1, max: 24 } }}
-               fullWidth
-               required
-               {...field}
-               onChange={(e) => field.onChange(Number(e.target.value))}
-               helperText="Approx. number of hours equipment works per day"
+           <TextField
+              type="date"
+              label="Service Start Date"
+              color="info"
+              margin="dense"
+              fullWidth
+              required
+              {...form.register("serviceStartDate")}
+                   />
+           <TextField
+              type="date"
+              label="Service End Date"
+              color="info"
+              margin="dense"
+              fullWidth
+              required
+              {...form.register("serviceEndDate")}
             />
-          )}
-         />
-         <div className="border p-4 rounded-md bg-green-50 col-span-2">
-          <h3 className="font-medium text-lg mb-3">Level A Maintenance</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+         { isHours ? (
+         <>
+           <Controller
+            name="dailyWorkingHours"
+            control={form.control}
+            defaultValue={1}
+            render={({ field }) => (
+              <TextField
+                 type="number"
+                 label="Daily Working Hours"
+                 color="info"
+                 margin="dense"
+                 slotProps={{ htmlInput: { min: 1, max: 24 } }}
+                 fullWidth
+                 required
+                 {...field}
+                 onChange={(e) => field.onChange(Number(e.target.value))}
+                 helperText="Approx. number of hours equipment works per day"
+              />
+            )}
+           />
+           <div className="border p-4 rounded-md bg-green-50 col-span-2">
+            <h3 className="font-medium text-lg mb-3">Level A Maintenance</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <Controller
+                name="levelAHours"
+                control={form.control}
+                defaultValue={0}
+                render={({ field }) => (
+                  <TextField
+                    type="number"
+                    label="Working Hours Interval"
+                    color="info"
+                    margin="dense"
+                    slotProps={{ htmlInput: { min: 0 } }}
+                    fullWidth
+                    required
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    helperText="Interval between maintenance tasks in hours"
+                  />
+                )}
+              />
+              <Controller
+                name="levelADuration"
+                control={form.control}
+                defaultValue={0}
+                render={({ field }) => (
+                  <TextField
+                    type="number"
+                    label="Duration (days)"
+                    color="info"
+                    margin="dense"
+                    slotProps={{ htmlInput: { min: 0 } }}
+                    fullWidth
+                    required
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    helperText="Expected maintenance duration in days"
+                  />
+                )}
+              />
+            </div>
+           </div>
+           <div className="border p-4 rounded-md bg-amber-50 col-span-2">
+            <h3 className="font-medium text-lg mb-3">Level B Maintenance</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <Controller
+                name="levelBHours"
+                control={form.control}
+                defaultValue={0}
+                render={({ field }) => (
+                  <TextField
+                    type="number"
+                    label="Working Hours Interval"
+                    color="info"
+                    margin="dense"
+                    slotProps={{ htmlInput: { min: 0 } }}
+                    fullWidth
+                    required
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    helperText="Interval between maintenance tasks in hours"
+                  />
+                )}
+              />
+              <Controller
+                name="levelBDuration"
+                control={form.control}
+                defaultValue={0}
+                render={({ field }) => (
+                  <TextField
+                    type="number"
+                    label="Duration (days)"
+                    color="info"
+                    margin="dense"
+                    slotProps={{ htmlInput: { min: 0 } }}
+                    fullWidth
+                    required
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    helperText="Expected maintenance duration in days"
+                  />
+                )}
+              />
+            </div>
+           </div>
+           <div className="border p-4 rounded-md bg-blue-50 col-span-2">
+            <h3 className="font-medium text-lg mb-3">Level C Maintenance</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <Controller
+                name="levelCHours"
+                control={form.control}
+                defaultValue={0}
+                render={({ field }) => (
+                  <TextField
+                    type="number"
+                    label="Working Hours Interval"
+                    color="info"
+                    margin="dense"
+                    slotProps={{ htmlInput: { min: 0 } }}
+                    fullWidth
+                    required
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    helperText="Interval between maintenance tasks in hours"
+                  />
+                )}
+              />
+              <Controller
+                name="levelCDuration"
+                control={form.control}
+                defaultValue={0}
+                render={({ field }) => (
+                  <TextField
+                    type="number"
+                    label="Duration (days)"
+                    color="info"
+                    margin="dense"
+                    slotProps={{ htmlInput: { min: 0 } }}
+                    fullWidth
+                    required
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    helperText="Expected maintenance duration in days"
+                  />
+                )}
+              />
+            </div>
+           </div>
+           <div className="border p-4 rounded-md bg-purple-50 col-span-2">
+            <h3 className="font-medium text-lg mb-3">Level D Maintenance</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <Controller
+                name="levelDHours"
+                control={form.control}
+                defaultValue={0}
+                render={({ field }) => (
+                  <TextField
+                    type="number"
+                    label="Working Hours Interval"
+                    color="info"
+                    margin="dense"
+                    slotProps={{ htmlInput: { min: 0 } }}
+                    fullWidth
+                    required
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    helperText="Interval between maintenance tasks in hours"
+                  />
+                )}
+              />
+              <Controller
+                name="levelDDuration"
+                control={form.control}
+                defaultValue={0}
+                render={({ field }) => (
+                  <TextField
+                    type="number"
+                    label="Duration (days)"
+                    color="info"
+                    margin="dense"
+                    slotProps={{ htmlInput: { min: 0 } }}
+                    fullWidth
+                    required
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    helperText="Expected maintenance duration in days"
+                  />
+                )}
+              />
+            </div>
+           </div>
+         </>
+         ) : (
+          <>
             <Controller
-              name="levelAHours"
-              control={form.control}
+              name="levelIMonths"
               defaultValue={0}
+              control={form.control}
               render={({ field }) => (
                 <TextField
                   type="number"
-                  label="Working Hours Interval"
+                  label="Period (months)"
                   color="info"
                   margin="dense"
                   slotProps={{ htmlInput: { min: 0 } }}
@@ -249,14 +412,13 @@ const AddMaintenanceForm = ({
                   required
                   {...field}
                   onChange={(e) => field.onChange(Number(e.target.value))}
-                  helperText="Interval between maintenance tasks in hours"
                 />
               )}
             />
             <Controller
-              name="levelADuration"
-              control={form.control}
+              name="levelIDuration"
               defaultValue={0}
+              control={form.control}
               render={({ field }) => (
                 <TextField
                   type="number"
@@ -268,141 +430,11 @@ const AddMaintenanceForm = ({
                   required
                   {...field}
                   onChange={(e) => field.onChange(Number(e.target.value))}
-                  helperText="Expected maintenance duration in days"
                 />
               )}
             />
-          </div>
-         </div>
-         <div className="border p-4 rounded-md bg-amber-50 col-span-2">
-          <h3 className="font-medium text-lg mb-3">Level B Maintenance</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <Controller
-              name="levelBHours"
-              control={form.control}
-              defaultValue={0}
-              render={({ field }) => (
-                <TextField
-                  type="number"
-                  label="Working Hours Interval"
-                  color="info"
-                  margin="dense"
-                  slotProps={{ htmlInput: { min: 0 } }}
-                  fullWidth
-                  required
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                  helperText="Interval between maintenance tasks in hours"
-                />
-              )}
-            />
-            <Controller
-              name="levelBDuration"
-              control={form.control}
-              defaultValue={0}
-              render={({ field }) => (
-                <TextField
-                  type="number"
-                  label="Duration (days)"
-                  color="info"
-                  margin="dense"
-                  slotProps={{ htmlInput: { min: 0 } }}
-                  fullWidth
-                  required
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                  helperText="Expected maintenance duration in days"
-                />
-              )}
-            />
-          </div>
-         </div>
-         <div className="border p-4 rounded-md bg-blue-50 col-span-2">
-          <h3 className="font-medium text-lg mb-3">Level C Maintenance</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <Controller
-              name="levelCHours"
-              control={form.control}
-              defaultValue={0}
-              render={({ field }) => (
-                <TextField
-                  type="number"
-                  label="Working Hours Interval"
-                  color="info"
-                  margin="dense"
-                  slotProps={{ htmlInput: { min: 0 } }}
-                  fullWidth
-                  required
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                  helperText="Interval between maintenance tasks in hours"
-                />
-              )}
-            />
-            <Controller
-              name="levelCDuration"
-              control={form.control}
-              defaultValue={0}
-              render={({ field }) => (
-                <TextField
-                  type="number"
-                  label="Duration (days)"
-                  color="info"
-                  margin="dense"
-                  slotProps={{ htmlInput: { min: 0 } }}
-                  fullWidth
-                  required
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                  helperText="Expected maintenance duration in days"
-                />
-              )}
-            />
-          </div>
-         </div>
-         <div className="border p-4 rounded-md bg-purple-50 col-span-2">
-          <h3 className="font-medium text-lg mb-3">Level D Maintenance</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <Controller
-              name="levelDHours"
-              control={form.control}
-              defaultValue={0}
-              render={({ field }) => (
-                <TextField
-                  type="number"
-                  label="Working Hours Interval"
-                  color="info"
-                  margin="dense"
-                  slotProps={{ htmlInput: { min: 0 } }}
-                  fullWidth
-                  required
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                  helperText="Interval between maintenance tasks in hours"
-                />
-              )}
-            />
-            <Controller
-              name="levelDDuration"
-              control={form.control}
-              defaultValue={0}
-              render={({ field }) => (
-                <TextField
-                  type="number"
-                  label="Duration (days)"
-                  color="info"
-                  margin="dense"
-                  slotProps={{ htmlInput: { min: 0 } }}
-                  fullWidth
-                  required
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                  helperText="Expected maintenance duration in days"
-                />
-              )}
-            />
-          </div>
-         </div>
+          </>
+         )}
 
          <div className="col-span-2 flex justify-end gap-x-2">
             <Button

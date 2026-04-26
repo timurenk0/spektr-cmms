@@ -75,6 +75,8 @@ export type TMaintenance = {
     levelCDuration: number;
     levelDHours: number;
     levelDDuration: number;
+    levelIMonths: number;
+    levelIDuration: number;
 }
 
 export type TMaintenanceEvent = {
@@ -84,8 +86,8 @@ export type TMaintenanceEvent = {
     tenantId: number;
     title: string;
     description: string;
-    status: "upcoming" | "overdue" | "incomplete" | "complete";
-    level: "A" | "B" | "C" | "D" | "E";
+    isComplete: boolean;
+    level: "A" | "B" | "C" | "D" | "E" | "I";
     start: string;
     end: string;
     scheduledAt: string;

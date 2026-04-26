@@ -180,6 +180,7 @@ export class DatabaseStorage {
                     status: equipments.status,
                     lastEvent: lastEventSubquery.lastEvent,
                     nextEvent: nextEventSubquery.nextEvent,
+                    totalWorkingHours: equipments.totalWorkingHours
                 } : {
                     ...getTableColumns(equipments),
                     lastEvent: lastEventSubquery.lastEvent,
@@ -286,7 +287,8 @@ export class DatabaseStorage {
             { duration: insertMaintenance.levelADuration, hours: insertMaintenance.levelAHours },
             { duration: insertMaintenance.levelBDuration, hours: insertMaintenance.levelBHours },
             { duration: insertMaintenance.levelCDuration, hours: insertMaintenance.levelCHours },
-            { duration: insertMaintenance.levelDDuration, hours: insertMaintenance.levelDHours }
+            { duration: insertMaintenance.levelDDuration, hours: insertMaintenance.levelDHours },
+            { duration: insertMaintenance.levelIDuration, hours: insertMaintenance.levelIMonths }
         ].some(level => level.duration && level.duration > 0 && level.hours && level.hours > 0);
         if (!hasValidLevels) throw new Error("At least one maintenance level must have hours/duration values > 0");
         
@@ -358,6 +360,7 @@ export class DatabaseStorage {
                             WHEN 'B' THEN 'oklch(68.1% 0.162 75.834)'
                             WHEN 'C' THEN 'oklch(42.4% 0.199 265.638)'
                             WHEN 'D' THEN 'oklch(43.8% 0.218 303.724)'
+                            WHEN 'I' THEN 'oklch(59.2% 0.249 0.584)'
                             WHEN 'E' THEN '#CC3700'
                             ELSE '#4D96FF'
                         END
@@ -368,6 +371,7 @@ export class DatabaseStorage {
                             WHEN 'B' THEN 'oklch(85.2% 0.199 91.936)'
                             WHEN 'C' THEN 'oklch(70.7% 0.165 254.624)'
                             WHEN 'D' THEN 'oklch(71.4% 0.203 305.504)'
+                            WHEN 'I' THEN 'oklch(71.8% 0.202 349.761)'
                             WHEN 'E' THEN '#FF4500'
                             ELSE '#4D96FF'
                         END

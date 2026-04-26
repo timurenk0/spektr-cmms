@@ -52,7 +52,8 @@ export async function PUT(
         
         const eventValidatedData = insertMaintenanceEventSchema.partial().parse({
             ...body,
-            status: body.status === "incomplete" ? "incomplete" : eventStatus,
+            isOverdue: eventStatus === "overdue" ? true : false,
+            isComplete: eventStatus === "complete" ? true : false
         });
 
         const updatedEvent = await storage.updateMaintenanceEvent(eventId, eventValidatedData);
