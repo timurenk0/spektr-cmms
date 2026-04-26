@@ -63,8 +63,8 @@ const DeleteEquipmentDocumentForm = (
         <div>
             <p>Are you sure you want to delete &quot;{documentName}&quot; document?</p>
             <div className="flex justify-end gap-2">
-                <Button type="submit" onClick={onSubmit} variant="outlined" color="error" disabled={deleteMutation.isPending}>Yes, fuck it</Button>
-                <Button onClick={onClose} variant="text" color="inherit">No, get me back</Button>
+                <Button type="submit" onClick={onSubmit} variant="outlined" color="error" disabled={deleteMutation.isPending}>Delete</Button>
+                <Button onClick={onClose} variant="text" color="inherit">Cancel</Button>
             </div>
         </div>
     )

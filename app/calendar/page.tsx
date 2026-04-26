@@ -80,7 +80,7 @@ const MyCalendar = () => {
                 ">
                   <strong>${info.event.title}</strong><br/>
                   <em><small>${info.event.extendedProps.description}</small></em><br/>
-                  <small>Complete: ${info.event.extendedProps.isComplete ? "✅" : "❌"}</small>
+                  ${info.event.extendedProps.isOverdue ? "<small style='color: #ff0000'>Overdue</small>" : `<small>Complete: ${info.event.extendedProps.isComplete ? "✅" : "❌"}</small>`}
                 </div>
                 `,
                 allowHTML: true,
