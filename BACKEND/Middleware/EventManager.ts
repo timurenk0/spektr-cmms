@@ -1,5 +1,5 @@
 import { add } from "date-fns";
-import { Equipment, InsertMaintenanceEvent, Maintenance } from "../Database/schema";
+import { Equipment, InsertMaintenanceEvent, Maintenance, MaintenanceEvent } from "../Database/schema";
 
 export function createMaintenanceEvents(
     maintenance: Maintenance,
@@ -38,8 +38,9 @@ export function createMaintenanceEvents(
         },
     };
 
-    const eventMap: Record<string, any> = {};
+    const eventMap: Record<string, InsertMaintenanceEvent> = {};
     const daily = maintenance.dailyWorkingHours;
+    const events: InsertMaintenanceEvent[] = [];
 
     for (let [k, v] of Object.entries(levels)) {
         if (v.duration === 0 || v.hours === 0) continue;
@@ -65,7 +66,8 @@ export function createMaintenanceEvents(
                     isComplete: false
                 };
     
-                eventMap[eventStart.toISOString().slice(0, 10)] = event;
+                // eventMap[eventStart.toISOString().slice(0, 10)] = event;
+                events.push(event);
                 
                 eventStart = new Date((add(eventStart, { months: v.hours })).getTime() - day);
                 eventEnd = new Date(eventStart.getTime() + (day * v.duration) - 1);
@@ -107,11 +109,12 @@ export function createMaintenanceEvents(
                 isComplete: false
             };
 
+            events.push(event);
             eventMap[eventStart.toISOString().slice(0, 10)] = event;
             eventStart = new Date(eventStart.getTime() + (day * dayInterval));
             eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
         }
     }
-
-    return Object.values(eventMap);
+    
+    return events;
 }

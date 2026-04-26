@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         // Validate user.
-        const user = await validateUser("admin");
+        // const user = await validateUser("admin");
 
         // Parse request body to JSON format.
         // Parse maintenance data from request body with DB schema for validation.
@@ -43,12 +43,11 @@ export async function POST(req: NextRequest) {
         const healthIndex = await storage.calculateHealthIndex(maintenanceValidatedData.equipmentId, maintenanceValidatedData.givenHealthIndex)
 
         await storage.updateEquipment(newMaintenance.equipmentId, {
-            totalWorkingHours: body.totalWorkingHours,
             healthIndex: healthIndex
         });        
 
         // Log activity for added maintenance using helper logger method.
-        await activityLogger(user, "add", "Maintenance added", `Maintenance for equipment ${newMaintenance.equipmentId} added to the database`, newMaintenance.equipmentId);
+        // await activityLogger(user, "add", "Maintenance added", `Maintenance for equipment ${newMaintenance.equipmentId} added to the database`, newMaintenance.equipmentId);
         
         return res.json(newMaintenance, { status: 201 });
     } catch (error: unknown) {

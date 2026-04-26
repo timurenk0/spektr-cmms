@@ -40,6 +40,7 @@ export default function AddEquipmentForm(
     const [equipmentImage, setEquipmentImage] = useState("");
     const [localEquipmentImage, setLocalEquipmentImage] = useState("");
     const [eqLocation, setEqLocation] = useState("");
+    const [requirements, setRequirements] = useState("");
 
     const { data: tenants, isLoading: isLoadingTenants } = useQuery<TTenant[]>({
         queryKey: ["/api/tenants"]
@@ -416,35 +417,19 @@ export default function AddEquipmentForm(
                 rows={4}
                 {...form.register("notes")}
              />
-            <Controller
-                name="totalWorkingHours"
-                control={form.control}
-                defaultValue={null}
-                render={({ field }) => (
-                    <TextField
-                        type="number"
-                        label="Total Working Hours (if applicable)"
-                        color="info"
-                        margin="dense"
-                        fullWidth
-                        value={field.value ?? ""}
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            field.onChange(value === "" ? null : Number(value))
-                        }}
-                    />
-                )}
-            />
              <Controller
                 name="requirements"
                 control={form.control}
                 defaultValue=""
                 render={({ field }) => (
-                    <FormControl className="col-span-2" fullWidth required>
+                    <FormControl fullWidth required>
                         <FormLabel>
                             <div className="inline text-gray-500">Requirements</div>
                         </FormLabel>
-                        <RadioGroup {...field}>
+                        <RadioGroup {...field} onChange={(e) => {
+                            field.onChange(e);
+                            setRequirements(e.target.value);
+                        }}>
                             {equipmentRequirements.map(req => (
                                 <FormControlLabel key={req} value={req.toLowerCase()} control={<Radio />} label={req} />
                             ))}
@@ -452,6 +437,28 @@ export default function AddEquipmentForm(
                     </FormControl>
                 )}
               />
+              { (requirements && requirements !== "calibration & testing") && (
+                <Controller
+                    name="totalWorkingHours"
+                    control={form.control}
+                    defaultValue={null}
+                    render={({ field }) => (
+                        <TextField
+                            type="number"
+                            label="Total Working Hours"
+                            color="info"
+                            margin="dense"
+                            fullWidth
+                            required
+                            value={field.value ?? ""}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                field.onChange(value === "" ? null : Number(value))
+                            }}
+                        />
+                    )}
+                />
+              ) }
               
 
               <div className="col-span-2 flex justify-end gap-x-2">
