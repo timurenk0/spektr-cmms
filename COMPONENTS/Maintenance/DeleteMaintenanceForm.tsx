@@ -76,8 +76,8 @@ export const DeleteMaintenanceForm = (
                     required
                 />
                 <div className="flex justify-end gap-2">
-                    <Button type="submit" onClick={onSubmit} variant="outlined" color="error" disabled={!reason || reason.length < 3}>Yes, fuck it!</Button>
-                    <Button onClick={onClose} variant="text" color="inherit">No, get me back!</Button>
+                    <Button type="submit" onClick={onSubmit} variant="outlined" color="error" disabled={!reason || reason.length < 3}>Delete</Button>
+                    <Button onClick={onClose} variant="text" color="inherit">Cancel</Button>
                 </div>
             </div>
         )
