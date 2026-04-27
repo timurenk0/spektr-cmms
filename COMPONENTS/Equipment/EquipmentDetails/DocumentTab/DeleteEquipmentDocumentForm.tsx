@@ -36,8 +36,7 @@ const DeleteEquipmentDocumentForm = (
             }
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/dociments"] });
-            queryClient.invalidateQueries({ queryKey: ["/api/dociments", documentId] });
+            queryClient.invalidateQueries({ queryKey: ["documents"] });
             toast.success("Document deleted successfully", {
                 duration: 2000,
                 position: "bottom-right",

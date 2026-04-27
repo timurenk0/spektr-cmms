@@ -53,7 +53,7 @@ const AddEquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, 
             return data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/photos"] });
+            queryClient.invalidateQueries({ queryKey: ["photos", equipmentId] });
             toast.success("Photo uploaded successfully", {
                 duration: 2000,
                 position: "bottom-right",

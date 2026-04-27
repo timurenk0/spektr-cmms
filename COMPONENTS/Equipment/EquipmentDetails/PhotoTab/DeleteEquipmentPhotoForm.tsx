@@ -34,8 +34,7 @@ const DeleteEquipmentPhotoForm = (
             }
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/photos"] });
-            queryClient.invalidateQueries({ queryKey: ["/api/photos", photoId] });
+            queryClient.invalidateQueries({ queryKey: ["photos"] })
             toast.success("Photo deleted successfully", {
                 duration: 2000,
                 position: "bottom-right",

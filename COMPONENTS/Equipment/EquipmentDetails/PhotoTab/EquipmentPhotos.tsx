@@ -15,7 +15,16 @@ const EquipmentPhotos = ({ equipmentId, userRole }: { equipmentId: number, userR
     const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
 
     const { data: photos = [], isLoading: isLoadingPhotos } = useQuery<TPhoto[]>({
-        queryKey: [`/api/equipments/${equipmentId}/photos`],
+        queryKey: ["photos", equipmentId],
+        queryFn: async () => {
+            const res = await fetch(`/api/equipments/${equipmentId}/photos`, {
+                method: "GET",
+                credentials: "include"
+            });
+            if (!res.ok) throw new Error("Failed to fetch equipment photos");
+
+            return await res.json();
+        },
         enabled: !!equipmentId
     });
 
