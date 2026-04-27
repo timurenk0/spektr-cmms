@@ -86,7 +86,7 @@ export type TMaintenanceEvent = {
     tenantId: number;
     title: string;
     description: string;
-    isComplete: boolean;
+    status: "complete" | "incomplete" | "pending";
     level: "A" | "B" | "C" | "D" | "E" | "I";
     start: string;
     end: string;

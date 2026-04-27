@@ -325,7 +325,7 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
     
     /* ============================================== Maintenance Events Methods ============================================== */
-    async getMaintenanceEvents(status: "any" | "complete" | "incomplete", start?: string, end?: string): Promise<(MaintenanceEvent & { color: string, isOverdue: boolean })[]> {
+    async getMaintenanceEvents(status: "any" | "pending" | "complete" | "incomplete", start?: string, end?: string): Promise<(MaintenanceEvent & { color: string, isOverdue: boolean })[]> {
         const conditions = [];
 
         if (start && end) {
@@ -333,7 +333,7 @@ export class DatabaseStorage {
         }
 
         if (status !== "any") {
-            conditions.push(eq(maintenanceEvents.isComplete, status === "complete" ? true : false));
+            conditions.push(eq(maintenanceEvents.status, status));
         }
 
         const events = await db.select({
@@ -348,13 +348,13 @@ export class DatabaseStorage {
             end: maintenanceEvents.end,
             scheduledAt: maintenanceEvents.scheduledAt,
             performedAt: maintenanceEvents.performedAt,
-            isComplete: maintenanceEvents.isComplete,
+            status: maintenanceEvents.status,
             isOverdue: sql<boolean>`
                 CURRENT_DATE - ${maintenanceEvents.start} > 3
             `,
             color: sql<string>`
                 CASE
-                    WHEN ${maintenanceEvents.isComplete} = 'true' THEN
+                    WHEN ${maintenanceEvents.status} = 'pending' THEN
                         CASE ${maintenanceEvents.level}
                             WHEN 'A' THEN 'oklch(43.2% 0.095 166.913)'
                             WHEN 'B' THEN 'oklch(68.1% 0.162 75.834)'
@@ -365,6 +365,7 @@ export class DatabaseStorage {
                             ELSE '#4D96FF'
                         END
                     WHEN CURRENT_DATE - ${maintenanceEvents.start}  > 3 THEN '#22222275'
+                    WHEN ${maintenanceEvents.status} = 'incomplete' THEN '#FF0000'
                     WHEN ${maintenanceEvents.start} >= CURRENT_DATE THEN
                         CASE ${maintenanceEvents.level}
                             WHEN 'A' THEN 'oklch(76.5% 0.177 163.223)'
@@ -395,12 +396,12 @@ export class DatabaseStorage {
 
         const completeEvents = (await db.select().from(maintenanceEvents).
                             where(
-                                eq(maintenanceEvents.isComplete, true)
+                                eq(maintenanceEvents.status, "complete")
                             )).length;
 
         const incompleteEvents = (await db.select().from(maintenanceEvents).
                             where(
-                                eq(maintenanceEvents.isComplete, false)
+                                eq(maintenanceEvents.status, "incomplete"),
                             )).length;
 
         return {
@@ -446,7 +447,7 @@ export class DatabaseStorage {
         .where(
         and(
             eq(maintenanceEvents.level, "E"),
-            eq(maintenanceEvents.isComplete, false),
+            eq(maintenanceEvents.status, "pending"),
             not(eq(maintenanceEvents.end, sql`current_date`))
         )
         ).returning();
@@ -561,17 +562,17 @@ export class DatabaseStorage {
 
         const complete = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week' AND is_complete = 'true') AS cmt1,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week' AND is_complete = 'true') AS ceq1,
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week' AND status = 'complete') AS cmt1,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week' AND status = 'complete') AS ceq1,
 
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 week' AND is_complete = 'true') AS cmt2,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 week' AND is_complete = 'true') AS ceq2,
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 week' AND status = 'complete') AS cmt2,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 week' AND status = 'complete') AS ceq2,
 
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 week' AND is_complete = 'true') AS cmt3,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 week' AND is_complete = 'true') AS ceq3,
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 week' AND status = 'complete') AS cmt3,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 week' AND status = 'complete') AS ceq3,
 
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 week' AND is_complete = 'true') AS cmt4,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 week' AND is_complete = 'true') AS ceq4
+                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 week' AND status = 'complete') AS cmt4,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 week' AND status = 'complete') AS ceq4
             FROM maintenance_events ${whereClause};
         `);
 
@@ -630,19 +631,19 @@ export class DatabaseStorage {
         const msc = await db.execute(sql`
             SELECT
                 COUNT(*) FILTER (WHERE start_date <= now()) AS total,
-                COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true') AS complete
+                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete') AS complete
             FROM maintenance_events ${whereClause};
         `);
         const pmp = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true' AND level != 'E') as planned,
-                COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true') as total
+                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete' AND level != 'E') as planned,
+                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete') as total
             FROM maintenance_events ${whereClause};
         `);
         const tcm = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true' AND performed_at IS NOT NULL AND performed_at - scheduled_at <= 2) as timely,
-                COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true') as total 
+                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete' AND performed_at IS NOT NULL AND performed_at - scheduled_at <= 2) as timely,
+                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete') as total 
             FROM maintenance_events ${whereClause};
         `);
         const ehi = await db.execute(sql`

@@ -51,12 +51,12 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
   }
   
   const mutation = useMutation({
-    mutationFn: async (status: boolean) => {
+    mutationFn: async (status: string) => {
       try {
         const response = await fetch(`/api/maintenance-events/${event._def.publicId}`, {
           method: "PUT",
           body: JSON.stringify({
-            isComplete: status,
+            status,
             performedAt: format(completionDate, "yyyy-MM-dd")
           }),
           credentials: "include"
@@ -102,16 +102,14 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
       return;
     }
     
-    const status = eventStatus === "complete";
-    
-    if (status) {
+    if (eventStatus === "complete") {
       const doc = await uploadDocument();
       if (!doc) {
         toast.error("No document found!");
         return;
       }      
     }
-    mutation.mutate(status);
+    mutation.mutate(eventStatus);
   }
 
     return (

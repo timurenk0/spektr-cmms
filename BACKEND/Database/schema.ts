@@ -152,17 +152,18 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   level: text("level").notNull(),
-  isComplete: boolean("is_complete").notNull().default(false),
+  status: text("status").notNull(),
   start: date("start_date").notNull(),
   end: date("end_date").notNull(),
   scheduledAt: date("scheduled_at").notNull().defaultNow(),
   performedAt: date("performed_at")
 }, (table) => [ 
     check("level_check", sql`level IN ('A', 'B', 'C', 'D', 'E', 'I')`),
+    check("status_check", sql`status IN ('complete', 'incomplete', 'pending')`),
     index("idx_maintenance_events_maintenance_id").on(table.maintenanceId),
     index("idx_me_tenant_equipment_id").on(table.tenantId, table.equipmentId, table.start),
     index("idx_maintenance_events_start_date").on(table.start),
-    index("idx_maintenance_events_status").on(table.isComplete),
+    index("idx_maintenance_events_status").on(table.status),
     unique("unique_equipment_start_level").on(table.equipmentId, table.start, table.level)
 ]);
 

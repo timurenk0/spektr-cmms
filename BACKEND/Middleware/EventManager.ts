@@ -47,11 +47,14 @@ export function createMaintenanceEvents(
 
         
         const day = 1000 * 3600 * 24;
+        const OVERDUE_THRESHOLD = 3;
         let eventStart = new Date(start.getTime());
         let eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
         
         if (k === "I") {            
             while (eventStart <= end) {
+                const status = (new Date().getTime() - eventStart.getTime()) / day > OVERDUE_THRESHOLD ? "incomplete" : "pending";
+                
                 const event: InsertMaintenanceEvent = {
                     equipmentId: maintenance.equipmentId,
                     maintenanceId: maintenance.id,
@@ -63,7 +66,7 @@ export function createMaintenanceEvents(
                     level: k,
                     scheduledAt: eventStart.toISOString().slice(0, 10),
                     performedAt: null,
-                    isComplete: false
+                    status
                 };
     
                 // eventMap[eventStart.toISOString().slice(0, 10)] = event;
@@ -83,6 +86,7 @@ export function createMaintenanceEvents(
         const dayInterval = v.hours / daily;
         
         while (eventStart <= end) {
+            const status = (new Date().getTime() - eventStart.getTime()) / day > OVERDUE_THRESHOLD ? "incomplete" : "pending";
             let closestDate = Object.keys(eventMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime()).findLast(e => e <= eventStart.toISOString().slice(0, 10) && (k !== "I" && eventMap[e].level > k));
 
             if (closestDate && (eventStart.getTime() - new Date(closestDate).getTime())/day < dayInterval) {
@@ -106,7 +110,7 @@ export function createMaintenanceEvents(
                 level: k,
                 scheduledAt: eventStart.toISOString().slice(0, 10),
                 performedAt: null,
-                isComplete: false
+                status
             };
 
             events.push(event);

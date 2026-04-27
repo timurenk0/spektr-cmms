@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
         const end = searchParams.get("end");
 
         if (status) {
-            if (status !== "any" && status !== "complete" && status != "incomplete") return res.json("Invalid status value", { status: 400 });
+            if (status !== "any" || !["complete", "incomplete", "pending"].includes(status)) return res.json("Invalid status value", { status: 400 });
 
             if (start && end) {
                 const response = await storage.getMaintenanceEvents(status, start, end);

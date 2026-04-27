@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
         // Log activity for added maintenance using helper logger method.
         // await activityLogger(user, "add", "Maintenance added", `Maintenance for equipment ${newMaintenance.equipmentId} added to the database`, newMaintenance.equipmentId);
         
-        return res.json(newMaintenance, { status: 201 });
+        return res.json(JSON.parse(JSON.stringify(newMaintenance)), { status: 201 });
     } catch (error: unknown) {
         const msg = error instanceof Error ? error.message : "Unkown error";
         return res.json({ error: `Failed to add maintenance records: ${msg}` }, { status: 500 });

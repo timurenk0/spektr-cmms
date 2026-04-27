@@ -121,7 +121,7 @@ const AddMaintenanceForm = ({
   
   
   const isLoading = (isLoadingEquipments || !equipments) || (isLoadingMaintenances || !maintenances);
-  if (isLoading) return "sosal?";
+  if (isLoading) return "Loading...";
   
   const onSubmit = (values: MaintenanceFormValues) => {
     console.log(values);

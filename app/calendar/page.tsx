@@ -56,6 +56,12 @@ const MyCalendar = () => {
     <h1>Loading...</h1>
   )
 
+  const statusColors: Record<string, string> = {
+    "complete": "#00aa00",
+    "incomplete": "#ff0000",
+    "pending": "#eeaa00"
+  }
+
   return (
     <>
       <FullCalendar
@@ -80,7 +86,7 @@ const MyCalendar = () => {
                 ">
                   <strong>${info.event.title}</strong><br/>
                   <em><small>${info.event.extendedProps.description}</small></em><br/>
-                  ${info.event.extendedProps.isOverdue ? "<small style='color: #ff0000'>Overdue</small>" : `<small>Complete: ${info.event.extendedProps.isComplete ? "✅" : "❌"}</small>`}
+                  ${info.event.extendedProps.isOverdue ? "<small style='color: #ff0000'>Overdue</small>" : `<small>Status: <em style='color: ${statusColors[info.event.extendedProps.status]}'>${info.event.extendedProps.status}</em></small>`}
                 </div>
                 `,
                 allowHTML: true,
@@ -88,7 +94,7 @@ const MyCalendar = () => {
               })
             }}
             eventClick={(e) => {
-              (e.event._def.extendedProps.isComplete || e.event._def.extendedProps.isOverdue)  ? console.log("Incomplete event") : setSelectedEvent(e.event);
+              (e.event._def.extendedProps.status !== "pending" || e.event._def.extendedProps.isOverdue)  ? console.log("Incomplete event") : setSelectedEvent(e.event);
             }}
       />
 
