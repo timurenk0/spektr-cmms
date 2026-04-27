@@ -45,15 +45,13 @@ export async function PUT(
         const event = await storage.getMaintenanceEvent(eventId);
         if (!event) return res.json({ error: "Specified maintenance event not found" }, { status: 404 });
 
-        const eventStatus = differenceInDays(body.performedAt, event.scheduledAt) < 3 ? "complete" : 
-                            differenceInDays(body.performedAt, event.scheduledAt) < 10 ? "overdue" : 
+        const eventStatus = differenceInDays(body.performedAt, event.scheduledAt) < 10 ? "overdue" : 
                             "incomplete"
 
         
         const eventValidatedData = insertMaintenanceEventSchema.partial().parse({
             ...body,
-            isOverdue: eventStatus === "overdue" ? true : false,
-            isComplete: eventStatus === "complete" ? true : false
+            isOverdue: eventStatus === "overdue"
         });
 
         const updatedEvent = await storage.updateMaintenanceEvent(eventId, eventValidatedData);
