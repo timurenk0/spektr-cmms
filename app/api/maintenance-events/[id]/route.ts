@@ -45,7 +45,7 @@ export async function PUT(
         const event = await storage.getMaintenanceEvent(eventId);
         if (!event) return res.json({ error: "Specified maintenance event not found" }, { status: 404 });
 
-        const eventStatus = differenceInDays(body.performedAt, event.scheduledAt) < 10 ? "overdue" : 
+        const eventStatus = Math.abs(differenceInDays(body.performedAt, event.scheduledAt)) < 10 ? "overdue" : 
                             "incomplete"
 
         
