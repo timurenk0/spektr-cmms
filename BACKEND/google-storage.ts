@@ -6,7 +6,7 @@ if (process.env.NODE_ENV === "production") {
     storage = new Storage(JSON.parse(process.env.GOOGLE_CREDENTIALS!)); 
 } else {
     storage = new Storage({
-        keyFilename: process.env.GCP_CREDENTIALS;
+        keyFilename: process.env.GCP_CREDENTIALS
     })
 }
 const BUCKET_NAME = process.env.GCP_BUCKET_NAME!;
