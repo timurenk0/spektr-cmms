@@ -1,9 +1,14 @@
 import { Bucket, Storage } from "@google-cloud/storage";
 import sharp from "sharp";
 
-const storage = new Storage({
-    keyFilename: process.env.GCP_CREDENTIALS
-});
+let storage: Storage;
+if (process.env.NODE_ENV === "production") {
+    storage = new Storage(JSON.parse(process.env.GOOGLE_CREDENTIALS!)); 
+} else {
+    storage = new Storage({
+        keyFilename: process.env.GCP_CREDENTIALS;
+    })
+}
 const BUCKET_NAME = process.env.GCP_BUCKET_NAME!;
 const bucket = storage.bucket(BUCKET_NAME);
 const publicURL = `https://storage.googleapis.com/${BUCKET_NAME}`;
