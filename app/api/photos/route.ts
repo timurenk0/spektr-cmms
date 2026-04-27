@@ -20,6 +20,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+    let imageUrl: string | null = null;
     try {
         const user = await validateUser("admin");
 
@@ -33,49 +34,26 @@ export async function POST(req: NextRequest) {
 
         if (!file) return res.json({ error: "No file found" }, { status: 400 });
 
-        let imageUrl: string | null = null;
-        if (type && type === "thumb") {
-            try{                
-                imageUrl = await Gstorage.uploadThumbPhoto(file);
-                return res.json({ equipmentImage: imageUrl }, { status: 201 });
-            } catch (error) {
-                if (imageUrl) {
-                    await Gstorage.deleteObject(imageUrl)
-                        .then(() => {
-                            console.log("Fallback successfully deleted the photo");
-                        })
-                        .catch(() => {
-                            throw new Error(`Fallback delete failed: ${error}`);
-                        })
-                }
-            }
-        } else {
-            if (!equipmentId) return res.json({ error: "No equipment ID found" }, { status: 400 });
-            const parsedEquipmentId = Number(equipmentId);
-            if (isNaN(parsedEquipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
-            try {
-                const documentData = {
-                    equipmentId: parsedEquipmentId,
-                }
-                const newPhoto = await uploadAndAddPhoto(file, documentData)
-
-                activityLogger(user, "add", "Photo uploaded", `Photo for equipment ${newPhoto?.equipmentId} added`, newPhoto?.equipmentId);
-
-                return res.json(newPhoto, { status: 201 });
-            } catch (error) {
-                if (imageUrl) {
-                    await Gstorage.deleteObject(imageUrl)
-                        .then(() => {
-                            console.log("Fallback successfully deleted the photo");
-                        })
-                        .catch(() => {
-                            throw new Error(`Fallback delete failed: ${error}`);
-                        })
-                }
-            }
+        if (type === "thumb") {
+            imageUrl = await Gstorage.uploadThumbPhoto(file);
+            return res.json({ equipmentImage: imageUrl }, { status: 201 });
         }
+
+
+        if (!equipmentId) return res.json({ error: "No equipment ID found" }, { status: 400 });
+        const parsedEquipmentId = Number(equipmentId);
+        if (isNaN(parsedEquipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
+        
+        const documentData = {
+            equipmentId: parsedEquipmentId,
+        }
+        const newPhoto = await uploadAndAddPhoto(file, documentData)
+
+        activityLogger(user, "add", "Photo uploaded", `Photo for equipment ${newPhoto?.equipmentId} added`, newPhoto?.equipmentId);
+
+        return res.json(newPhoto, { status: 201 });
     } catch (error: unknown) {
         const msg = error instanceof Error ? [error.message, error.cause, error.stack] : "Unknown error";
-        res.json({ error: `Failed to post photo: ${msg}` }, { status: 500 });
+        return res.json({ error: `Failed to post photo: ${msg}` }, { status: 500 });
     }
 }
