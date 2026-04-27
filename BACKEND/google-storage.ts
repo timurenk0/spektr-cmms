@@ -3,7 +3,11 @@ import sharp from "sharp";
 
 let storage: Storage;
 if (process.env.NODE_ENV === "production") {
-    storage = new Storage(JSON.parse(process.env.GOOGLE_CREDENTIALS!)); 
+    const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS!);
+
+    credentials.private_key = credentials.private_key.replace(/\\n/g, "\n");
+
+    storage = new Storage({credentials}); 
 } else {
     storage = new Storage({
         keyFilename: process.env.GCP_CREDENTIALS
