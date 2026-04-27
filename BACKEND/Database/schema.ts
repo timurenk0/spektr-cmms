@@ -176,7 +176,6 @@ export const photos = pgTable("photos", {
     equipmentId: integer("equipment_id").notNull().references(() => equipments.id, { onDelete: "cascade" }),
     imageUrl: text("image_url").notNull(),
     uploadedAt: timestamp("uploaded_at").defaultNow(),
-    notes: text("notes")
 });
 
 export const insertPhotoSchema = createInsertSchema(photos).omit({

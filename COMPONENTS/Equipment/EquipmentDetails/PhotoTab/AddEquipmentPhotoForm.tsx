@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, InputAdornment, TextField } from '@mui/material';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileIcon, ImageIcon } from 'lucide-react';
+import Image from 'next/image';
 import React, { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -14,19 +15,18 @@ import z from 'zod'
 
 const formSchema = z.object({
     file: z.file().max(10_000_000).mime(["image/png", "image/jpeg"]),
-    notes: z.string().optional()
 });
 type PhotoFormValues = z.infer<typeof formSchema>;
 
 
 const AddEquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, onClose: () => void }) => {
     const queryClient = useQueryClient();
+    const [localEquipmentImage, setLocalEquipmentImage] = useState<string | null>(null);
 
     const form = useForm<PhotoFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             file: undefined,
-            notes: ""
         }
     });
   
@@ -36,7 +36,6 @@ const AddEquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, 
 
             formData.append("equipmentId", String(equipmentId));
             formData.append("file", values.file);
-            formData.append("notes", values.notes ?? "");
 
             const response = await fetch("/api/photos", {
                 method: "POST",
@@ -96,8 +95,14 @@ const AddEquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, 
                             accept: ["image/png", "image/jpeg"],
                             onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
                                 const file = e.target.files?.[0];
+                                if (!file) throw new Error("No file selected");
                                 field.onChange(file);
                                 console.log(file);
+
+                                const reader = new FileReader();
+                                reader.readAsDataURL(file);
+
+                                reader.addEventListener("load", () => setLocalEquipmentImage(String(reader.result)))
                             },
                         },
                         input: {
@@ -107,15 +112,12 @@ const AddEquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, 
                 />
             )}
         />
-        <TextField
-            label="Notes"
-            color='info'
-            margin='dense'
-            fullWidth
-            multiline
-            rows={4}
-            {...form.register("notes")}
-        />
+        {localEquipmentImage && (
+            <div className="mt-2">
+                <p className="text-sm">Image preview:</p>
+                <Image src={localEquipmentImage} width={32} height={32} alt="equipment_image_preview" className="w-auto h-auto max-w-64 max-h-64 rounded-md mt-1" />
+            </div>
+        )}
         <div className="mt-6 flex justify-end gap-4">
             <Button
                 type='button'

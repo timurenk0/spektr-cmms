@@ -99,7 +99,6 @@ export type TPhoto = {
     equipmentId: number;
     title: string;
     imageUrl: string;
-    notes: string | null;
 }
 
 export type TTenant = {
