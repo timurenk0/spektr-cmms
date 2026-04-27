@@ -71,8 +71,7 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
             return data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
-            queryClient.invalidateQueries({ queryKey: [`/api/equipments/${equipmentId}`] });
+            queryClient.invalidateQueries({ queryKey: ["documents", equipmentId] })
             toast.success("Document uploaded successfully", {
                 duration: 2000,
                 position: "bottom-right",

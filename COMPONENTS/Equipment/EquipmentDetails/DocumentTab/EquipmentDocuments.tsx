@@ -24,7 +24,17 @@ const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, us
 
 
     const { data: documents = [], isLoading: isLoadingDocuments } = useQuery<TDocument[]>({
-        queryKey: [`/api/equipments/${equipmentId}/documents`],
+        queryKey: ["documents", equipmentId],
+        queryFn: async () => {
+            const res = await fetch(`/api/equipments/${equipmentId}/documents`, {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (!res.ok) throw new Error("Failed to fetch documents");
+
+            return await res.json();
+        },
         enabled: !!equipmentId
     });
 
@@ -45,8 +55,7 @@ const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, us
             return true;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
-            queryClient.invalidateQueries({ queryKey: [`/api/equipments/${equipmentId}`] });
+            queryClient.invalidateQueries({ queryKey: ["documents", equipmentId] });
             toast.success("Document deleted successfully", {
                 duration: 2000,
                 position: "bottom-right",
