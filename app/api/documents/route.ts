@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         
         await activityLogger(user, "add", "Document uploaded", `Document uploaded for equipment ${newDocument.equipmentId}`, newDocument.equipmentId);
         
-        return res.json(newDocument, { status: 201 });
+        return res.json(JSON.parse(JSON.stringify(newDocument)), { status: 201 });
     } catch (error) {
         const msg = error instanceof Error ? error.message : "Unknown error";
         return res.json({ error: `Failed to post document: ${msg}` }, { status: 500 });

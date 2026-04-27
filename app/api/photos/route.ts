@@ -51,9 +51,9 @@ export async function POST(req: NextRequest) {
 
         activityLogger(user, "add", "Photo uploaded", `Photo for equipment ${newPhoto?.equipmentId} added`, newPhoto?.equipmentId);
 
-        return res.json(newPhoto, { status: 201 });
+        return res.json(JSON.parse(JSON.stringify(newPhoto)), { status: 201 });
     } catch (error: unknown) {
-        const msg = error instanceof Error ? [error.message, error.cause, error.stack] : "Unknown error";
+        const msg = error instanceof Error ? error.message : "Unknown error";
         return res.json({ error: `Failed to post photo: ${msg}` }, { status: 500 });
     }
 }

@@ -13,17 +13,20 @@ export default async function uploadAndAddPhoto(
 
         const photo = insertPhotoSchema.parse({...photoData, imageUrl});
         const newPhoto = await storage.addPhoto(photo);
+        console.log(newPhoto);
 
         return newPhoto;
     } catch (error) {
         if (imageUrl) {
             await Gstorage.deleteObject(imageUrl)
                 .then(() => {
-                    console.log("Fallback successfully deleted the file");
+                    return true; 
                 })
-                .catch(() => {
-                    throw new Error(`Fallback delete failed: ${error}`);
+                .catch((err) => {
+                    throw new Error(`Fallback delete failed: ${err}`);
                 })
         }
+
+        throw error;
     }
 }
