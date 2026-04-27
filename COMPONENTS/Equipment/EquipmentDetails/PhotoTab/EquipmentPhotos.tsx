@@ -3,12 +3,11 @@
 import SlideDialog from '@/COMPONENTS/ui/SlideDialog';
 import { Button } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { Trash, Upload, X, ZoomIn } from 'lucide-react';
-import React, { useState } from 'react'
+import { Trash, Upload, ZoomIn } from 'lucide-react';
+import { useState } from 'react'
 import Image from 'next/image';
 import AddEquipmentPhotoForm from './AddEquipmentPhotoForm';
 import { TPhoto } from '@/COMPONENTS/utils/types';
-import DeleteEquipmentForm from '../../DeleteEquipmentForm';
 import DeleteEquipmentPhotoForm from './DeleteEquipmentPhotoForm';
 
 const EquipmentPhotos = ({ equipmentId, userRole }: { equipmentId: number, userRole: string }) => {

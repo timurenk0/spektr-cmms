@@ -535,17 +535,28 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
     
     /* =============================================== Stats Methods ========================================================== */
-    async getDashboardCardStats(): Promise<any> {
+    async getDashboardCardStats(tenant: number): Promise<any> {
+        const whereClause = tenant !== 1 ? sql`WHERE ${tenant} = tenant_id` : sql``;
+        
         const total = await db.execute(sql`
-            SELECT 
-            (SELECT COUNT(*) FROM maintenances) AS eq,
-            (SELECT COUNT(*) FROM maintenance_events) AS mt
+            SELECT m.eq, e.mt
+            FROM (
+                SELECT COUNT(*) as eq
+                FROM maintenances
+                ${whereClause}
+            ) m
+            CROSS JOIN (
+                SELECT COUNT(*) as mt
+                FROM maintenance_events
+                ${whereClause}
+            ) e
         `);
 
         const overdue = await db.execute(sql`
             SELECT
-            (SELECT COUNT(DISTINCT equipment_id) FROM maintenance_events WHERE start_date < now()) as oeq,
-            (SELECT COUNT(*) FROM maintenance_events WHERE start_date < now()) as omt
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date < now()) AS oeq,
+                COUNT(*) FILTER (WHERE start_date < now()) AS omt
+            FROM maintenance_events ${whereClause}
         `);
 
         const complete = await db.execute(sql`
@@ -561,7 +572,7 @@ export class DatabaseStorage {
 
                 COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 week' AND is_complete = 'true') AS cmt4,
                 COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 week' AND is_complete = 'true') AS ceq4
-            FROM maintenance_events;
+            FROM maintenance_events ${whereClause};
         `);
 
         const upcoming = await db.execute(sql`
@@ -577,13 +588,14 @@ export class DatabaseStorage {
 
                 COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 weeks') AS umt4,
                 COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 weeks') AS ueq4 
-            FROM maintenance_events;
+            FROM maintenance_events ${whereClause};
         `);
 
         const emergency = await db.execute(sql`
             SELECT
-            (SELECT COUNT(DISTINCT equipment_id) FROM maintenance_events WHERE level = 'E') as eeq,
-            (SELECT COUNT(*) FROM maintenance_events WHERE level = 'E') as emt
+                COUNT(DISTINCT equipment_id) FILTER (WHERE level = 'E') AS eeq,
+                COUNT(*) FILTER (WHERE level = 'E') AS emt
+            FROM maintenance_events ${whereClause}
         `);
     
         return {
@@ -612,27 +624,29 @@ export class DatabaseStorage {
         }
     }
 
-    async getKPIs(): Promise<any> {
+    async getKPIs(tenant: number): Promise<any> {
+        const whereClause = tenant !== 1 ? sql`WHERE ${tenant} = tenant_id` : sql``;
+        
         const msc = await db.execute(sql`
             SELECT
                 COUNT(*) FILTER (WHERE start_date <= now()) AS total,
                 COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true') AS complete
-            FROM maintenance_events;
+            FROM maintenance_events ${whereClause};
         `);
         const pmp = await db.execute(sql`
             SELECT
                 COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true' AND level != 'E') as planned,
                 COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true') as total
-            FROM maintenance_events;
+            FROM maintenance_events ${whereClause};
         `);
         const tcm = await db.execute(sql`
             SELECT
                 COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true' AND performed_at IS NOT NULL AND performed_at - scheduled_at <= 2) as timely,
                 COUNT(*) FILTER (WHERE start_date <= now() AND is_complete = 'true') as total 
-            FROM maintenance_events;
+            FROM maintenance_events ${whereClause};
         `);
         const ehi = await db.execute(sql`
-            SELECT AVG(health_index) FROM equipments;
+            SELECT AVG(health_index) FROM equipments ${whereClause};
         `)
 
         return {
