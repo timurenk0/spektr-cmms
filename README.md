@@ -2,7 +2,6 @@
 - Add user role check on each delete endpoint
 - Add maintenance events count for each equipment in API
 - Fix status badge in equipment details for non-admin users
-- Add where clauses normally for stats
 
 
 

@@ -46,6 +46,18 @@ const getHealthBadge = (healthIndex: number | null) => {
   }
 }
 
+const statusColors: Record<string, string> = {
+  "operational": "bg-green-200 text-green-800",
+  "under repair": "bg-amber-200 text-amber-800",
+  "out of service": "bg-red-200 text-red-800",
+}
+
+const hoverStatusColors: Record<string, string> = {
+  "operational": "text-green-800 hover:text-green-400",
+  "under repair": "text-amber-800 hover:text-amber-400",
+  "out of service": "text-red-800 hover:text-red-400",
+}
+
 const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
   const queryClient = useQueryClient();
   const [statusSelectionOpen, setStatusSelectionOpen] = useState(false);
@@ -135,24 +147,17 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
 
                   <div className="flex flex-col items-center relative">
                     <span className="text-xs text-gray-500 mb-1">Status</span>
-                      <div className={`pb-1 px-2 rounded-full text-xs font-semibold ${
-                        equipment.status === "operational" ? "bg-green-200 text-green-800" :
-                        equipment.status === "under repair" ? "bg-amber-200 text-amber-800" :
-                        equipment.status === "out of service" && "bg-red-200 text-red-800"
-                      }`}>
-                        {equipment.status.slice(0, 1).toUpperCase()}{equipment.status.slice(1).toLowerCase()}
-                        { user.role === "admin" && (
-                          <button
-                          onClick={() => setStatusSelectionOpen(!statusSelectionOpen)}
-                          className={`
-                            ${equipment.status === "operational" ? "text-green-800 hover:text-green-400" :
-                              equipment.status === "under repair" ? "text-amber-800 hover:text-amber-600" :
-                              "text-amber-800 hover:text-amber-600"
-                          } h-4 w-4 ms-1 rounded-full cursor-pointer`}
-                          >
-                            <ArrowBigDown height={16} width={16} className="mt-1" />
-                          </button>
-                        )}
+                      <div className={`flex ${statusColors[equipment.status]} py-1 px-2 rounded-full text-xs font-semibold`}>
+                          {equipment.status.slice(0, 1).toUpperCase()}{equipment.status.slice(1).toLowerCase()}
+                          { user.role === "admin" && (
+                            <button
+                            onClick={() => setStatusSelectionOpen(!statusSelectionOpen)}
+                            className={`
+                              ${hoverStatusColors[equipment.status]} h-4 w-4 ms-1 rounded-full cursor-pointer`}
+                            >
+                              <ArrowBigDown height={16} width={16} />
+                            </button>
+                          )}
                       </div>
                       {statusSelectionOpen && (
                         <div
