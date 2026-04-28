@@ -9,15 +9,14 @@
     45deg,
     #ff0707,
     #ff0707 10px,
-    #ffffff 10px,
-    #ffffff 20px
+    #fff 10px,
+    #fff 20px
   );
-  color: #000; /* Magenta */
   font-size: 16px;
   font-weight: 700; /* Bold for extra clarity */
   border: 1px solid #000;
   line-height: 16px;
-  padding: 4px 8px;
+  padding: 2px 8px;
 }
 
 .police-tape-complete {
@@ -25,13 +24,12 @@
     45deg,
     #39ff07,
     #39ff07 10px,
-    #ffffff 10px,
-    #ffffff 20px
+    #fff 10px,
+    #fff 20px
   );
-  color: #000; /* Magenta */
   font-size: 16px;
   font-weight: 700; /* Bold for extra clarity */
   border: 1px solid #000;
   line-height: 16px;
-  padding: 4px 8px;
+  padding: 2px 8px;
 }

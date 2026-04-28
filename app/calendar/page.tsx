@@ -39,7 +39,15 @@ const MyCalendar = () => {
         const res = await fetch(`/api/maintenance-events?start=${fetchInfo.startStr.slice(0, 10)}&end=${fetchInfo.endStr.slice(0, 10)}`);
         const data = await res.json();
   
-        successCallback(data);
+        successCallback(data.map(d => {
+          if (d.level === "E") {
+            switch (d.status) {
+              case "pending": d.classNames = ["police-tape"]; d.textColor = "#000"; break;
+              default: d.classNames = ["police-tape-complete"];d.textColor = "#000" ; break;
+            }
+          }
+          return d
+        }));
       } catch (error: unknown) {
         const err = error instanceof Error ? error : new Error("Unknown error");
         failureCallback(err);

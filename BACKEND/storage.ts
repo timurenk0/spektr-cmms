@@ -371,7 +371,7 @@ export class DatabaseStorage {
                         END
                     WHEN CURRENT_DATE - ${maintenanceEvents.start}  > 3 THEN '#22222275'
                     WHEN ${maintenanceEvents.status} = 'incomplete' THEN '#FF0000'
-                    WHEN ${maintenanceEvents.status} >= 'complete' THEN
+                    WHEN ${maintenanceEvents.status} = 'complete' THEN
                         CASE ${maintenanceEvents.level}
                             WHEN 'A' THEN 'oklch(76.5% 0.177 163.223)'
                             WHEN 'B' THEN 'oklch(85.2% 0.199 91.936)'
