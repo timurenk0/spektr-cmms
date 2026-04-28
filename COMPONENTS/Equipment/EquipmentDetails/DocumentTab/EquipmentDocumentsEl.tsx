@@ -25,7 +25,7 @@ const EquipmentDocumentsEl = ({ documents, userRole, deleteDocumentMutation }: P
                     </div>
                     <div>
                         <div className='text-nowrap text-ellipsis overflow-hidden max-w-[200px]'>{doc.title}</div>
-                        <div className="text-xs text-gray-500">{format(new Date(doc.uploadedAt), "HH:mm | MMM dd, yy")}</div>
+                        <div className="text-xs text-gray-500">{format(new Date(doc.uploadedAt), "HH:mm | MMM d, yyyy")}</div>
                     </div>
                     <div className="text-sm text-gray-500 italic ms-10 flex-1 min-w-0 truncate" title={doc.notes ? doc.notes : ""}>
                         {doc.notes}

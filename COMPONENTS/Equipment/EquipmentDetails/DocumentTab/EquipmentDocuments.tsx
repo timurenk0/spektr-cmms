@@ -78,25 +78,25 @@ const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, us
     if (isLoading) return (
         <Skeleton>
             <TabPanel value="all">
-                <EquipmentDocumentsEl documents={[]} userRole='admin' deleteDocumentMutation={deleteDocumentMutation.mutate} />
+                <EquipmentDocumentsEl documents={[]} userRole={userRole} deleteDocumentMutation={deleteDocumentMutation.mutate} />
             </TabPanel>
             <TabPanel value="manual">
-                <EquipmentDocumentsEl documents={[]} userRole='admin' deleteDocumentMutation={deleteDocumentMutation.mutate} />
+                <EquipmentDocumentsEl documents={[]} userRole={userRole} deleteDocumentMutation={deleteDocumentMutation.mutate} />
             </TabPanel>
             <TabPanel value="maintenance">
-                <EquipmentDocumentsEl documents={[]} userRole='admin' deleteDocumentMutation={deleteDocumentMutation.mutate} />
+                <EquipmentDocumentsEl documents={[]} userRole={userRole} deleteDocumentMutation={deleteDocumentMutation.mutate} />
             </TabPanel>
             <TabPanel value="certificate">
-                <EquipmentDocumentsEl documents={[]} userRole='admin' deleteDocumentMutation={deleteDocumentMutation.mutate} />
+                <EquipmentDocumentsEl documents={[]} userRole={userRole} deleteDocumentMutation={deleteDocumentMutation.mutate} />
             </TabPanel>
             <TabPanel value="premob">
-                <EquipmentDocumentsEl documents={[]} userRole='admin' deleteDocumentMutation={deleteDocumentMutation.mutate} />
+                <EquipmentDocumentsEl documents={[]} userRole={userRole} deleteDocumentMutation={deleteDocumentMutation.mutate} />
             </TabPanel>
             <TabPanel value="fault">
-                <EquipmentDocumentsEl documents={[]} userRole='admin' deleteDocumentMutation={deleteDocumentMutation.mutate} />
+                <EquipmentDocumentsEl documents={[]} userRole={userRole} deleteDocumentMutation={deleteDocumentMutation.mutate} />
             </TabPanel>
             <TabPanel value="emergency">
-                <EquipmentDocumentsEl documents={[]} userRole='admin' deleteDocumentMutation={deleteDocumentMutation.mutate} />
+                <EquipmentDocumentsEl documents={[]} userRole={userRole} deleteDocumentMutation={deleteDocumentMutation.mutate} />
             </TabPanel>
         </Skeleton>
     )
