@@ -348,7 +348,7 @@ export class DatabaseStorage {
             end: sql<string>`
                 COALESCE(
                     ${maintenanceEvents.end}::text,
-                    to_char(now(), 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+                    to_char(now(), 'YYYY-MM-DD')
                 )
             `,
             scheduledAt: maintenanceEvents.scheduledAt,
@@ -365,8 +365,8 @@ export class DatabaseStorage {
                             WHEN 'B' THEN 'oklch(68.1% 0.162 75.834)'
                             WHEN 'C' THEN 'oklch(42.4% 0.199 265.638)'
                             WHEN 'D' THEN 'oklch(43.8% 0.218 303.724)'
+                            WHEN 'E' THEN 'oklch(0.559643 0.192567 35.8054)'
                             WHEN 'I' THEN 'oklch(59.2% 0.249 0.584)'
-                            WHEN 'E' THEN '#CC3700'
                             ELSE '#4D96FF'
                         END
                     WHEN CURRENT_DATE - ${maintenanceEvents.start}  > 3 THEN '#22222275'
@@ -377,8 +377,8 @@ export class DatabaseStorage {
                             WHEN 'B' THEN 'oklch(85.2% 0.199 91.936)'
                             WHEN 'C' THEN 'oklch(70.7% 0.165 254.624)'
                             WHEN 'D' THEN 'oklch(71.4% 0.203 305.504)'
+                            WHEN 'E' THEN 'oklch(0.4915 0.1306 49.65)'
                             WHEN 'I' THEN 'oklch(71.8% 0.202 349.761)'
-                            WHEN 'E' THEN '#FF4500'
                             ELSE '#4D96FF'
                         END
                 END
