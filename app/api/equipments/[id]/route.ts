@@ -1,4 +1,4 @@
-import { insertEquipmentSchema } from "@/BACKEND/Database/schema";
+import { insertEquipmentSchema, InsertMaintenanceEvent, MaintenanceEvent } from "@/BACKEND/Database/schema";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
@@ -86,9 +86,37 @@ export async function PATCH(
         if (!equipment) return res.json({ error: "Specified equipment not found" }, { status: 404 });
         
         if (status && !reason) {
+            await activityLogger(user, "update", "Equipment status updated", `Equipment ${equipment.name} status updated to ${status}`, equipmentId);
+            
+            if (status === "under repair") {
+                const maintenance = await storage.getMainteancesByEquipmentId(equipment.id);
+                if (!maintenance) return res.json({ error: "Can't change status of equipment without ongoing maintenance" }, { status: 400 });
+                
+                const today = new Date().toISOString().slice(0, 10);
+                const event: InsertMaintenanceEvent = {
+                    equipmentId: equipment.id,
+                    maintenanceId: maintenance.id,
+                    title: `${equipment.assetId} emergency repair`,
+                    description: `Emergency repair for equipment ${equipment.name} ${equipment.manufacturer}`,
+                    level: "E",
+                    status: "pending",
+                    scheduledAt: today,
+                    start: today,
+                    tenantId: equipment.tenantId,
+                    end: null,
+                    performedAt: null
+                };
+                
+                await storage.addMaintenanceEvents([event]);
+                await activityLogger(user, "add", "Emergency repair started", `Emergency repair for equipment ${equipment.name} started!`, equipment.id);
+            }
+            
+            if (status === "operational" && await storage.getEmergencyMaintenanceEventByEquipmentId(equipment.id)) { 
+                return res.json({ error: "First finish ongoing emergency repair!" }, { status: 403 });
+            }
+            
             const newEquipment = await storage.updateEquipment(equipmentId, { status });
             if (!newEquipment) return res.json({ error: "Failed to update equipment status" }, { status: 500 })
-            await activityLogger(user, "update", "Equipment status updated", `Equipment ${equipment.name} status updated to ${status}`, equipmentId);
             return res.json(true, { status: 200 });
         }
 

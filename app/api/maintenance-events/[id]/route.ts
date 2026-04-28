@@ -45,6 +45,22 @@ export async function PATCH(
         const event = await storage.getMaintenanceEvent(eventId);
         if (!event) return res.json({ error: "Specified maintenance event not found" }, { status: 404 });
 
+
+        if (event.level === "E") {
+            const eventValidatedData = insertMaintenanceEventSchema.partial().parse({
+                ...body,
+                end: body.performedAt
+            });
+            await storage.updateMaintenanceEvent(eventId, eventValidatedData);
+
+            const equipment = await storage.updateEquipment(event.equipmentId, {status: "operational"});
+            if (!equipment) return res.json({ error: "Equipment not found!" }, { status: 404 });
+
+            await activityLogger(user, "update", "Emergency repair finished", `Emergency repair for equipment ${equipment.assetId} finished!`, equipment.id);
+            
+            return res.json(true, { status: 201 });
+        }
+
         const eventStatus = Math.abs(differenceInDays(body.performedAt, event.scheduledAt)) < 10 ? "overdue" : 
                             "incomplete"
 

@@ -154,7 +154,7 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   level: text("level").notNull(),
   status: text("status").notNull(),
   start: date("start_date").notNull(),
-  end: date("end_date").notNull(),
+  end: date("end_date"), // nullable for emergency events
   scheduledAt: date("scheduled_at").notNull().defaultNow(),
   performedAt: date("performed_at")
 }, (table) => [ 

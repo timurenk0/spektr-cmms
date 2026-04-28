@@ -1,7 +1,7 @@
 # PRIORITY
 - Add user role check on each delete endpoint
 - Add maintenance events count for each equipment in API
-- Event date move logic
+
 
 
 # FEATURES
@@ -11,4 +11,4 @@
 # ISSUES
 - Change JWT_SECRET to something more serious
 - Error messages on frontend
-- Try to rewrite maintenance events fetching info using TanStack
+- First app visit tries to access dashboard API 

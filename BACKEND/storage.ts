@@ -325,7 +325,7 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
     
     /* ============================================== Maintenance Events Methods ============================================== */
-    async getMaintenanceEvents(status: "any" | "pending" | "complete" | "incomplete", start?: string, end?: string): Promise<(MaintenanceEvent & { color: string, isOverdue: boolean })[]> {
+    async getMaintenanceEvents(status: "any" | "pending" | "complete" | "incomplete",  start?: string, end?: string): Promise<(MaintenanceEvent & { color: string, isOverdue: boolean })[]> {
         const conditions = [];
 
         if (start && end) {
@@ -345,7 +345,12 @@ export class DatabaseStorage {
             description: maintenanceEvents.description,
             level: maintenanceEvents.level,
             start: maintenanceEvents.start,
-            end: maintenanceEvents.end,
+            end: sql<string>`
+                COALESCE(
+                    ${maintenanceEvents.end}::text,
+                    to_char(now(), 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+                )
+            `,
             scheduledAt: maintenanceEvents.scheduledAt,
             performedAt: maintenanceEvents.performedAt,
             status: maintenanceEvents.status,
@@ -381,6 +386,10 @@ export class DatabaseStorage {
         }).from(maintenanceEvents).where(and(...conditions));
 
         return events;
+    }
+
+    async getEmergencyMaintenanceEventByEquipmentId(id: number): Promise<MaintenanceEvent | undefined> {
+        return (await db.select().from(maintenanceEvents).where(and(eq(maintenanceEvents.equipmentId, id), eq(maintenanceEvents.level, "E"), eq(maintenanceEvents.status, "pending"))))[0];
     }
 
     async getMaintenanceEventsInfo(): Promise<{total: number, upcoming: number, overdue: number, complete: number, incomplete: number}> {
