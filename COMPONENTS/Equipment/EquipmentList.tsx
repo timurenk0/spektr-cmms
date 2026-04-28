@@ -1,7 +1,7 @@
 "use client"
 
 
-import { Button, Card, CardActionArea, CardContent, FormControl, Input, InputLabel, MenuItem, Paper, Select, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
+import { Box, Button, Card, CardActionArea, CardContent, FormControl, Input, InputAdornment, InputLabel, MenuItem, Paper, Select, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { EquipmentTypes } from "../utils/equipmentTypes";
@@ -9,6 +9,7 @@ import EquipmentListEl from "./EquipmentListEl";
 import ListSkeleton from "../SKELETONS/ListSkeleteon";
 import { useAuth } from "../utils/authContext";
 import { TEquipment } from "../utils/types";
+import { Filter } from "lucide-react";
 
 const equipmentStatuses = ["operational", "under repair", "out of service"]
 
@@ -19,8 +20,8 @@ const EquipmentList = () => {
     search: "",
     type: "",
     category: "",
-    location: "",
-    status: "",
+    location: "all",
+    status: "all",
   });
   const [searchInput, setSearchInput] = useState("");
 
@@ -48,8 +49,8 @@ const EquipmentList = () => {
       search: "",
       type: "",
       category: "",
-      location: "",
-      status: ""
+      location: "all",
+      status: "all"
     });
   };
 
@@ -57,7 +58,7 @@ const EquipmentList = () => {
     limit: rowsPerPage.toString(),
     page: (page + 1).toString(),
     ...Object.fromEntries(
-      Object.entries(filters).filter(([, v]) => v !== "")
+      Object.entries(filters).filter(([, v]) => v !== "" && v !== "all")
     )
   }).toString();
 
@@ -132,18 +133,36 @@ const EquipmentList = () => {
               Equipment Count: <span className="font-bold">{equipments.totalCount}</span>
             </div>
             <FormControl size="small" fullWidth>
-              <InputLabel id="location-filter" color="info">Select Location</InputLabel>
-              <Select labelId="location-filter" label="Select Location" color="info" value={filters.location} onChange={(e) => updateFilters("location", (e.target as HTMLInputElement).value)}>
+              <Select
+                color="info"
+                value={filters.location}
+                onChange={(e) => updateFilters("location", (e.target as HTMLInputElement).value)}
+                startAdornment={
+                  <InputAdornment position="start">
+                    <Filter />
+                  </InputAdornment>
+                }
+              >
+                <MenuItem value="all">All Locations</MenuItem>
                 {equipmentLocations.map(loc => (
                   <MenuItem key={loc} value={loc}>{loc}</MenuItem>
                 ))}
               </Select>
             </FormControl>
             <FormControl size="small" fullWidth>
-              <InputLabel id="status-filter" color="info">Select Status</InputLabel>
-              <Select labelId="status-filter" label="Select Status" color="info" value={filters.status} onChange={(e) => updateFilters("status", (e.target as HTMLInputElement).value)}>
+              <Select
+                color="info"
+                value={filters.status}
+                onChange={(e) => updateFilters("status", (e.target as HTMLInputElement).value)}
+                startAdornment={
+                  <InputAdornment position="start">
+                    <Filter />
+                  </InputAdornment>
+                }
+              >
+                <MenuItem value="all">All Statuses</MenuItem>
                 {equipmentStatuses.map(status => (
-                  <MenuItem key={status} value={status}>{status}</MenuItem>
+                  <MenuItem key={status} value={status}>{status[0].toUpperCase()+status.slice(1).toLowerCase()}</MenuItem>
                 ))}
               </Select>
             </FormControl>
