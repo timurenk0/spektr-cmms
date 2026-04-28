@@ -41,8 +41,8 @@ export function authorize(user: AuthUser | null, roles: string[] | string): bool
 
 export async function validateUser(role?: string | string[]) {
     const user = await authService();
-    if (!user) throw res.json({ error: "Unauthorized" }, { status: 401 });
-    if (role && !authorize(user, role)) throw res.json({ error: "Forbidden" }, {status: 403});
+    if (!user) throw new Error("Unauthorized");
+    if (role && !authorize(user, role)) throw new Error("Forbidden");
     
     return user;
 }

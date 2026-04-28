@@ -11,10 +11,9 @@ import DeleteEquipmentDocumentForm from './DeleteEquipmentDocumentForm';
 type Props = {
     documents: TDocument[],
     userRole: string,
-    deleteDocumentMutation: (documentId: number) => void;
 }
 
-const EquipmentDocumentsEl = ({ documents, userRole, deleteDocumentMutation }: Props) => {   
+const EquipmentDocumentsEl = ({ documents, userRole }: Props) => {   
   return documents.length > 0 ? (
     <div className="space-y-2">
         {documents.map(doc => (
@@ -31,19 +30,21 @@ const EquipmentDocumentsEl = ({ documents, userRole, deleteDocumentMutation }: P
                         {doc.notes}
                     </div>
                 </Link>
-                <div className='shrink-0 flex'>
-                    <SlideDialog
-                        title='Delete Document'
-                        Btn={(props) => (
-                            <button {...props} className='flex items-center px-3 rounded-md hover:bg-gray-100 hover:text-red-600'>
-                                <Trash size={16} />
-                            </button>
-                        )}
-                        DialogForm={(props) => (
-                            <DeleteEquipmentDocumentForm {...props} documentId={doc.id} documentName={doc.title} />
-                        )}
-                    />
-                </div>
+                {userRole === "admin" && (
+                    <div className='shrink-0 flex'>
+                        <SlideDialog
+                            title='Delete Document'
+                            Btn={(props) => (
+                                <button {...props} className='flex items-center px-3 rounded-md hover:bg-gray-100 hover:text-red-600'>
+                                    <Trash size={16} />
+                                </button>
+                            )}
+                            DialogForm={(props) => (
+                                <DeleteEquipmentDocumentForm {...props} documentId={doc.id} documentName={doc.title} />
+                            )}
+                        />
+                    </div>
+                )}
             </div>
         ))}
     </div>

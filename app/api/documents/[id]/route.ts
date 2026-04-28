@@ -1,5 +1,7 @@
 import { Gstorage } from "@/BACKEND/google-storage";
+import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
+import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { NextRequest, NextResponse as res } from "next/server";
 
 
@@ -8,6 +10,8 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const user = await validateUser("admin");
+        
         const { id } = await params;
         const documentId = parseInt(id);
         if (isNaN(documentId)) return res.json({ error: "Document ID is not a number" }, { status: 400 });
@@ -15,6 +19,8 @@ export async function DELETE(
         const documentUrl = await storage.deleteDocument(documentId);
 
         await Gstorage.deleteObject(documentUrl);
+
+        await activityLogger(user, "delete", "Document deleted", "Document deleted successfully"); 
 
         return res.json(true, { status: 200 });
     } catch (error) {
