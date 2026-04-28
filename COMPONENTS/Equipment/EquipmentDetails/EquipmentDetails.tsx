@@ -25,7 +25,6 @@ function calculateAge(manufDate: Date): number[] {
   const months = differenceInMonths(today, manufDate);
   const years = months/12;
 
-  console.log(months);
   return [Math.floor(years), months%Math.floor(years)];
 }
 
@@ -115,9 +114,9 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
       
       return await res.json();
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
-      toast.success(`Updated equipment status to ${data}`);
+      toast.success("Successfully updated equipment status");
       return; 
     },
     onError: (err) => {
