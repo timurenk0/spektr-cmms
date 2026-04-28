@@ -1,7 +1,7 @@
 "use client"
 
 import SlideDialog from '@/COMPONENTS/ui/SlideDialog';
-import { Button } from '@mui/material';
+import { Button, Skeleton } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { Trash, Upload, ZoomIn } from 'lucide-react';
 import { useState } from 'react'
@@ -13,7 +13,7 @@ import DeleteEquipmentPhotoForm from './DeleteEquipmentPhotoForm';
 const EquipmentPhotos = ({ equipmentId, userRole }: { equipmentId: number, userRole: string }) => {
     const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
 
-    const { data: photos = [], isLoading: isLoadingPhotos } = useQuery<TPhoto[]>({
+    const { data: photos, isLoading: isLoadingPhotos } = useQuery<TPhoto[]>({
         queryKey: ["photos", equipmentId],
         queryFn: async () => {
             const res = await fetch(`/api/equipments/${equipmentId}/photos`, {
@@ -28,7 +28,18 @@ const EquipmentPhotos = ({ equipmentId, userRole }: { equipmentId: number, userR
     });
 
     const isLoading = (!photos || isLoadingPhotos);
-    if (isLoading) return (<h1>Loading...</h1>)
+    if (isLoading) return (
+        <Skeleton>
+            <div className='flex gap-4'>
+                <Image src={"/window.svg"} alt="" width={120} height={120} />
+                <Image src={"/window.svg"} alt="" width={120} height={120} />
+                <Image src={"/window.svg"} alt="" width={120} height={120} />
+                <Image src={"/window.svg"} alt="" width={120} height={120} />
+                <Image src={"/window.svg"} alt="" width={120} height={120} />
+                <Image src={"/window.svg"} alt="" width={120} height={120} />
+            </div>
+        </Skeleton>
+    )
     
   return (
     <>

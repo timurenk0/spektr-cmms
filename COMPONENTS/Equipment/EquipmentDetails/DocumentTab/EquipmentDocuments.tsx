@@ -2,7 +2,7 @@
 
 
 import { TabContext, TabList, TabPanel } from '@mui/lab'
-import { Button, Tab } from '@mui/material'
+import { Button, Skeleton, Tab } from '@mui/material'
 import React, { useState } from 'react'
 import EquipmentDocumentsEl from './EquipmentDocumentsEl'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -75,7 +75,31 @@ const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, us
     
     const isLoading = (!documents || isLoadingDocuments);
 
-    if (isLoading) return (<h1>Loading...</h1>)
+    if (isLoading) return (
+        <Skeleton>
+            <TabPanel value="all">
+                <EquipmentDocumentsEl documents={[]} userRole='admin' deleteDocumentMutation={deleteDocumentMutation.mutate} />
+            </TabPanel>
+            <TabPanel value="manual">
+                <EquipmentDocumentsEl documents={[]} userRole='admin' deleteDocumentMutation={deleteDocumentMutation.mutate} />
+            </TabPanel>
+            <TabPanel value="maintenance">
+                <EquipmentDocumentsEl documents={[]} userRole='admin' deleteDocumentMutation={deleteDocumentMutation.mutate} />
+            </TabPanel>
+            <TabPanel value="certificate">
+                <EquipmentDocumentsEl documents={[]} userRole='admin' deleteDocumentMutation={deleteDocumentMutation.mutate} />
+            </TabPanel>
+            <TabPanel value="premob">
+                <EquipmentDocumentsEl documents={[]} userRole='admin' deleteDocumentMutation={deleteDocumentMutation.mutate} />
+            </TabPanel>
+            <TabPanel value="fault">
+                <EquipmentDocumentsEl documents={[]} userRole='admin' deleteDocumentMutation={deleteDocumentMutation.mutate} />
+            </TabPanel>
+            <TabPanel value="emergency">
+                <EquipmentDocumentsEl documents={[]} userRole='admin' deleteDocumentMutation={deleteDocumentMutation.mutate} />
+            </TabPanel>
+        </Skeleton>
+    )
     
   return (
         <TabContext value={activeTab}>
