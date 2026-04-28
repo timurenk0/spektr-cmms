@@ -4,16 +4,19 @@ import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { NextRequest, NextResponse as res } from "next/server";
 
+
+type Status = "any" | "pending" | "complete" | "incomplete";
+
 export async function GET(req: NextRequest) {
     try {
         const searchParams = req.nextUrl.searchParams;
-        const status = searchParams.get("status");
+        const status = searchParams.get("status") as Status;
 
         const start = searchParams.get("start");
         const end = searchParams.get("end");
 
         if (status) {
-            if (status !== "any" || !["complete", "incomplete", "pending"].includes(status)) return res.json("Invalid status value", { status: 400 });
+            if (!["any", "complete", "incomplete", "pending"].includes(status)) return res.json("Invalid status value", { status: 400 });
 
             if (start && end) {
                 const response = await storage.getMaintenanceEvents(status, start, end);

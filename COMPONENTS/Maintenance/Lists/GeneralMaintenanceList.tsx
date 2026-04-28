@@ -1,5 +1,6 @@
 import { TEquipment, TMaintenanceEvent } from '@/COMPONENTS/utils/types';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { format } from 'date-fns';
 import Image from 'next/image';
 import React from 'react'
 
@@ -76,7 +77,7 @@ const GeneralMaintenanceList = ({
                     </div>
                 </div>
                 </TableCell>
-                <TableCell>{ev.start}</TableCell>
+                <TableCell>{format(ev.start, "MMM dd, yyyy")}</TableCell>
                 {complete && (
                     <TableCell>Completed Date</TableCell>
                 )}

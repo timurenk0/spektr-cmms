@@ -21,10 +21,33 @@ const UpcomingMaintenanceList = ({
     latestDate.setDate(latestDate.getDate()+28);
 
     const { data: events, isLoading: isLoadingEvents } = useQuery<TMaintenanceEvent[]>({
-        queryKey: [`/api/maintenance-events?status=upcoming&start=${today.toISOString().slice(0, 10)}&end=${latestDate.toISOString().slice(0, 10)}`]
+        queryKey: [`/api/maintenance-events?status=pending&start=${today.toISOString().slice(0, 10)}&end=${latestDate.toISOString().slice(0, 10)}`]
     });
 
-    if (!events || isLoadingEvents) return <h1>Loading...</h1>
+    if (!events || isLoadingEvents) return (
+        <Paper sx={{ width: "100%", overflow: "hidden" }}>
+            <TabContext value="7">
+                <TabList>
+                    <Tab value="7" />
+                    <Tab value="14" />
+                    <Tab value="21" />
+                    <Tab value="28" />
+                </TabList>
+                <TabPanel value="7">
+                    <GeneralMaintenanceList mEvents={[]} equipments={[]} />
+                </TabPanel>
+                <TabPanel value="14">
+                    <GeneralMaintenanceList mEvents={[]} equipments={[]} />
+                </TabPanel>
+                <TabPanel value="21">
+                    <GeneralMaintenanceList mEvents={[]} equipments={[]} />
+                </TabPanel>
+                <TabPanel value="28">
+                    <GeneralMaintenanceList mEvents={[]} equipments={[]} />
+                </TabPanel>
+            </TabContext>
+        </Paper>
+    )
 
     const handleValueChange = (event: React.SyntheticEvent, val: string) => {
         setValue(val);
