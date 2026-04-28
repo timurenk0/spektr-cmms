@@ -86,6 +86,7 @@ const Login = () => {
         >
             <Image src="/spektr-logo.png" width={256} height={256} alt="SpektrGroup logo" className="mx-auto" />
             <p className="text-center text-sm text-gray-600">Owned and managed by SpektrGroup</p>
+            <h1 className="text-2xl font-bold mt-6">Sign In</h1>
             <TextField
                 label="Username"
                 color="info"
