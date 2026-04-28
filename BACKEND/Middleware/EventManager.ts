@@ -1,5 +1,6 @@
-import { add } from "date-fns";
+import { add, differenceInDays } from "date-fns";
 import { Equipment, InsertMaintenanceEvent, Maintenance, MaintenanceEvent } from "../Database/schema";
+import { storage } from "../storage";
 
 export function createMaintenanceEvents(
     maintenance: Maintenance,

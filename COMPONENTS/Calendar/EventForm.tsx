@@ -54,7 +54,7 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
     mutationFn: async (status: string) => {
       try {
         const response = await fetch(`/api/maintenance-events/${event._def.publicId}`, {
-          method: "PUT",
+          method: "PATCH",
           body: JSON.stringify({
             status,
             performedAt: format(completionDate, "yyyy-MM-dd")

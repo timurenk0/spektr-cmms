@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
 
             return res.json(response, { status: 200 });
         }
+
         
         const response = await storage.getMaintenanceEvents("any");
         return res.json(response, { status: 200 });

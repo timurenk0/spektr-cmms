@@ -27,7 +27,7 @@ export async function GET(
     }
 }
 
-export async function PUT(
+export async function PATCH(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
@@ -61,6 +61,11 @@ export async function PUT(
         }
 
         await activityLogger(user, "update", "Maintenance event updated", `Maintenance event ${updatedEvent.id} updated`, updatedEvent.equipmentId);
+
+        if (updatedEvent.status === "complete" && differenceInDays(updatedEvent.start, updatedEvent.performedAt!) !== 0) {
+            const shiftedEvents = await storage.shiftMaintenanceEvents(updatedEvent);
+            if (!shiftedEvents) throw new Error("Nothing to shift...");
+        }
         
         return res.json(updatedEvent, { status: 201 });            
     } catch (error) {

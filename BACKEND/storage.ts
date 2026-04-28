@@ -16,7 +16,7 @@ import type { NeonDatabase, NeonQueryResultHKT } from "drizzle-orm/neon-serverle
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { differenceInCalendarMonths } from "date-fns";
+import { differenceInCalendarMonths, differenceInDays } from "date-fns";
 import { createMaintenanceEvents } from "./Middleware/EventManager";
 
 
@@ -417,8 +417,12 @@ export class DatabaseStorage {
         return (await db.select().from(maintenanceEvents).where(eq(maintenanceEvents.id, id)))[0];
     }
     
-    async getMaintenanceEventsByEquipmentId(id: number): Promise<MaintenanceEvent[]> {
-        return await db.select().from(maintenanceEvents).where(eq(maintenanceEvents.equipmentId, id));
+    async getMaintenanceEventsByEquipmentId(id: number, level?: string): Promise<MaintenanceEvent[]> {
+        const conditions = [eq(maintenanceEvents.equipmentId, id)];
+        if (level) {
+            conditions.push(lte(maintenanceEvents.level, level));
+        }
+        return await db.select().from(maintenanceEvents).where(and(...conditions));
     }
 
     async addMaintenanceEvents(
@@ -438,6 +442,45 @@ export class DatabaseStorage {
         // const updatedEquipment = await this.subtractPenaltyScore(event);
 
         return event;
+    }
+
+    async shiftMaintenanceEvents(
+        event: MaintenanceEvent
+    ): Promise<MaintenanceEvent[]> {
+        // Assuming updated complete event is passed
+        if (!event.performedAt) {
+            throw new Error("Can't shift incomplete events.")
+        }
+        const shift = differenceInDays(event.performedAt, event.start);
+        
+        // Interval-based events should NOT affect any other levels
+        if (event.level === "I") {
+            const shiftedEvents = await db.update(maintenanceEvents).set({
+                start: sql`${maintenanceEvents.start} + (${shift} * interval '1 day')`,
+                end: sql`${maintenanceEvents.end} + (${shift} * interval '1 day')`,
+            }).where(
+                and(
+                    eq(maintenanceEvents.equipmentId, event.equipmentId),
+                    gte(maintenanceEvents.start, event.scheduledAt),
+                    eq(maintenanceEvents.level, event.level)
+                )
+            ).returning();
+
+            return shiftedEvents;
+        }
+        
+        const shiftedEvents = await db.update(maintenanceEvents).set({
+            start: sql`${maintenanceEvents.start} + (${shift} * interval '1 day')`,
+            end: sql`${maintenanceEvents.end} + (${shift} * interval '1 day')`,
+        }).where(
+            and(
+                eq(maintenanceEvents.equipmentId, event.equipmentId),
+                gte(maintenanceEvents.start, event.scheduledAt),
+                lte(maintenanceEvents.level, event.level)
+            )
+        ).returning();
+        
+        return shiftedEvents;
     }
 
     async moveEmergencyEvents(): Promise<MaintenanceEvent[]> {
