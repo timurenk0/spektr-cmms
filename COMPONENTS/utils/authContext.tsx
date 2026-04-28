@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useState } from "react"
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react"
 import { TUser } from "./types";
 
 
@@ -20,7 +20,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; initialUser?: T
     const [isLoading, setIsLoading] = useState(!initialUser);
 
     useEffect(() => {
-        if (initialUser) return;
+        if (initialUser) {
+            setIsLoading(false);
+            return;
+        }
+        
         const fetchUser = async () => {
             try {
                 const response = await fetch("/api/auth/me", {
@@ -29,8 +33,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; initialUser?: T
                 if (response.ok) {
                     const userData = await response.json();
                     setUser(userData);
+                } else if (response.status === 401) {
+                    setUser(null);
                 }
+
             } catch (error) {
+                setUser(null);
                 throw new Error(`Failed to fetch user: ${error}`);
             } finally {
                 setIsLoading(false);
@@ -39,8 +47,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; initialUser?: T
         fetchUser();
     }, [initialUser]);
 
+    const value = useMemo(() => ({user, setUser, isLoading}), [user, isLoading])
+    
     return (
-        <AuthContext.Provider value={{ user, setUser, isLoading }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );

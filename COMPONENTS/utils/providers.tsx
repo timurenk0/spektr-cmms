@@ -7,20 +7,27 @@ import { TUser } from "./types";
 
 
 export default function Providers({ children, initialUser }: { children: React.ReactNode, initialUser?: TUser }) {
-    const defaultQueryFn = async ({ queryKey }: QueryFunctionContext) => {
-        const res = await fetch(queryKey[0] as string);
-        if (!res.ok) throw new Error("Fetch request failed");
-        return await res.json();
-    }
-    
     const [queryClient] = useState(() => new QueryClient({
         defaultOptions: {
             queries: {
-                queryFn: defaultQueryFn
+                queryFn: async ({ queryKey }) => {
+                    const res = await fetch(queryKey[0] as string, {
+                        credentials: "include"
+                    });
+                    if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+                
+                    return await res.json();
+                },
+                staleTime: 1000 * 60 * 5,
+                gcTime: 1000 * 60 * 10,
+                retry: (failureCount, error) => {
+                    if (error instanceof Error && error.message.includes("401")) return false;
+                    return failureCount < 3;
+                }
             }
         }
     }));
-
+    
     return (
         <QueryClientProvider client={queryClient}>
             <AuthProvider initialUser={initialUser}>
