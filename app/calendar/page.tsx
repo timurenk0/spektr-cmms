@@ -39,7 +39,7 @@ const MyCalendar = () => {
         const res = await fetch(`/api/maintenance-events?start=${fetchInfo.startStr.slice(0, 10)}&end=${fetchInfo.endStr.slice(0, 10)}`);
         const data = await res.json();
   
-        successCallback(data.map(d => {
+        successCallback(data.map((d: EventInput) => {
           if (d.level === "E") {
             switch (d.status) {
               case "pending": d.classNames = ["police-tape"]; d.textColor = "#000"; break;
