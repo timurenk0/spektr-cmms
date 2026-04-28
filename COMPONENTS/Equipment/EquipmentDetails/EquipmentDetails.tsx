@@ -16,8 +16,18 @@ import { TEquipment } from "@/COMPONENTS/utils/types";
 import { HealthBadgeFull } from "@/COMPONENTS/ui/badges/HealthBadge";
 import { DetailBadge } from "@/COMPONENTS/ui/badges/DetailBadge";
 import EquipmentComponents from "./ComponentTab/EquipmentComponents";
-import { format } from "date-fns";
+import { differenceInMonths, format } from "date-fns";
 import toast from "react-hot-toast";
+
+
+function calculateAge(manufDate: Date): number[] {
+  const today = new Date();
+  const months = differenceInMonths(today, manufDate);
+  const years = months/12;
+
+  console.log(months);
+  return [Math.floor(years), months%Math.floor(years)];
+}
 
 
 const getHealthBadge = (healthIndex: number | null) => {
@@ -67,33 +77,34 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
     setActiveTab(val);
   }
 
+  
   const { user, isLoading: isLoadingUser } = useAuth();
-
+  
   const { data: equipment, isLoading: isLoadingEquipment } = useQuery<TEquipment>({
-      queryKey: [`equipment`, equipmentId],
-      queryFn: async () => {
-        const res = await fetch(`/api/equipments/${equipmentId}`, {
-          method: "GET",
+    queryKey: [`equipment`, equipmentId],
+    queryFn: async () => {
+      const res = await fetch(`/api/equipments/${equipmentId}`, {
+        method: "GET",
           credentials: "include"
         });
         if (!res.ok) {
           throw new Error("Failed to fetch equipment unit");
         }
-
+        
         return await res.json()
       }
-  });
-
-  const updateStatus = useMutation({
-    mutationFn: async (status: string) => {
-      if (status === equipment?.status) {
-        toast.error("Can't update equipment status to the same status value");
-        throw new Error("Same status update rejected");
-      }
-
-      const res = await fetch(`/api/equipments/${equipmentId}`, {
-        method: "PATCH",
-        body: JSON.stringify({
+    });
+    
+    const updateStatus = useMutation({
+      mutationFn: async (status: string) => {
+        if (status === equipment?.status) {
+          toast.error("Can't update equipment status to the same status value");
+          throw new Error("Same status update rejected");
+        }
+        
+        const res = await fetch(`/api/equipments/${equipmentId}`, {
+          method: "PATCH",
+          body: JSON.stringify({
           status
         }),
         credentials: "include"
@@ -101,7 +112,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
       if (!res.ok) {
         throw new Error("Failed to update equipment status");
       }
-
+      
       return await res.json();
     },
     onSuccess: (data) => {
@@ -118,9 +129,10 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
   
   const isLoading = (!equipment || isLoadingEquipment) || (!user || isLoadingUser);
   if (isLoading) return (<h1>Loading...</h1>);
-
+  
+  const [equipmentYears, equipmentMonths] = calculateAge(new Date(equipment.dateOfManufacturing));
   console.log(equipment)
-
+  
   return (
     <div>
       <div className="bg-white rounded-lg shadow-sm">
@@ -204,7 +216,8 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
               </div>
               <div>
                 <div className="text-sm font-bold text-green-600">
-                  12
+                    {equipmentYears > 0 && `${equipmentYears} ${equipmentYears > 0 ? "years " : "year "}`}
+                    {`${equipmentMonths} ${equipmentMonths !== 1 ? "months" : "month"}`}
                 </div>
                 <div className="text-xs text-gray-500">Equipment Age</div>
               </div>
