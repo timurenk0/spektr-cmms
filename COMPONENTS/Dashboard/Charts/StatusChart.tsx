@@ -2,7 +2,7 @@
 
 
 import { TEquipment } from "@/COMPONENTS/utils/types";
-import { Paper } from "@mui/material";
+import { Paper, Skeleton } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import {
     Tooltip,
@@ -21,7 +21,17 @@ const StatusChart = () => {
    });
 
    const isLoading = (!equipments || isLoadingEquipments);
-   if (isLoading) return (<h1>Loading...</h1>)
+   if (isLoading) return (
+    <Skeleton>
+        <Paper>
+            <ResponsiveContainer>
+                <PieChart>
+                    <Pie></Pie>
+                </PieChart>
+            </ResponsiveContainer>
+        </Paper>
+    </Skeleton>
+   )
 
    const statusData = [
     {name: "Operational", value: equipments.equips.filter(eq => eq.status==="operational").length},

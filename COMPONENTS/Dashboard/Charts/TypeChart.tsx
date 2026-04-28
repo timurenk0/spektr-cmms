@@ -28,7 +28,15 @@ const TypeChart = () => {
     });
 
     const isLoading = (!equipments  || isLoadingEquipment);
-    if (isLoading) return (<h1>Loading...</h1>);
+    if (isLoading) return (
+        <Paper>
+            <ResponsiveContainer>
+                <BarChart>
+                    <Bar />
+                </BarChart>
+            </ResponsiveContainer>
+        </Paper>
+    );
 
 
 
