@@ -64,7 +64,7 @@ export async function PATCH(
 
         if (updatedEvent.status === "complete" && differenceInDays(updatedEvent.start, updatedEvent.performedAt!) !== 0) {
             const shiftedEvents = await storage.shiftMaintenanceEvents(updatedEvent);
-            if (!shiftedEvents) throw new Error("Nothing to shift...");
+            if (shiftedEvents.length < 1) return res.json({ message: "Nothing to shift..." }, { status: 201 });
         }
         
         return res.json(updatedEvent, { status: 201 });            

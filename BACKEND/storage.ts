@@ -452,6 +452,9 @@ export class DatabaseStorage {
             throw new Error("Can't shift incomplete events.")
         }
         const shift = differenceInDays(event.performedAt, event.start);
+        if (shift === 0) {
+            return [];
+        }
         
         // Interval-based events should NOT affect any other levels
         if (event.level === "I") {

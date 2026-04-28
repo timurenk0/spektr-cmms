@@ -1,4 +1,4 @@
-import { add, differenceInDays } from "date-fns";
+import { add, addDays, addMonths, differenceInDays, subDays } from "date-fns";
 import { Equipment, InsertMaintenanceEvent, Maintenance, MaintenanceEvent } from "../Database/schema";
 import { storage } from "../storage";
 
@@ -54,7 +54,7 @@ export function createMaintenanceEvents(
         
         if (k === "I") {            
             while (eventStart <= end) {
-                const status = (new Date().getTime() - eventStart.getTime()) / day > OVERDUE_THRESHOLD ? "incomplete" : "pending";
+                const status = differenceInDays(new Date(), eventStart) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
                 
                 const event: InsertMaintenanceEvent = {
                     equipmentId: maintenance.equipmentId,
@@ -73,7 +73,7 @@ export function createMaintenanceEvents(
                 // eventMap[eventStart.toISOString().slice(0, 10)] = event;
                 events.push(event);
                 
-                eventStart = new Date((add(eventStart, { months: v.hours })).getTime() - day);
+                eventStart = subDays(addMonths(eventStart, v.hours ), 1);
                 eventEnd = new Date(eventStart.getTime() + (day * v.duration) - 1);
                 
                 if (eventStart > end) {
@@ -87,11 +87,11 @@ export function createMaintenanceEvents(
         const dayInterval = v.hours / daily;
         
         while (eventStart <= end) {
-            const status = (new Date().getTime() - eventStart.getTime()) / day > OVERDUE_THRESHOLD ? "incomplete" : "pending";
+            const status = differenceInDays(new Date(), eventStart) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
             let closestDate = Object.keys(eventMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime()).findLast(e => e <= eventStart.toISOString().slice(0, 10) && (k !== "I" && eventMap[e].level > k));
 
             if (closestDate && (eventStart.getTime() - new Date(closestDate).getTime())/day < dayInterval) {
-                eventStart = new Date(new Date(closestDate).getTime() + (day * dayInterval)); 
+                eventStart = addDays(new Date(closestDate), dayInterval); 
                 eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
 
                 continue;
@@ -116,7 +116,7 @@ export function createMaintenanceEvents(
 
             events.push(event);
             eventMap[eventStart.toISOString().slice(0, 10)] = event;
-            eventStart = new Date(eventStart.getTime() + (day * dayInterval));
+            eventStart = addDays(eventStart, dayInterval);
             eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
         }
     }
