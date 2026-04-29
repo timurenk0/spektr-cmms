@@ -108,6 +108,9 @@ const AddEquipmentComponentForm = ({
                                 label="Name"
                                 color="info"
                                 margin="dense"
+                                slotProps={{
+                                    htmlInput: { maxLength: 255 }
+                                }}
                                 fullWidth
                                 required
                                 {...field}
@@ -122,6 +125,9 @@ const AddEquipmentComponentForm = ({
                                 label="Manufacturer"
                                 color="info"
                                 margin="dense"
+                                slotProps={{
+                                    htmlInput: { maxLength: 255 }
+                                }}
                                 fullWidth
                                 required
                                 {...field}
@@ -136,6 +142,9 @@ const AddEquipmentComponentForm = ({
                                 label="Part Number"
                                 color="info"
                                 margin="dense"
+                                slotProps={{
+                                    htmlInput: { maxLength: 255 }
+                                }}
                                 fullWidth
                                 required
                                 {...field}
@@ -149,6 +158,9 @@ const AddEquipmentComponentForm = ({
                             <TextField
                                 label="Fail Impact"
                                 color="info"
+                                slotProps={{
+                                    htmlInput: { maxLength: 255 }
+                                }}
                                 margin="dense"
                                 fullWidth
                                 required
@@ -162,7 +174,7 @@ const AddEquipmentComponentForm = ({
                         render={({ field }) => (
                             <TextField
                                 type="number"
-                                slotProps={{ htmlInput: { min: 1 } }}
+                                slotProps={{ htmlInput: { min: 1, max: 9999 } }}
                                 {...field}
                                 onChange={(e) => field.onChange(Number(e.target.value))}
                                 label="Stock"
@@ -181,6 +193,9 @@ const AddEquipmentComponentForm = ({
                                 label="Notes"
                                 color="info"
                                 margin="dense"
+                                slotProps={{
+                                    htmlInput: { maxLength: 511 }
+                                }}
                                 fullWidth
                                 {...field}
                             />

@@ -96,6 +96,12 @@ const AddEquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, 
                             onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
                                 const file = e.target.files?.[0];
                                 if (!file) throw new Error("No file selected");
+
+                                if (file.size > 1024*1024*10) {
+                                    toast.error("Image size should not exceed 10MB!");
+                                    return;
+                                }
+                                
                                 field.onChange(file);
                                 console.log(file);
 

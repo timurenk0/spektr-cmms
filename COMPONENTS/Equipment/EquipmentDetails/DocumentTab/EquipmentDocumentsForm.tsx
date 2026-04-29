@@ -103,6 +103,9 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
             label="Document Title"
             color="info"
             margin="dense"
+            slotProps={{
+                htmlInput: { maxLength: 255 }
+            }}
             fullWidth
             required
             {...form.register("title")}
@@ -121,7 +124,18 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
                         htmlInput: {
                             accept: "application/pdf",
                             onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                                e.preventDefault();
                                 const file = e.target.files?.[0];
+                                if (!file) {
+                                    toast.error("No file found!");
+                                    return
+                                }
+
+                                if (file.size > 1024*1024*10) {
+                                    toast.error("File should not exceed 10MB!");
+                                    return;
+                                }
+                                
                                 field.onChange(file);
                                 console.log(file);
                             },
@@ -152,6 +166,9 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
             label="Notes"
             color="info"
             margin="dense"
+            slotProps={{
+                htmlInput: { maxLength: 511 }
+            }}
             fullWidth
             multiline
             rows={4}

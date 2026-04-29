@@ -424,7 +424,13 @@ export default function AddEquipmentForm(
                                 accept: ["image/jpeg", "image/png"],
                                 onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
                                     const file = e.target.files?.[0];
-                                    if (!file) throw new Error("No file selected")
+                                    if (!file) throw new Error("No file selected");
+                                    
+                                    if (file.size > 1024*1024*5) {
+                                        toast.error("Equipment thumbnail image size should not exceed 5MB!");
+                                        return;
+                                    }
+                                        
                                     field.onChange(file);
                                     const reader = new FileReader();
                                     reader.readAsDataURL(file);
@@ -452,6 +458,9 @@ export default function AddEquipmentForm(
                 color="info"
                 margin="dense"
                 className="col-span-2"
+                slotProps={{
+                    htmlInput: { maxLength: 511 }
+                }}
                 fullWidth
                 multiline
                 rows={4}
