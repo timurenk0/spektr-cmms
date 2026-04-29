@@ -23,9 +23,9 @@ import toast from "react-hot-toast";
 function calculateAge(manufDate: Date): number[] {
   const today = new Date();
   const months = differenceInMonths(today, manufDate);
-  const years = months/12;
+  const years = Math.floor(months/12);
 
-  return [Math.floor(years), months%Math.floor(years)];
+  return [years, years > 0 ? months%years : months];
 }
 
 
