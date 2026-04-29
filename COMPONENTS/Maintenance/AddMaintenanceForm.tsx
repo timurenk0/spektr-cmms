@@ -25,6 +25,7 @@ const AddMaintenanceForm = ({
   onClose: () => void
 }) => {
   const queryClient = useQueryClient();
+  const [serviceStart, setServiceStart] = useState("");
   
   /* ======================================DATA FETCHING=========================================== */
   
@@ -188,15 +189,24 @@ const AddMaintenanceForm = ({
               label="Service Start Date"
               color="info"
               margin="dense"
+              slotProps={{
+                htmlInput: { min: new Date(new Date().getTime() - 1000*86400*365*2).toISOString().slice(0, 10), max: new Date(new Date().getTime() + 1000*86400*365*5).toISOString().slice(0, 10) }
+              }}
               fullWidth
               required
               {...form.register("serviceStartDate")}
-                   />
+              onChange={e => {
+                setServiceStart(e.target.value)
+              }}
+            />
            <TextField
               type="date"
               label="Service End Date"
               color="info"
               margin="dense"
+              slotProps={{
+                htmlInput: { min: serviceStart, max: new Date(new Date().getTime() + 1000*86400*365*5).toISOString().slice(0, 10) }
+              }}
               fullWidth
               required
               {...form.register("serviceEndDate")}

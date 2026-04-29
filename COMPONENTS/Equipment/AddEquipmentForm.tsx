@@ -147,14 +147,20 @@ export default function AddEquipmentForm(
 
     const mutation = useMutation({
         mutationFn: async (values: EquipmentFormValues) => {
-            console.log(values);
+            
+            const imageUrl = values.equipmentImage || await uploadImage(values.image);
+            if (!imageUrl) throw new Error("No image URL");
+            
             const url = `/api/equipments${equipmentId ? `/${equipmentId}` : ""}`;
             const method = equipmentId ? "PUT" : "POST";
 
             const response = await fetch(url, {
                 method,
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(values)
+                body: JSON.stringify({
+                    ...values,
+                    equipmentImage: imageUrl || values.equipmentImage
+                })
             });
 
             const data = await response.json().catch(() => null);
@@ -191,12 +197,12 @@ export default function AddEquipmentForm(
     const onSubmit = async (values: EquipmentFormValues) => {
 
         
-        const imageUrl = values.equipmentImage || await uploadImage(values.image);
-        if (!imageUrl) return;
+        // const imageUrl = values.equipmentImage || await uploadImage(values.image);
+        // if (!imageUrl) return;
         const data = {
                 ...values,
                 location: (values.location === "Project" && form.getValues("projectId")) ? values.location + " " + form.getValues("projectId") : values.location,
-                equipmentImage: imageUrl || values.equipmentImage,
+                // equipmentImage: imageUrl || values.equipmentImage,
                 status: "operational"
             };
         mutation.mutate(data);
@@ -348,7 +354,7 @@ export default function AddEquipmentForm(
                 label="Date of Manufacturing"
                 color="info"
                 slotProps={{
-                    htmlInput: { min: "2000-01-01", max: new Date().toISOString().slice(0, 10) }
+                    htmlInput: { min: new Date(new Date().getTime()-1000*86400*365*20).toISOString().slice(0, 10), max: new Date().toISOString().slice(0, 10) }
                 }}
                 margin="dense"
                 fullWidth
