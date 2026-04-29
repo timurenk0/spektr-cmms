@@ -176,6 +176,7 @@ export default function AddEquipmentForm(
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["equipment-update"] })
             queryClient.invalidateQueries({ queryKey: ["equipment-list"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/equipments?concise=true"] });
             toast.success(`Equipment ${equipmentId ? "updated" : "added"} successfully`, {
                 duration: 2000,
                 position: "bottom-right",
