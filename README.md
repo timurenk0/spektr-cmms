@@ -1,7 +1,7 @@
 # PRIORITY
 - Add user role check on each delete endpoint
 - Add maintenance events count for each equipment in API
-
+- Add equipment health index degradation
 
 
 # FEATURES

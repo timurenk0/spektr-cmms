@@ -40,6 +40,7 @@ export default function AddEquipmentForm(
     const [equipmentImage, setEquipmentImage] = useState("");
     const [localEquipmentImage, setLocalEquipmentImage] = useState("");
     const [eqLocation, setEqLocation] = useState("");
+    const [DOF, setDOF] = useState(new Date().toISOString().slice(0, 10));
     const [requirements, setRequirements] = useState("");
 
     const { data: tenants, isLoading: isLoadingTenants } = useQuery<TTenant[]>({
@@ -215,6 +216,9 @@ export default function AddEquipmentForm(
                 label="Equipment name"
                 color="info"
                 margin="dense"
+                slotProps={{
+                    htmlInput: { maxLength: 255 }
+                }}
                 fullWidth
                 required
                 {...form.register("name")}
@@ -237,6 +241,9 @@ export default function AddEquipmentForm(
             <TextField
                 label="Manufacturer"
                 color="info"
+                slotProps={{
+                    htmlInput: { maxLength: 255 }
+                }}
                 margin="dense"
                 fullWidth
                 required
@@ -245,6 +252,9 @@ export default function AddEquipmentForm(
             <TextField
                 label="Model"
                 color="info"
+                slotProps={{
+                    htmlInput: { maxLength: 255 }
+                }}
                 margin="dense"
                 fullWidth
                 required
@@ -253,6 +263,9 @@ export default function AddEquipmentForm(
             <TextField
                 label="Serial Number"
                 color="info"
+                slotProps={{
+                    htmlInput: { maxLength: 255 }
+                }}
                 margin="dense"
                 fullWidth
                 required
@@ -261,6 +274,9 @@ export default function AddEquipmentForm(
             <TextField
                 label="Asset ID"
                 color="info"
+                slotProps={{
+                    htmlInput: { maxLength: 255 }
+                }}
                 margin="dense"
                 fullWidth
                 required
@@ -269,6 +285,9 @@ export default function AddEquipmentForm(
             <TextField
                 label="Owning Department"
                 color="info"
+                slotProps={{
+                    htmlInput: { maxLength: 255 }
+                }}
                 margin="dense"
                 fullWidth
                 required
@@ -286,7 +305,7 @@ export default function AddEquipmentForm(
                         margin="dense"
                         fullWidth
                         required
-                        slotProps={{ htmlInput: { min: 1 } }}
+                        slotProps={{ htmlInput: { min: 1, max: 600 } }}
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
                     />
@@ -328,20 +347,32 @@ export default function AddEquipmentForm(
                 type="date"
                 label="Date of Manufacturing"
                 color="info"
+                slotProps={{
+                    htmlInput: { min: "2000-01-01", max: new Date().toISOString().slice(0, 10) }
+                }}
                 margin="dense"
                 fullWidth
                 required
                 {...form.register("dateOfManufacturing")}
+                onChange={e => {
+                    setDOF(e.target.value)
+                }}
             />
             <TextField
                 type="date"
                 label="In Service Date"
                 color="info"
+                slotProps={{
+                    htmlInput: { min: DOF, max: new Date().toISOString().slice(0, 10) }
+                }}
+                disabled={!DOF}
                 margin="dense"
                 fullWidth
                 required
                 {...form.register("inServiceDate")}
+                helperText="*First select date of manufacturing"
             />
+            
             <div>
                 <Controller
                     name="location"
@@ -362,6 +393,9 @@ export default function AddEquipmentForm(
                     <TextField
                         label="Project ID"
                         color="info"
+                        slotProps={{
+                            htmlInput: { maxLength: 247 }
+                        }}
                         margin="dense"
                         fullWidth
                         {...form.register("projectId")}
@@ -447,6 +481,9 @@ export default function AddEquipmentForm(
                             type="number"
                             label="Total Working Hours"
                             color="info"
+                            slotProps={{
+                                htmlInput: { min: 0, max: 99999 },
+                            }}
                             margin="dense"
                             fullWidth
                             required
