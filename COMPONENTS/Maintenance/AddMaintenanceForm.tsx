@@ -99,6 +99,7 @@ const AddMaintenanceForm = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/maintenances"] });
       queryClient.invalidateQueries({ queryKey: ["/api/maintenance-events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/maintenance-events/info"] })
       queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
       toast.success(`Maintenance record ${maintenanceId ? "updated" : "added"} successfully`, {
         duration: 2000,

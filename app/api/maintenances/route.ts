@@ -7,11 +7,7 @@ import { NextRequest, NextResponse as res } from "next/server";
 
 export async function GET(req: NextRequest) {
     try {
-        const id = parseInt(req.nextUrl.searchParams.get("equipmentId") || "-1");
-
-        if (isNaN(id)) return res.json({ error: "Invalid equipment ID" });
-        
-        const maintenances = id >= 0 ? await storage.getMainteancesByEquipmentId(id) : await storage.getMaintenances();
+        const maintenances = await storage.getMaintenances();
         return res.json(maintenances, { status: 200 });
     } catch (error) {
         const msg = error instanceof Error ? error.message : "Unknown error";
@@ -22,7 +18,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         // Validate user.
-        // const user = await validateUser("admin");
+        const user = await validateUser("admin");
 
         // Parse request body to JSON format.
         // Parse maintenance data from request body with DB schema for validation.
@@ -47,7 +43,7 @@ export async function POST(req: NextRequest) {
         });        
 
         // Log activity for added maintenance using helper logger method.
-        // await activityLogger(user, "add", "Maintenance added", `Maintenance for equipment ${newMaintenance.equipmentId} added to the database`, newMaintenance.equipmentId);
+        await activityLogger(user, "add", "Maintenance added", `Maintenance for equipment ${newMaintenance.equipmentId} added to the database`, newMaintenance.equipmentId);
         
         return res.json(JSON.parse(JSON.stringify(newMaintenance)), { status: 201 });
     } catch (error: unknown) {

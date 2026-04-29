@@ -19,7 +19,7 @@ const MaintenanceList = () => {
   const { user, isLoading: isLoadingUser } = useAuth();
 
   // Fetch data
-  const { data: maintenances, isLoading: isLoadingMaintenances } = useQuery<TMaintenance[]>({
+  const { data: maintenances, isLoading: isLoadingMaintenances } = useQuery<(TMaintenance & { totalCount: number, completeCount: number, overdueCount: number, pendingCount: number })[]>({
     queryKey: ["/api/maintenances"]
   });
 
@@ -57,7 +57,7 @@ const MaintenanceList = () => {
           <Tab label={`Overdue (${info.overdue})`} value="Overdue"  />
         </TabList>
         <TabPanel value="All">
-          <AllMaintenanceList userRole={user.role} maintenances={maintenances} info={info} equipments={equipments.equips} />
+          <AllMaintenanceList userRole={user.role} maintenances={maintenances} equipments={equipments.equips} />
         </TabPanel>
         <TabPanel value="Upcoming">
           <UpcomingMaintenanceList equipments={equipments.equips} />

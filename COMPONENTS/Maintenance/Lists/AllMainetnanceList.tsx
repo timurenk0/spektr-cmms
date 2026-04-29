@@ -8,18 +8,10 @@ import { DeleteMaintenanceForm } from "../DeleteMaintenanceForm";
 const AllMaintenanceList = ({
   userRole,
   maintenances,
-  info,
   equipments,
 }: {
   userRole: string,
-  maintenances: TMaintenance[],
-  info: {
-    total: number,
-    upcoming: number,
-    overdue: number,
-    complete: number,
-    incomplete: number
-  },
+  maintenances: (TMaintenance & { totalCount: number, completeCount: number, overdueCount: number, pendingCount: number })[],
   equipments: TEquipment[],
 }) => {
 
@@ -58,10 +50,10 @@ const AllMaintenanceList = ({
                 </div>
               </div>
             </TableCell>
-            <TableCell>{info.total}</TableCell>
-            <TableCell>{info.upcoming}</TableCell>
-            <TableCell>{info.complete}</TableCell>
-            <TableCell>{info.overdue}</TableCell>
+            <TableCell>{m.totalCount}</TableCell>
+            <TableCell>{m.pendingCount}</TableCell>
+            <TableCell>{m.completeCount}</TableCell>
+            <TableCell>{m.overdueCount}</TableCell>
             { userRole === "admin" && (
               <TableCell>
                 <div className="flex justify-center">
