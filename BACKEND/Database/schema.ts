@@ -9,7 +9,9 @@ import {
   index,
   unique,
   doublePrecision,
-  boolean
+  boolean,
+  varchar,
+  char
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
@@ -26,10 +28,10 @@ export const activities = pgTable("activities", {
     tenantId: integer("tenant_id").notNull().references(() => tenants.id),
     userId: integer("user_id").notNull().references(() => users.id),
     equipmentId: integer("equipment_id"),
-    username: text("username").notNull(),
-    action: text("action").notNull(),
-    title: text("title").notNull(),
-    description: text("description").notNull(),
+    username: varchar("username", { length: 255 }).notNull(),
+    action: varchar("action", { length: 255 }).notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
+    description: varchar("description", { length: 511 }).notNull(),
     createdAt: timestamp("created_at").defaultNow()
 }, (table) => [
   check("action_check", sql`action IN ('add', 'delete', 'update')`)
@@ -44,13 +46,15 @@ export const insertActivitySchema = createInsertSchema(activities).omit({
 export const components = pgTable("components", {
     id: serial("id").primaryKey(),
     equipmentId: integer("equipment_id").notNull().references(()=>equipments.id, { onDelete: "cascade" }),
-    name: text("name").notNull(),
-    manufacturer: text("manufacturer").notNull(),
-    partNumber: text("part_number").notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    manufacturer: varchar("manufacturer", { length: 255 }).notNull(),
+    partNumber: varchar("part_number", { length: 255 }).notNull(),
     stock: integer("recommended_stock").notNull(),
-    failImpact: text("fail_impact").notNull(),
-    notes: text("notes")
-});
+    failImpact: varchar("fail_impact", { length: 255 }).notNull(),
+    notes: varchar("notes", { length: 511 })
+}, (table) => ({
+    uniqueNamePerEquipment: unique().on(table.equipmentId, table.name)
+}));
 
 export const insertComponentSchema = createInsertSchema(components).omit({
     id: true
@@ -60,11 +64,11 @@ export const insertComponentSchema = createInsertSchema(components).omit({
 export const documents = pgTable("documents", {
     id: serial("id").primaryKey(),
     equipmentId: integer("equipment_id").notNull().references(() => equipments.id, { onDelete: "cascade" }),
-    title: text("title").notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
     fileUrl: text("file_url").notNull(),
-    category: text("category").notNull(),
+    category: varchar("category", { length: 255 }).notNull(),
     uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
-    notes: text("notes")
+    notes: varchar("notes", { length: 255 })
 }, (table) => [
     check("category_check", sql`category IN ('manual', 'maintenance', 'certificate', 'premob', 'fault', 'emergency', 'other')`)
 ]);
@@ -80,24 +84,24 @@ export const equipments = pgTable(
   {
     id: serial("id").primaryKey(),
     tenantId: integer("tenant_id").notNull().references(()=>tenants.id, { onDelete: "cascade" }),
-    name: text("name").notNull(),
-    manufacturer: text("manufacturer").notNull(),
-    model: text("model").notNull(),
-    assetId: text("asset_id").notNull(),
-    serialNumber: text("serial_number").notNull(),
-    type: text("type").notNull(),
-    category: text("category").notNull(),
-    status: text("status").notNull().default("operational"),
+    name: varchar("name", { length: 255 }).notNull(),
+    manufacturer: varchar("manufacturer", { length: 255 }).notNull(),
+    model: varchar("model", { length: 255 }).notNull(),
+    assetId: varchar("asset_id", { length: 255 }).notNull(),
+    serialNumber: varchar("serial_number", { length: 255 }).notNull(),
+    type: varchar("type", { length: 255 }).notNull(),
+    category: varchar("category", { length: 255 }).notNull(),
+    status: varchar("status", { length: 255 }).notNull().default("operational"),
     dateOfManufacturing: date("date_of_manufacturing").notNull(),
     inServiceDate: date("in_service_date").notNull(),
     usefulLifeSpan: integer("useful_life_span").notNull(),
     totalWorkingHours: integer("total_working_hours"),
-    requirements: text("requirements").notNull(),
-    location: text("location").notNull(),
-    department: text("department").notNull(),
+    requirements: varchar("requirements", { length: 255 }).notNull(),
+    location: varchar("location", { length: 255 }).notNull(),
+    department: varchar("department", { length: 255 }).notNull(),
     equipmentImage: text("equipment_image").notNull(),
     healthIndex: doublePrecision("health_index"),
-    notes: text("notes"),
+    notes: varchar("notes", { length: 511 }),
     uploadedAt: timestamp("uploaded_at").notNull().defaultNow()
   },
   (table) => [
@@ -109,6 +113,8 @@ export const equipments = pgTable(
       "status_check",
       sql`status IN ('operational', 'under repair', 'out of service')`
     ),
+    unique("unique_asset_id_per_tenant").on(table.tenantId, table.assetId),
+    unique("unique_serial_number_per_tenant").on(table.tenantId, table.serialNumber),
     ]
 );
 
@@ -149,10 +155,10 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   equipmentId: integer("equipment_id").notNull().references(() => equipments.id, { onDelete: "cascade" }),
   maintenanceId: integer("maintenance_id").notNull().references(() => maintenances.id, { onDelete: "cascade" }),
   tenantId: integer("tenant_id").notNull().references(()=>tenants.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  level: text("level").notNull(),
-  status: text("status").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: varchar("description", { length: 511 }).notNull(),
+  level: char("level").notNull(),
+  status: varchar("status", { length: 255 }).notNull(),
   start: date("start_date").notNull(),
   end: date("end_date"), // nullable for emergency events
   scheduledAt: date("scheduled_at").notNull().defaultNow(),
@@ -187,7 +193,7 @@ export const insertPhotoSchema = createInsertSchema(photos).omit({
 // Tenant table schema
 export const tenants = pgTable("tenants", {
     id: serial("id").primaryKey(),
-    name: text("name").notNull().unique()
+    name: varchar("name", { length: 255 }).notNull().unique()
 });
 
 export const insertTenantSchema = createInsertSchema(tenants).omit({
@@ -198,9 +204,9 @@ export const insertTenantSchema = createInsertSchema(tenants).omit({
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   tenantId: integer("tenant_id").notNull().references(()=>tenants.id, { onDelete: "cascade" }),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  role: text("role").notNull().default("user"),
+  username: varchar("username", { length: 255 }).notNull().unique(),
+  password: varchar("password", { length: 255 }).notNull(),
+  role: varchar("role", { length: 255 }).notNull().default("user"),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
