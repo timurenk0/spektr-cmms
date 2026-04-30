@@ -56,7 +56,7 @@ export async function PATCH(
             const equipment = await storage.updateEquipment(event.equipmentId, {status: "operational"});
             if (!equipment) return res.json({ error: "Equipment not found!" }, { status: 404 });
 
-            await activityLogger(user, "update", "Emergency repair finished", `Emergency repair for equipment ${equipment.assetId} finished!`, equipment.id);
+            await activityLogger(user, "update", `Emergency repair for equipment ${equipment.assetId} finished!`, equipment.id);
             
             return res.json(true, { status: 201 });
         }
@@ -76,7 +76,7 @@ export async function PATCH(
             return res.json({ error: "Specified maintenance event not found" }, { status: 404 });
         }
 
-        await activityLogger(user, "update", "Maintenance event updated", `Maintenance event ${updatedEvent.id} updated`, updatedEvent.equipmentId);
+        await activityLogger(user, "update", `Maintenance event ${updatedEvent.id} updated`, updatedEvent.equipmentId);
 
         if (updatedEvent.status === "complete" && differenceInDays(updatedEvent.start, updatedEvent.performedAt!) !== 0) {
             const shiftedEvents = await storage.shiftMaintenanceEvents(updatedEvent);

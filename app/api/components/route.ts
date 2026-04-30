@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
         const newComponent = await storage.addComponent(componentValidatedData);
 
-        await activityLogger(user, "add", "Component added", `Component ${newComponent.name} added for equipment ${newComponent.equipmentId}`, newComponent.equipmentId);
+        await activityLogger(user, "add", `Component ${newComponent.name} added for equipment ${newComponent.equipmentId}`, newComponent.equipmentId);
 
         return res.json(newComponent, { status: 201 });
     } catch (error) {

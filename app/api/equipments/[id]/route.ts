@@ -54,7 +54,7 @@ export async function PUT(
         const updatedEquipment = await storage.updateEquipment(equipmentId, equipmentValidatedData);
     
         // Log the activity for update equipment using helper logger method.
-        await activityLogger(user, "update", "Equipment updated", `Equipment ${updatedEquipment?.name} updated`, equipmentId);
+        await activityLogger(user, "update", `Equipment ${updatedEquipment?.name} updated`, equipmentId);
     
         return res.json(updatedEquipment, { status: 200 });       
     } catch (error) {
@@ -86,7 +86,7 @@ export async function PATCH(
         if (!equipment) return res.json({ error: "Specified equipment not found" }, { status: 404 });
         
         if (status && !reason) {
-            await activityLogger(user, "update", "Equipment status updated", `Equipment ${equipment.name} status updated to ${status}`, equipmentId);
+            await activityLogger(user, "update", `Equipment ${equipment.name} status updated to ${status}`, equipmentId);
             
             if (status === "under repair") {
                 const maintenance = await storage.getMainteancesByEquipmentId(equipment.id);
@@ -108,7 +108,7 @@ export async function PATCH(
                 };
                 
                 await storage.addMaintenanceEvents([event]);
-                await activityLogger(user, "add", "Emergency repair started", `Emergency repair for equipment ${equipment.name} started!`, equipment.id);
+                await activityLogger(user, "add", `Emergency repair for equipment ${equipment.name} started!`, equipment.id);
             }
             
             if (status === "operational" && await storage.getEmergencyMaintenanceEventByEquipmentId(equipment.id)) { 
@@ -121,7 +121,7 @@ export async function PATCH(
         }
 
         // Log the activity for deleted equipment using helper logger method.
-        await activityLogger(user, "delete", "Equipment deleted", `Equipment ${equipment.name} removed | Reason: ${reason}`, equipmentId);       
+        await activityLogger(user, "delete", `Equipment ${equipment.name} removed | Reason: ${reason}`, equipmentId);       
 
         // Delete specified equipment.
         await storage.deleteEquipment(equipmentId);

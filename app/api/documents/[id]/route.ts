@@ -20,7 +20,7 @@ export async function DELETE(
 
         await Gstorage.deleteObject(documentUrl);
 
-        await activityLogger(user, "delete", "Document deleted", "Document deleted successfully"); 
+        await activityLogger(user, "delete", "Document deleted successfully"); 
 
         return res.json(true, { status: 200 });
     } catch (error) {

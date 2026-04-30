@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
         const newTenant = await storage.addTenant(tenantValidatedData);
 
-        await activityLogger(user, "add", "Tenant added", `Tenant ${newTenant.name} added to the database`, newTenant.id);
+        await activityLogger(user, "add", `Tenant ${newTenant.name} added to the database`, newTenant.id);
 
         return res.json(newTenant, { status: 201 });        
     } catch (error) {

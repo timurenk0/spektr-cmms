@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
         }
         const newPhoto = await uploadAndAddPhoto(file, documentData)
 
-        activityLogger(user, "add", "Photo uploaded", `Photo for equipment ${newPhoto?.equipmentId} added`, newPhoto?.equipmentId);
+        activityLogger(user, "add", `Photo for equipment ${newPhoto?.equipmentId} added`, newPhoto?.equipmentId);
 
         return res.json(JSON.parse(JSON.stringify(newPhoto)), { status: 201 });
     } catch (error: unknown) {

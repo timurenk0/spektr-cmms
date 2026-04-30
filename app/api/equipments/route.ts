@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
         const newEquipment = await storage.addEquipment(equipmentValidatedData);
         
         // Log the activity for added equipment using helper logger method.
-        await activityLogger(user, "add", "Equipment added", `Equipment ${newEquipment.name} added to the database`, newEquipment.id);
+        await activityLogger(user, "add", `Equipment ${newEquipment.name} added to the database`, newEquipment.id);
 
         return res.json(JSON.parse(JSON.stringify(newEquipment)), { status: 201 });
     } catch (error) {

@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
         const newUser = await storage.addUser(validatedUser);
 
         // Log the activity for added user using helper logger method.
-        await activityLogger(user, "add", "User added", `User ${newUser.username} added to the database`);
+        await activityLogger(user, "add", `User ${newUser.username} added to the database`);
         
         return res.json(newUser, { status: 201 });
     } catch (error) {

@@ -21,7 +21,7 @@ export async function PATCH(
         const maintenance = await storage.getMaintenance(maintenanceId);
         if (!maintenance) return res.json({ error: "Specified maintenance not found" }, { status: 404 });
 
-        await activityLogger(user, "delete", "Maintenance deleted", `Maintenance for equipment ${maintenance.equipmentId} removed | Reason: ${reason}`, maintenance.equipmentId);
+        await activityLogger(user, "delete", `Maintenance for equipment ${maintenance.equipmentId} removed | Reason: ${reason}`, maintenance.equipmentId);
 
         await storage.deleteMaintenance(maintenanceId);
 

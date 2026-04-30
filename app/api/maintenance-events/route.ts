@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
         console.log(body);
         const newMaintenanceEvent = insertMaintenanceEventSchema.parse(body);
 
-        await activityLogger(user, "add", "Maintenance events added", `Maintenance events for equipment ${newMaintenanceEvent.equipmentId} added to the database`, newMaintenanceEvent.equipmentId)
+        await activityLogger(user, "add", `Maintenance events for equipment ${newMaintenanceEvent.equipmentId} added to the database`, newMaintenanceEvent.equipmentId)
         
     } catch (error) {
         const msg = error instanceof Error ? [error.message, error.stack] : "Unknown error";

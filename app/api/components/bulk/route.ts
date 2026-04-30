@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
 
         const components = await storage.addComponentsBulk(componentsValidatedData);
 
-        await activityLogger(user, "add", "Components added", `${components.length} components successfully added in bulk`, components[0].equipmentId);
+        await activityLogger(user, "add", `${components.length} components successfully added in bulk`, components[0].equipmentId);
 
         return res.json(components, { status: 201 });
     } catch (error) {
