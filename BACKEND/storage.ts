@@ -414,8 +414,13 @@ export class DatabaseStorage {
 
         const overdueEvents = (await db.select().from(maintenanceEvents).
                             where(
-                                lt(maintenanceEvents.start, today)
-                            )).length;
+                                and(
+                                    lt(maintenanceEvents.start, sql`CURRENT_DATE + interval '1 day'`),
+                                    eq(maintenanceEvents.status, "pending")
+                                )
+                            ));
+
+                            console.log(overdueEvents)
 
         const completeEvents = (await db.select().from(maintenanceEvents).
                             where(
@@ -428,9 +433,9 @@ export class DatabaseStorage {
                             )).length;
 
         return {
-            total: upcomingEvents+overdueEvents,
+            total: upcomingEvents+overdueEvents.length,
             upcoming: upcomingEvents,
-            overdue: overdueEvents,
+            overdue: overdueEvents.length,
             complete: completeEvents,
             incomplete: incompleteEvents,
         };

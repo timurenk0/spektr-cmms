@@ -18,7 +18,9 @@ const OverdueMaintenanceList = ({equipments}: { equipments: TEquipment[] }) => {
     }
 
   return (
-    <GeneralMaintenanceList equipments={equipments} mEvents={events} />
+    <>
+      <GeneralMaintenanceList equipments={equipments} mEvents={events} />
+    </>
   )
 }
 

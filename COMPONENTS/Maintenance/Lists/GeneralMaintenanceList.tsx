@@ -31,6 +31,18 @@ const getLevelBadge = (level: string) => {
                     {level}
                 </div>
             );
+        case "E":
+            return (
+                <div className="w-20 police-tape text-center mx-auto py-2 rounded-[100px]">
+                    {level}
+                </div>
+            );
+        case "I":
+            return (
+                <div className="w-20 bg-pink-500 text-white text-center mx-auto py-2 rounded-[100px]">
+                    {level}
+                </div>
+            );
     }
 }
 
@@ -50,7 +62,7 @@ const GeneralMaintenanceList = ({
         <TableHead>
             <TableRow sx={{ "& .MuiTableCell-root": { fontWeight: "bold", textAlign: "center" } }}>
                 <TableCell>Equipment</TableCell>
-                <TableCell>Due Date</TableCell>
+                <TableCell>Scheduled At</TableCell>
                 {complete && (
                     <TableCell>Completed Date</TableCell>
                 )}
@@ -77,9 +89,9 @@ const GeneralMaintenanceList = ({
                     </div>
                 </div>
                 </TableCell>
-                <TableCell>{format(ev.start, "MMM dd, yyyy")}</TableCell>
+                <TableCell>{format(ev.scheduledAt, "MMM dd, yyyy")}</TableCell>
                 {complete && (
-                    <TableCell>Completed Date</TableCell>
+                    <TableCell>{format(ev.start, "MMM dd, yyyy")}</TableCell>
                 )}
                 <TableCell>{getLevelBadge(ev.level)}</TableCell>
             </TableRow>
