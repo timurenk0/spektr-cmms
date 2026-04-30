@@ -148,7 +148,7 @@ export default function AddEquipmentForm(
     const mutation = useMutation({
         mutationFn: async (values: EquipmentFormValues) => {
             
-            const imageUrl = values.equipmentImage || await uploadImage(values.image);
+            const imageUrl = localEquipmentImage ? await uploadImage(values.image) : equipment?.equipmentImage;
             if (!imageUrl) throw new Error("No image URL");
             
             const url = `/api/equipments${equipmentId ? `/${equipmentId}` : ""}`;
