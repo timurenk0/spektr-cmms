@@ -56,11 +56,16 @@ export default function AddEquipmentForm(
                 throw new Error("Failed to fetch specified equipment data");
             }
 
-            return await res.json();
+            const data = await res.json();
+
+            setDOF(data.dateOfManufacturing);
+
+            return data;
         },
         enabled: !!equipmentId
     });
 
+    
     const uploadImage = async (file: File | undefined) => {
         try {
             if (!file) throw new Error("No file selected");
