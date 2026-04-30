@@ -52,6 +52,7 @@ const Settings = () => {
     const [value, setValue] = useState("personal");
     const [role, setRole] = useState("user");
     const [showPw, setShowPw] = useState(false);
+    const [randomPw, setRandomPw] = useState("");
     const [availableRoles, setAvailableRoles] = useState<string[]>([]);
     const [availableTenants, setAvailableTenants] = useState<string[]>([]);
     
@@ -244,6 +245,9 @@ const Settings = () => {
                                 label="Username"
                                 color="info"
                                 margin="dense"
+                                slotProps={{
+                                    htmlInput: { maxLength: 255 }
+                                }}
                                 required
                                 {...form.register("username")}
                             />
@@ -253,13 +257,16 @@ const Settings = () => {
                                     onFocus={() => setShowPw(true)}
                                     label="Password"
                                     color="info"
-                                    defaultValue=""
+                                    value={randomPw}
                                     margin="dense"
+                                    slotProps={{
+                                        htmlInput: { maxLength: 255 }
+                                    }}
                                     required
                                     {...form.register("password")}
                                     onBlur={() => setShowPw(false)}
                                 />
-                                <button type="button" className="underline text-blue-500 text-sm me-auto cursor-pointer" onClick={() => form.setValue("password", generatePassword())}>Generate Password</button>
+                                <button type="button" className="underline text-blue-500 text-sm me-auto cursor-pointer" onClick={() => setRandomPw(generatePassword())}>Generate Password</button>
                             </div>
                             
                             <div>

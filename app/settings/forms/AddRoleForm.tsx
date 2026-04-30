@@ -13,6 +13,9 @@ const AddRoleForm = ({ addNewRole, who, onClose }: { addNewRole: (role: string)=
                 label={`New ${who}`}
                 fullWidth
                 margin="dense"
+                slotProps={{
+                    htmlInput: { maxLength: 255 }
+                }}
                 defaultValue={""}
                 onChange={(e) => setRole(e.target.value)}
                 required
