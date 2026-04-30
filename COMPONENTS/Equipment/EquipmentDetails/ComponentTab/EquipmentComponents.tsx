@@ -72,11 +72,11 @@ const EquipmentComponents = ({
                                             />
                                         </TableCell>
                                     )}
-                                    <TableCell>{comp.name}</TableCell>
-                                    <TableCell>{comp.manufacturer}</TableCell>
-                                    <TableCell>{comp.partNumber}</TableCell>
+                                    <TableCell title={comp.name} className="max-w-32 truncate">{comp.name}</TableCell>
+                                    <TableCell title={comp.manufacturer} className="max-w-32 truncate">{comp.manufacturer}</TableCell>
+                                    <TableCell title={comp.partNumber} className="max-w-32 truncate">{comp.partNumber}</TableCell>
                                     <TableCell>{comp.stock}</TableCell>
-                                    <TableCell>{comp.failImpact}</TableCell>
+                                    <TableCell title={comp.failImpact} className="max-w-32 truncate">{comp.failImpact}</TableCell>
                                     <TableCell className="max-w-20 truncate" title={comp.notes || "No notes"}>{comp.notes?.length ? comp.notes : ""}</TableCell>
                                 </TableRow>
                             )) : (

@@ -10,11 +10,11 @@ const EquipmentOverview = ({ equipment }: { equipment: TEquipment }) => {
             {/* Row 1 */}
             <div>
                 <div className="text-sm text-gray-500">Name</div>
-                <div>{equipment.name}</div>
+                <div title={equipment.name} className="max-w-64 truncate">{equipment.name}</div>
             </div>
             <div>
                 <div className="text-sm text-gray-500">ID</div>
-                <div>{equipment.assetId}</div>
+                <div title={equipment.assetId} className="max-w-64 truncate">{equipment.assetId}</div>
             </div>
             <div>
                 <div className="text-sm text-gray-500">Date of Manufacture</div>
@@ -24,11 +24,11 @@ const EquipmentOverview = ({ equipment }: { equipment: TEquipment }) => {
             {/* Row 2 */}
             <div>
                 <div className="text-sm text-gray-500">Manufacturer</div>
-                <div>{equipment.manufacturer}</div>
+                <div title={equipment.manufacturer} className="max-w-64 truncate">{equipment.manufacturer}</div>
             </div>
             <div>
                 <div className="text-sm text-gray-500">Location</div>
-                <div>{equipment.location}</div>
+                <div title={equipment.location} className="max-w-64 truncate">{equipment.location}</div>
             </div>
             <div>
                 <div className="text-sm text-gray-500">Date Put in Service</div>
@@ -38,7 +38,7 @@ const EquipmentOverview = ({ equipment }: { equipment: TEquipment }) => {
             {/* Row 3 */}
             <div>
                 <div className="text-sm text-gray-500">Model</div>
-                <div>{equipment.model}</div>
+                <div title={equipment.model} className="max-w-64 truncate">{equipment.model}</div>
             </div>
             <div>
                 <div className="text-sm text-gray-500">Status</div>

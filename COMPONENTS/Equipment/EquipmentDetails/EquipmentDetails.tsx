@@ -148,7 +148,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                     <div className="ml-2 w-3 h-3 rounded-full bg-green-500"></div>
                   )}
                 </h1>
-                <div className="text-sm text-gray-600 mt-1 mb-1">
+                <div title={equipment.manufacturer+" "+equipment.model} className="text-sm text-gray-600 mt-1 mb-1 max-w-lg truncate">
                   {equipment.manufacturer}{" "}{equipment.model}
                 </div>
                 <div className="flex space-x-3 mt-2">
