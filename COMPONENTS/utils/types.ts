@@ -90,6 +90,7 @@ export type TMaintenanceEvent = {
     level: "A" | "B" | "C" | "D" | "E" | "I";
     start: string;
     end: string;
+    reason: string | null;
     scheduledAt: string;
     performedAt: string | null;
 }

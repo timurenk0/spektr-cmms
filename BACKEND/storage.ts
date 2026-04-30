@@ -368,6 +368,7 @@ export class DatabaseStorage {
             scheduledAt: maintenanceEvents.scheduledAt,
             performedAt: maintenanceEvents.performedAt,
             status: maintenanceEvents.status,
+            reason: maintenanceEvents.reason,
             isOverdue: sql<boolean>`
                 CURRENT_DATE - ${maintenanceEvents.start} > 3
             `,
