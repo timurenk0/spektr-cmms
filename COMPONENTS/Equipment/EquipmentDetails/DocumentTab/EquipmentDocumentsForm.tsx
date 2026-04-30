@@ -33,8 +33,6 @@ const documentCategories: Record<string, string> = {
 const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number, onClose: () => void }) => {
     const queryClient = useQueryClient();
 
-    const [isUploading, setIsUploading] = useState(false);
-    
     const form = useForm<DocumentFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -186,7 +184,7 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
             </Button>
             <Button
                 type="submit"
-                disabled={uploadMutation.isPending || isUploading}
+                disabled={uploadMutation.isPending}
             >
                 {uploadMutation.isPending ? "Uploading..." : "Upload Document"}
             </Button>
