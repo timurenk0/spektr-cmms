@@ -4,7 +4,7 @@
 import { TEquipment } from "@/COMPONENTS/utils/types";
 import { Button, Paper } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { RefreshCw } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import { useState } from "react";
 import {
     BarChart,
@@ -17,8 +17,6 @@ import {
     ResponsiveContainer
 } from "recharts"
 
-
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 
 const TypeChart = () => {
     const [type, setType] = useState<string>("");
@@ -71,7 +69,7 @@ const TypeChart = () => {
             <h3 className="px-6 pt-4 font-semibold">Equipment by {!type ? "Type" : `Category (type=${type})`}</h3>
             {type.length>0 ? (
                 <Button onClick={refreshChart}  variant="text" color="inherit" sx={{ marginLeft: "1rem" }}>
-                    <RefreshCw width={32} height={32} />
+                    <ArrowLeftIcon width={32} height={32} />
                 </Button>
             ) : ""}
         <div className="h-80">
@@ -87,7 +85,8 @@ const TypeChart = () => {
                 >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
-                        className={!type ? "underline cursor-pointer" : ""} 
+                        // className={!type ? "underline cursor-pointer" : ""} 
+                        style={!type ? { textDecoration: "underline", cursor: "pointer" } : {}}
                         dataKey="name" 
                         angle={-25} 
                         textAnchor="end" 
