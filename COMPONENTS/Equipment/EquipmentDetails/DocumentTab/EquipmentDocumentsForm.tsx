@@ -50,6 +50,8 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
         mutationFn: async (values: DocumentFormValues) => {
             const formData = new FormData();
 
+            if (values.file && values.file.size > 1024*1024*10) throw new Error("File size should not exceed 10MB!")
+            
             formData.append("file", values.file);
             formData.append("equipmentId", equipmentId.toString());
             formData.append("title", values.title);
@@ -80,9 +82,9 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
             form.reset();
             onClose();
         },
-        onError: (error) => {
-            console.error(error.stack, error.cause);
-            toast.error(`Failed to upload document: ${error.message}`, {
+        onError: (error: unknown) => {
+            const msg = error instanceof Error ? error.message : "Unknown error";
+            toast.error(`Failed to upload document: ${msg}`, {
                 duration: 2000,
                 position: "bottom-right",
                 icon: "❌"
@@ -133,7 +135,6 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
 
                                 if (file.size > 1024*1024*10) {
                                     toast.error("File should not exceed 10MB!");
-                                    return;
                                 }
                                 
                                 field.onChange(file);
