@@ -148,6 +148,9 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
                 color="info"
                 margin="dense"
                 value={completionDate}
+                slotProps={{
+                  htmlInput: event._def.extendedProps.level === "E" ? { min: event.startStr } : {}
+                }}
                 required
                 fullWidth
                 onChange={(e) => setCompletionDate(format(e.target.value, "yyyy-MM-dd"))}
