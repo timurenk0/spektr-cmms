@@ -30,7 +30,6 @@ export const activities = pgTable("activities", {
     equipmentId: integer("equipment_id"),
     username: varchar("username", { length: 255 }).notNull(),
     action: varchar("action", { length: 255 }).notNull(),
-    title: varchar("title", { length: 255 }).notNull(),
     description: varchar("description", { length: 511 }).notNull(),
     createdAt: timestamp("created_at").defaultNow()
 }, (table) => [
@@ -161,6 +160,7 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   status: varchar("status", { length: 255 }).notNull(),
   start: date("start_date").notNull(),
   end: date("end_date"), // nullable for emergency events
+  reason: varchar("reason", { length: 255 }),
   scheduledAt: date("scheduled_at").notNull().defaultNow(),
   performedAt: date("performed_at")
 }, (table) => [ 
