@@ -11,7 +11,7 @@ import {
 } from "./Database/schema";
 import * as schema from "./Database/schema";
 import { db } from "./Database/db";
-import { eq, and, asc, desc, sql, not, ExtractTablesWithRelations, lt, gte, lte, ilike, or, getTableColumns, gt } from "drizzle-orm";
+import { eq, and, asc, desc, sql, not, ExtractTablesWithRelations, lt, gte, lte, ilike, or, getTableColumns, gt, count } from "drizzle-orm";
 import type { NeonDatabase, NeonQueryResultHKT } from "drizzle-orm/neon-serverless";
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import jwt from "jsonwebtoken";
@@ -251,6 +251,14 @@ export class DatabaseStorage {
 
     async getEquipmentLocations(): Promise<string[]> {
         return (await db.selectDistinct({ location: equipments.location }).from(equipments)).map(loc=>loc.location);
+    }
+
+    async getEquipmentStatusCount(tenantId: number): Promise<{ operational: number, underRepair: number, outOfService: number } | undefined> {
+        const operationalCount = await db.select({ count: count() }).from(equipments).where(and(eq(equipments.tenantId, tenantId), eq(equipments.status, "operational")));
+        const underRepairCount = await db.select({ count: count() }).from(equipments).where(and(eq(equipments.tenantId, tenantId), eq(equipments.status, "under repair")));
+        const outOfServiceCount = await db.select({ count: count() }).from(equipments).where(and(eq(equipments.tenantId, tenantId), eq(equipments.status, "out of service")));
+        
+        return { operational: operationalCount[0].count, underRepair: underRepairCount[0].count, outOfService: outOfServiceCount[0].count }
     }
     
     async addEquipment(insertEquipment: InsertEquipment): Promise<Equipment> {

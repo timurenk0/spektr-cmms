@@ -4,6 +4,7 @@
 import { TEquipment } from "@/COMPONENTS/utils/types";
 import { Paper, Skeleton } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import {
     Tooltip,
     Legend,
@@ -16,27 +17,62 @@ import {
 
 const StatusChart = () => {
 
-   const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ equips: TEquipment[], count: number }>({
-    queryKey: ["/api/equipments"]
+   const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ operational: number, underRepair: number, outOfService: number }>({
+    queryKey: ["equipments-status"],
+    queryFn: async () => {
+        const res = await fetch("/api/stats/equipment-status");
+        if (!res.ok) {
+            toast.dismiss();
+            toast.error("Failed to load equipment data. Try to refresh the page.");
+            throw new Error("Failed to fetch equipment data");
+        }
+
+        return await res.json();
+    }
    });
 
    const isLoading = (!equipments || isLoadingEquipments);
    if (isLoading) return (
     <Skeleton>
-        <Paper>
-            <ResponsiveContainer>
-                <PieChart>
-                    <Pie></Pie>
-                </PieChart>
-            </ResponsiveContainer>
+        <Paper sx={{ width: "100vw" }}>
+            <h3 className="px-6 pt-4 font-semibold">Equipment Status</h3>
+            <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                        <Pie
+                            data={[]}
+                            cx="50%"
+                            cy="50%"
+                            labelLine
+                            label={({ name, value, percent }) => 
+                                `${value>0 ? name+":": ""} ${value>0?value+" | "+(percent ? percent*100 : 0).toFixed(0)+"%" : ""}`
+                        }
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        >
+                            {[].map((entry, index) => (
+                                <Cell
+                                    key={`cell-${index}`}
+                                    fill={COLORS[index % COLORS.length]}
+                                >
+
+                                </Cell>
+                            ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                    </PieChart>
+                </ResponsiveContainer>
+            </div>
         </Paper>
     </Skeleton>
    )
 
    const statusData = [
-    {name: "Operational", value: equipments.equips.filter(eq => eq.status==="operational").length},
-    {name: "Under Repair", value: equipments.equips.filter(eq => eq.status==="under repair").length},
-    {name: "Out of Service", value: equipments.equips.filter(eq => eq.status==="out of service").length},
+    {name: "Operational", value: equipments.operational },
+    {name: "Under Repair", value: equipments.underRepair },
+    {name: "Out of Service", value: equipments.outOfService },
    ]
 
 
