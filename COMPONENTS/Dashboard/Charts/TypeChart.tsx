@@ -19,7 +19,7 @@ import {
 
 
 const TypeChart = () => {
-    const [type, setType] = useState<string>("");
+    const [category, setCategory] = useState<string>("");
 
     const { data: equipments, isLoading: isLoadingEquipment } = useQuery<{ equips: TEquipment[], count: number }>({
         queryKey: ["/api/equipments"]
@@ -43,12 +43,12 @@ const TypeChart = () => {
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis
                                 // className={!type ? "underline cursor-pointer" : ""}
-                                style={!type ? { textDecoration: "underline", cursor: "pointer" } : {}}
+                                style={!category ? { textDecoration: "underline", cursor: "pointer" } : {}}
                                 dataKey="name"
                                 angle={-25}
                                 textAnchor="end"
                                 height={100}
-                                onClick={(e) => {!type ? setType(e.value) : ""}}
+                                onClick={(e) => {!category ? setCategory(e.value) : ""}}
                             />
                             <YAxis
                                 tickCount={0}
@@ -70,14 +70,14 @@ const TypeChart = () => {
 
 
 
-    const equipmentTypeCount = equipments.equips.reduce((acc: Record<string, number>, equipment: TEquipment) => {
-        acc[equipment.type || "Uncategorized"] = (acc[equipment.type || "Uncategorized"] || 0) + 1;
+    const equipmentCategoryCount = equipments.equips.reduce((acc: Record<string, number>, equipment: TEquipment) => {
+        acc[equipment.category || "Uncategorized"] = (acc[equipment.category || "Uncategorized"] || 0) + 1;
         return acc;
     }, {});
 
-    const equipmentCategoryCount = equipments.equips.reduce((acc: Record<string, number>, equipment: TEquipment) => {
-        if (equipment.type === type) {
-            acc[equipment.category] = (acc[equipment.category] || 0) + 1;
+    const equipmentTypeCount = equipments.equips.reduce((acc: Record<string, number>, equipment: TEquipment) => {
+        if (equipment.category === category) {
+            acc[equipment.type] = (acc[equipment.type] || 0) + 1;
         }
         return acc;
     }, {});
@@ -93,13 +93,13 @@ const TypeChart = () => {
     }));
 
     const refreshChart = () => {
-        setType("");
+        setCategory("");
     }
     
   return (
     <Paper>
-            <h3 className="px-6 pt-4 font-semibold">Equipment by {!type ? "Type" : `Category (type=${type})`}</h3>
-            {type.length>0 ? (
+            <h3 className="px-6 pt-4 font-semibold">Equipment by {!category ? "Category" : `Type (category=${category})`}</h3>
+            {category.length>0 ? (
                 <Button onClick={refreshChart}  variant="text" color="inherit" sx={{ marginLeft: "1rem" }}>
                     <ArrowLeftIcon width={32} height={32} />
                 </Button>
@@ -107,7 +107,7 @@ const TypeChart = () => {
         <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                    data={type.length>0 ? equipmentCategoryData : equipmentTypeData}
+                    data={category ? equipmentTypeData : equipmentCategoryData}
                     margin={{
                         top: 20,
                         right: 30,
@@ -118,15 +118,15 @@ const TypeChart = () => {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                         // className={!type ? "underline cursor-pointer" : ""} 
-                        style={!type ? { textDecoration: "underline", cursor: "pointer" } : {}}
+                        style={!category ? { textDecoration: "underline", cursor: "pointer" } : {}}
                         dataKey="name" 
                         angle={-25} 
                         textAnchor="end" 
                         height={100} 
-                        onClick={(e) => {!type ? setType(e.value) : ""}}
+                        onClick={(e) => {!category ? setCategory(e.value) : ""}}
                     />
                     <YAxis
-                        tickCount={type.length>0 ? Math.max(...equipmentCategoryData.map(d => d.count)) + 1 : Math.max(...equipmentTypeData.map(d => d.count)) + 1}
+                        tickCount={category ? Math.max(...equipmentTypeData.map(d => d.count)) + 1 : Math.max(...equipmentCategoryData.map(d => d.count)) + 1}
                         interval={0}
                     />
                     <Tooltip/>
