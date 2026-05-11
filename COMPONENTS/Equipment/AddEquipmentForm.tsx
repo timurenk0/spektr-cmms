@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import Image from "next/image"
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { Button, FormControl, FormControlLabel, FormLabel, InputAdornment, InputLabel, MenuItem, Radio, RadioGroup, Select, TextField } from "@mui/material";
+import { Button, FormControl, FormControlLabel, FormLabel, InputAdornment, InputLabel, MenuItem, Radio, RadioGroup, Select, Skeleton, TextField } from "@mui/material";
 import { EquipmentTypes } from "../utils/equipmentTypes";
 import { TEquipment, TTenant } from "../utils/types";
 import { ImageIcon } from "lucide-react";
@@ -153,8 +153,12 @@ export default function AddEquipmentForm(
     const mutation = useMutation({
         mutationFn: async (values: EquipmentFormValues) => {
             
+            if (values.image && values.image.size > 1024*1024*5) {
+                throw new Error("Image size should exceeds 5MB! Choose another image");
+            }
+            
             const imageUrl = localEquipmentImage ? await uploadImage(values.image) : equipment?.equipmentImage;
-            if (!imageUrl) throw new Error("No image URL");
+            if (!imageUrl) throw new Error("Failed to upload image");
             
             const url = `/api/equipments${equipmentId ? `/${equipmentId}` : ""}`;
             const method = equipmentId ? "PUT" : "POST";
@@ -216,7 +220,11 @@ export default function AddEquipmentForm(
 
 
     const isLoading = (isLoadingEquipment) || (!tenants || isLoadingTenants);
-    if (isLoading) return (<h1>Loading data...</h1>)
+    if (isLoading) return (
+        <>
+            Loading data<span className="dots"></span>
+        </>
+    )
 
   return (
     <form
@@ -433,7 +441,12 @@ export default function AddEquipmentForm(
                                     if (!file) throw new Error("No file selected");
                                     
                                     if (file.size > 1024*1024*5) {
-                                        toast.error("Equipment thumbnail image size should not exceed 5MB!");
+                                        toast.error("Equipment thumbnail image size should not exceed 5MB!", {
+                                            icon: "⚠️",
+                                            position: "top-center"
+                                        });
+                                        e.target.value = "";
+                                        setLocalEquipmentImage("");
                                         return;
                                     }
                                         
