@@ -1,7 +1,7 @@
 "use client"
 
-import { Button } from "@mui/material";
-import { Plus } from "lucide-react";
+import { Button, Skeleton } from "@mui/material";
+import { Plus, User } from "lucide-react";
 import SlideDialog from "@/COMPONENTS/ui/SlideDialog";
 import AddEquipmentForm from "@/COMPONENTS/Equipment/AddEquipmentForm";
 import { useAuth } from "../utils/authContext";
@@ -11,7 +11,11 @@ export default function AddEquipmentButton() {
 
     const { user, isLoading } = useAuth();
 
-    if (!user || isLoading) return (<h1>Loading user...</h1>)
+    if (!user || isLoading) return (
+        <>
+            Loading User<span className="dots"></span>
+        </>
+    )
     
     return (
         <>
