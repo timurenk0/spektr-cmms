@@ -10,11 +10,10 @@ const GaugeCharts = () => {
     const { data, isLoading } = useQuery({
         queryKey: ["dashboard-gauges"],
         queryFn: async () => {
-            const res = await fetch("/api/stats/kpis", {
-                credentials: "include"
-            });
+            const res = await fetch("/api/stats/kpis");
             if (!res.ok) {
-                toast.error("Failed to retrieve KPI data");
+                toast.dismiss()
+                toast.error("Failed to retrieve KPI data. Try to refresh the page.");
                 throw new Error("Failed to fetch KPI endpoint");
             }
 

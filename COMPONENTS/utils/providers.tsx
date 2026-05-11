@@ -22,7 +22,7 @@ export default function Providers({ children, initialUser }: { children: React.R
                 gcTime: 1000 * 60 * 10,
                 retry: (failureCount, error) => {
                     if (error instanceof Error && error.message.includes("401")) return false;
-                    return failureCount < 3;
+                    return failureCount < 2;
                 },
                 retryDelay: (retryIdx) => Math.min(1000 * 2 ** retryIdx, 30000)
            }

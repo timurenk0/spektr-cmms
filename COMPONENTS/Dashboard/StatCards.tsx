@@ -12,9 +12,8 @@ const StatCards = () => {
     queryFn: async () => {
       const res = await fetch("/api/stats/dashboard-cards");
       if (!res.ok) {
-        toast.error("Failed to retrieve stats. Try to refresh the page", {
-          icon: "😕"
-        });
+        toast.dismiss();
+        toast.error("Failed to retrieve stats. Try to refresh the page");
         throw new Error("Failed to fetch stats");
       }
 
