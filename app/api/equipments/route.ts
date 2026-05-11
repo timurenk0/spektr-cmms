@@ -3,6 +3,7 @@ import { NextRequest, NextResponse as res } from "next/server";
 import { insertEquipmentSchema } from "@/BACKEND/Database/schema";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
+import z, { ZodError } from "zod";
 
 
 export async function GET(
@@ -70,8 +71,27 @@ export async function POST(req: NextRequest) {
         await activityLogger(user, "add", `Equipment ${newEquipment.name} added to the database`, newEquipment.id);
 
         return res.json(JSON.parse(JSON.stringify(newEquipment)), { status: 201 });
-    } catch (error) {
-        const msg = error instanceof Error ? [error.message] : "Unkown error";
-        return res.json({ error: `Failed to add equipment: ${msg}` }, { status: 500 });
+    } catch (error: any) {
+        let msg = "Unknown error";
+        if (error instanceof Error) {
+            if (error instanceof ZodError) {
+                const err = z.treeifyError(error);
+                if (err.properties) {
+                    if (Object.keys(err.properties).length > 1) {
+                        const errKey = Object.keys(err.properties)[0];
+                        const errVal = (Object.values(err.properties)[0].errors)[0];
+                        console.error(errKey, errVal);
+
+                        msg = `\"${errKey}\" field ${(errVal.split(":")[1]).trim()}`;
+                    }
+                }
+                // console.error(z.treeifyError(error).properties)
+            } else {
+                msg = error.message;
+            }
+        } 
+
+        // const origmsg = error instanceof Error ? error.message : "Unkown error";
+        return res.json({ error: msg }, { status: 500 });
     }
 }

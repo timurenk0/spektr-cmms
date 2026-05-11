@@ -89,16 +89,16 @@ const EquipmentList = () => {
     <ListSkeleton />
   )
 
-  const rows = equipments?.equips ?? [];
+  const rows = equipments.equips ?? [];
 
 
   return (
     <>
       {filters.type && (<h1 className="ps-1 pb-1">Equipment Type: <span className="font-semibold underline">{filters.type}</span></h1>)}
       <div className="flex gap-2 mb-3">
-        {EquipmentTypes.map(type => (
+        {EquipmentTypes.map((type, idx) => (
           !filters.type ? (
-            <Card key={type.id} className="w-full">
+            <Card key={idx} className="w-full">
               <CardActionArea onClick={() => updateFilters("type", type.id)}>
                 <CardContent className="text-green-600 flex justify-center">
                   {type.icon}
@@ -107,8 +107,8 @@ const EquipmentList = () => {
               </CardActionArea>
             </Card>
           ) : (
-            type.id === filters.type && type.categories.map(category => (
-              <Card key={category} className="w-full">
+            type.id === filters.type && type.categories.map((category, idx) => (
+              <Card key={idx} className="w-full">
                 <CardActionArea
                   onClick={() => updateFilters("category", category)}
                   className="h-full"
@@ -144,8 +144,8 @@ const EquipmentList = () => {
                 }
               >
                 <MenuItem value="all">All Locations</MenuItem>
-                {equipmentLocations.map(loc => (
-                  <MenuItem key={loc} value={loc}>{loc}</MenuItem>
+                {equipmentLocations.map((loc, idx) => (
+                  <MenuItem key={idx} value={loc}>{loc}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -161,8 +161,8 @@ const EquipmentList = () => {
                 }
               >
                 <MenuItem value="all">All Statuses</MenuItem>
-                {equipmentStatuses.map(status => (
-                  <MenuItem key={status} value={status}>{status[0].toUpperCase()+status.slice(1).toLowerCase()}</MenuItem>
+                {equipmentStatuses.map((status, idx) => (
+                  <MenuItem key={idx} value={status}>{status[0].toUpperCase()+status.slice(1).toLowerCase()}</MenuItem>
                 ))}
               </Select>
             </FormControl>

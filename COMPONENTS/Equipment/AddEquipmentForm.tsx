@@ -195,7 +195,12 @@ export default function AddEquipmentForm(
             onClose();
         },
         onError: (error) => {
-            toast.error(`Failed to ${equipmentId ? "update" : "add"} equipment: ${error.message}`, {
+            // toast.error(`Failed to ${equipmentId ? "update" : "add"} equipment: ${error.message}`, {
+            //     duration: 2000,
+            //     position: "bottom-right",
+            //     icon: "❌"
+            // });
+            toast.error(`Failed to add equipment: ${error.message}`, {
                 duration: 2000,
                 position: "bottom-right",
                 icon: "❌"

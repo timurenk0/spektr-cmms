@@ -41,7 +41,7 @@ const DeleteEquipmentForm = (
                 }
             },
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ["equipments"] });
+                queryClient.invalidateQueries({ queryKey: ["equipment-list"] });
                 toast.success("Equipment deleted successfully", {
                     duration: 2000,
                     position: "bottom-right",
