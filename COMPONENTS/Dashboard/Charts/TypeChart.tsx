@@ -2,7 +2,7 @@
 
 
 import { TEquipment } from "@/COMPONENTS/utils/types";
-import { Button, Paper } from "@mui/material";
+import { Button, Paper, Skeleton } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftIcon } from "lucide-react";
 import { useState } from "react";
@@ -27,13 +27,45 @@ const TypeChart = () => {
 
     const isLoading = (!equipments  || isLoadingEquipment);
     if (isLoading) return (
-        <Paper>
-            <ResponsiveContainer>
-                <BarChart>
-                    <Bar />
-                </BarChart>
-            </ResponsiveContainer>
-        </Paper>
+        <Skeleton>
+            <Paper sx={{ width: "100vw" }}>
+                <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                            data={[]}
+                            margin={{
+                                top: 20,
+                                right: 30,
+                                left: 20,
+                                bottom: 0
+                            }}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis
+                                // className={!type ? "underline cursor-pointer" : ""}
+                                style={!type ? { textDecoration: "underline", cursor: "pointer" } : {}}
+                                dataKey="name"
+                                angle={-25}
+                                textAnchor="end"
+                                height={100}
+                                onClick={(e) => {!type ? setType(e.value) : ""}}
+                            />
+                            <YAxis
+                                tickCount={0}
+                                interval={0}
+                            />
+                            <Tooltip/>
+                            <Legend/>
+                            <Bar
+                                dataKey="count"
+                                name="Equipment Count"
+                                fill="#2563eb"
+                            />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            </Paper>
+        </Skeleton>
     );
 
 
