@@ -32,25 +32,25 @@ function calculateAge(manufDate: Date): number[] {
 const getHealthBadge = (healthIndex: number | null) => {
   if (healthIndex == null) {
     return (
-      <HealthBadgeFull color="gray" value="-" />
+      <HealthBadgeFull background="#e3e3e3" color="#3e3e3e" value="-" />
     )
   }
 
   if (healthIndex < 30) {
     return (
-      <HealthBadgeFull color="red" value={healthIndex.toFixed(2)} />
+      <HealthBadgeFull background="#ff8b8b" color="#d10000" value={healthIndex.toFixed(2)} />
     )
   } else if (healthIndex < 60) {
     return (
-      <HealthBadgeFull color="amber" value={healthIndex.toFixed(2)} />
+      <HealthBadgeFull background="#ffc166" color="#8b4e00" value={healthIndex.toFixed(2)} />
     )
   } else if (healthIndex < 85) {
     return (
-      <HealthBadgeFull color="yellow" value={healthIndex.toFixed(2)} />
+      <HealthBadgeFull background="#f8ff73" color="#8b8700" value={healthIndex.toFixed(2)} />
     )
   } else {
     return (
-      <HealthBadgeFull color="green" value={healthIndex.toFixed(2)} />
+      <HealthBadgeFull background="#93ff73" color="#2c9d00" value={healthIndex.toFixed(2)} />
     )
   }
 }

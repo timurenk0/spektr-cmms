@@ -36,25 +36,25 @@ const getStatusBadge = (status: string) => {
 const getHealthBadge = (healthIndex: number | null) => {
     if (healthIndex == null) {
         return (
-            <HealthBadge color="gray" value="-" />
+            <HealthBadge background="#e3e3e3" color="#3e3e3e" value="-" />
         )
     }
 
     if (healthIndex < 30) {
         return (
-            <HealthBadge color="red" value={healthIndex.toFixed(2)} />
+            <HealthBadge background="#ff8b8b" color="#d10000" value={healthIndex.toFixed(2)} />
         )
     } else if (healthIndex < 60) {
         return (
-            <HealthBadge color="amber" value={healthIndex.toFixed(2)} />
+            <HealthBadge background="#ffc166" color="#8b4e00" value={healthIndex.toFixed(2)} />
         )
     } else if (healthIndex < 85) {
         return (
-            <HealthBadge color="yellow" value={healthIndex.toFixed(2)} />
+            <HealthBadge background="#f8ff73" color="#8b8700" value={healthIndex.toFixed(2)} />
         )
     } else {
         return (
-            <HealthBadge color="green" value={healthIndex.toFixed(2)} />
+            <HealthBadge background="#93ff73" color="#2c9d00" value={healthIndex.toFixed(2)} />
         )
     }
 }
