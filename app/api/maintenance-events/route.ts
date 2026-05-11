@@ -9,6 +9,8 @@ type Status = "any" | "pending" | "complete" | "incomplete";
 
 export async function GET(req: NextRequest) {
     try {
+        const user = await validateUser();
+        
         const searchParams = req.nextUrl.searchParams;
         const status = searchParams.get("status") as Status;
 
@@ -19,17 +21,17 @@ export async function GET(req: NextRequest) {
             if (!["any", "complete", "incomplete", "pending"].includes(status)) return res.json("Invalid status value", { status: 400 });
 
             if (start && end) {
-                const response = await storage.getMaintenanceEvents(status, start, end);
+                const response = await storage.getMaintenanceEvents(user.tenantId, status, start, end);
                 return res.json(response, { status: 200 });
             }
             
-            const response = await storage.getMaintenanceEvents(status);
+            const response = await storage.getMaintenanceEvents(user.tenantId, status);
 
             return res.json(response, { status: 200 });
         }
 
         
-        const response = await storage.getMaintenanceEvents("any");
+        const response = await storage.getMaintenanceEvents(user.tenantId, "any");
         return res.json(response, { status: 200 });
     } catch (error) {
         const msg = error instanceof Error ? error.message : "Unknown error";

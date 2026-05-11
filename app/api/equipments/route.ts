@@ -77,12 +77,16 @@ export async function POST(req: NextRequest) {
             if (error instanceof ZodError) {
                 const err = z.treeifyError(error);
                 if (err.properties) {
-                    if (Object.keys(err.properties).length > 1) {
+                    if (Object.keys(err.properties).length > 0) {
                         const errKey = Object.keys(err.properties)[0];
                         const errVal = (Object.values(err.properties)[0].errors)[0];
                         console.error(errKey, errVal);
 
                         msg = `\"${errKey}\" field ${(errVal.split(":")[1]).trim()}`;
+
+                        if (errKey === "tenantId") {
+                            msg = `User error. Kindly contact your admin to resolve the issue`;
+                        }
                     }
                 }
                 // console.error(z.treeifyError(error).properties)

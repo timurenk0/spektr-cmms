@@ -347,11 +347,11 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
     
     /* ============================================== Maintenance Events Methods ============================================== */
-    async getMaintenanceEvents(status: "any" | "pending" | "complete" | "incomplete",  start?: string, end?: string): Promise<(MaintenanceEvent & { color: string, isOverdue: boolean })[]> {
-        const conditions = [];
+    async getMaintenanceEvents(tenantId: number, status: "any" | "pending" | "complete" | "incomplete",  start?: string, end?: string): Promise<(MaintenanceEvent & { color: string, isOverdue: boolean })[]> {
+        const conditions = [and(eq(maintenanceEvents.tenantId, tenantId))];
 
         if (start && end) {
-            conditions.push(and(gte(maintenanceEvents.start, start), lte(maintenanceEvents.start, end)));
+            conditions.push(gte(maintenanceEvents.start, start), lte(maintenanceEvents.start, end));
         }
 
         if (status !== "any") {

@@ -36,7 +36,7 @@ const MyCalendar = () => {
   const fetchEvents = useCallback(
     async (fetchInfo: EventSourceFuncArg, successCallback: (events: EventInput[]) => void, failureCallback: (error: Error) => void) => {
       try {
-        const res = await fetch(`/api/maintenance-events?start=${fetchInfo.startStr.slice(0, 10)}&end=${fetchInfo.endStr.slice(0, 10)}`);
+        const res = await fetch(`/api/maintenance-events?start=${fetchInfo.startStr.slice(0, 10)}&end=${fetchInfo.endStr.slice(0, 10)}`, { credentials: 'include' });
         const data = await res.json();
   
         successCallback(data.map((d: EventInput) => {

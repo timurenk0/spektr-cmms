@@ -11,7 +11,10 @@ const AddMaintenanceButton = () => {
 
     const { user, isLoading } = useAuth();
 
-    if (!user || isLoading) return (<h1>Loading user...</h1>);
+    if (!user || isLoading) return (
+    <>
+        Loading user<span className="dots"></span>
+    </>);
     
   return (
     <>

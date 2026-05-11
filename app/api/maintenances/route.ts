@@ -3,6 +3,7 @@ import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { NextRequest, NextResponse as res } from "next/server";
+import z, { ZodError } from "zod";
 
 
 export async function GET(req: NextRequest) {
@@ -47,7 +48,28 @@ export async function POST(req: NextRequest) {
         
         return res.json(JSON.parse(JSON.stringify(newMaintenance)), { status: 201 });
     } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : "Unkown error";
-        return res.json({ error: `Failed to add maintenance records: ${msg}` }, { status: 500 });
+        let msg = "Unknown error";
+        if (error instanceof Error) {
+            if (error instanceof ZodError) {
+                const err = z.treeifyError(error);
+                if (err.properties) {
+                    if (Object.keys(err.properties).length > 0) {
+                        const errKey = Object.keys(err.properties)[0];
+                        const errVal = (Object.values(err.properties)[0].errors)[0];
+                        console.error(errKey, errVal);
+
+                        msg = `\"${errKey}\" field ${(errVal.split(":")[1]).trim()}`
+
+                        if (errKey === "tenantId") {
+                            msg = `User error. Kindly contact your admin to resolve the issue`;
+                        }
+                    }
+                }
+            } else {
+                msg = error.message;
+            }
+        }
+        
+        return res.json({ error: msg }, { status: 500 });
     }
 }
