@@ -543,10 +543,10 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
     
     /* =================================================== Activity Methods =================================================== */
-    async getActivities(limit: number = 12, equipmentId?: number): Promise<Activity[]> {
+    async getActivities(tenantId: number, limit: number = 12, equipmentId?: number): Promise<Activity[]> {
         return equipmentId ?
-            await db.select().from(activities).where(eq(activities.equipmentId, equipmentId)).orderBy(desc(activities.createdAt)).limit(limit) : 
-            await db.select().from(activities).orderBy(desc(activities.createdAt)).limit(limit);
+            await db.select().from(activities).where(and(eq(activities.tenantId, tenantId), eq(activities.equipmentId, equipmentId))).orderBy(desc(activities.createdAt)).limit(limit) : 
+            await db.select().from(activities).where(eq(activities.tenantId, tenantId)).orderBy(desc(activities.createdAt)).limit(limit);
     }
     
     async addActivity(insertActivity: InsertActivity): Promise<Activity> {
