@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
         const maintenanceValidatedData = insertMaintenanceSchema.parse(data);
         if (!maintenanceValidatedData) return;
 
-        if (maintenanceValidatedData.serviceStartDate >= maintenanceValidatedData.serviceEndDate) throw new ApiError({
+        if (maintenanceValidatedData.serviceStartDate >= maintenanceValidatedData.serviceEndDate) return buildError({
             code: "VALIDATION_ERROR",
             field: "service_end_date",
             message: "Maintenance service can't start after or on the same date as service end date.",
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
             status: 400
         })
         
-        if (equipment.totalWorkingHours && !maintenanceValidatedData.dailyWorkingHours) throw new ApiError({
+        if (equipment.totalWorkingHours && !maintenanceValidatedData.dailyWorkingHours) return buildError({
             code: "VALIDATION_ERROR",
             field: "daily_working_hours",
             message: "Equipment with total working hours values MUST have daily working hours in maintenance form.",

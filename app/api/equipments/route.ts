@@ -126,6 +126,7 @@ export async function POST(req: NextRequest) {
                         const duplicateValue = duplicateMatch[1].split(",")[1].trim();
                         return buildError({
                             code: "DUPLICATE_EQUIPMENT",
+                            field: duplicateValue,
                             message: `Equipment with this ${duplicateValue} already exists.`,
                             suggestion: `Try a different ${duplicateValue}.`,
                             status: 409
@@ -134,7 +135,7 @@ export async function POST(req: NextRequest) {
     
                 }
     
-                
+                console.error(error);
                 return buildError({
                     code: "SERVER_ERROR",
                     message: "Something went wrong while creating equipment.",
