@@ -112,7 +112,8 @@ export const equipments = pgTable(
       "status_check",
       sql`status IN ('operational', 'under repair', 'out of service')`
     ),
-    unique("unique_asset_id_per_tenant").on(table.tenantId, table.assetId),
+    // Allow N/A as value
+    // unique("unique_asset_id_per_tenant").on(table.tenantId, table.assetId),
     unique("unique_serial_number_per_tenant").on(table.tenantId, table.serialNumber),
     ]
 );
@@ -160,7 +161,7 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   status: varchar("status", { length: 255 }).notNull(),
   start: date("start_date").notNull(),
   end: date("end_date"), // nullable for emergency events
-  reason: varchar("reason", { length: 255 }),
+  reason: varchar("reason", { length: 511 }),
   scheduledAt: date("scheduled_at").notNull().defaultNow(),
   performedAt: date("performed_at")
 }, (table) => [ 
