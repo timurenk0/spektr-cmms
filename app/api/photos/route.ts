@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
         }
 
         if (!file) return res.json({ error: "No file found" }, { status: 400 });
+        if (file.size > 1024*1024*5) return res.json({ error: "File too big" }, { status: 400 });
 
         if (type === "thumb") {
             imageUrl = await Gstorage.uploadThumbPhoto(file);

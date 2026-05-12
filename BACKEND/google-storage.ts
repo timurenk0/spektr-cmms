@@ -36,6 +36,8 @@ class GStorage {
      */
     async uploadDocument(doc: File): Promise<string> {
         const buffer = Buffer.from(await doc.arrayBuffer());
+
+        if (buffer.byteLength > 1024*1024*10) throw new Error("File too big!");
         
         // Generate document folder name using current date
         const now = new Date();

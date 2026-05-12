@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
                     return buildError({
                         code: "TENANT_ERROR",
                         field,
-                        message: "You have chosen inexistent tenant.",
+                        message: "Your account is linked with inexistent tenant",
                         suggestion: "Please contact IT administrator.",
                         status: 403
                     })
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
 
                 return buildError({
                     code: "SERVER_ERROR",
-                    message: "Something went wrong while creating equipment.",
+                    message: "Something went wrong while creating maintenance.",
                     suggestion: "Please try again later.",
                     status: 500
                 })
