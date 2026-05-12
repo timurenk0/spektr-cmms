@@ -4,7 +4,7 @@ import { insertEquipmentSchema } from "@/BACKEND/Database/schema";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { ZodError } from "zod";
-import buildError from "@/BACKEND/Utils/errorBuilder";
+import buildError, { ApiError } from "@/BACKEND/Utils/errorBuilder";
 import { DatabaseError } from "@neondatabase/serverless";
 import { DrizzleQueryError } from "drizzle-orm";
 
@@ -76,8 +76,15 @@ export async function POST(req: NextRequest) {
         await activityLogger(user, "add", `Equipment ${newEquipment.name} added to the database`, newEquipment.id);
 
         return res.json(JSON.parse(JSON.stringify(newEquipment)), { status: 201 });
-    } catch (error: any) {
-        // Zod errors
+    } catch (error: unknown) {
+        if (error instanceof ApiError) {
+            return buildError({
+                code: error.code,
+                
+            })
+        }
+        
+        // Zod errors        
         if (error instanceof ZodError) {
             console.error(error);
             const firstError = error.issues[0];

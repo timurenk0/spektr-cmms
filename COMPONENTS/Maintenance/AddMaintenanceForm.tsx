@@ -87,11 +87,13 @@ const AddMaintenanceForm = ({
         body: JSON.stringify(values)
       });
       
-      const data = await response.json().catch(() => null);
+      const data = await response.json();
       
       if (!response.ok) {
-        const message = data.error || `Request failed: ${response.status} ${response.statusText}`
-        throw new Error(message);
+        const message = data.error.message;
+        const suggest = data.error.suggestion;
+        const res = message+" "+suggest || `Request failed: ${response.status} ${response.statusText}`;
+        throw new Error(res);
       }
       
       return data;

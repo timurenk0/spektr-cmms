@@ -2,7 +2,7 @@ import { insertMaintenanceSchema } from "@/BACKEND/Database/schema";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
-import buildError from "@/BACKEND/Utils/errorBuilder";
+import buildError, { ApiError } from "@/BACKEND/Utils/errorBuilder";
 import { DatabaseError } from "@neondatabase/serverless";
 import { DrizzleQueryError } from "drizzle-orm";
 import { NextRequest, NextResponse as res } from "next/server";
@@ -28,7 +28,15 @@ export async function POST(req: NextRequest) {
         // Parse maintenance data from request body with DB schema for validation.
         const body = await req.json();
         const equipment = await storage.getEquipment(body.equipmentId);
-        if (!equipment) return res.json({ error: "No equipment found" }, { status: 404 });
+        // if (!equipment) return res.json({ error: "No equipment found" }, { status: 404 });
+        if (!equipment) return buildError({
+            code: "NOT_FOUND",
+            field: "equipment_id",
+            message: "Equipment with given id is not found.",
+            suggestion: "Double-check the submitted form fields",
+            status: 404
+        });
+
         const data = {
             ...body,
             tenantId: equipment.tenantId
@@ -51,6 +59,16 @@ export async function POST(req: NextRequest) {
         
         return res.json(JSON.parse(JSON.stringify(newMaintenance)), { status: 201 });
     } catch (error: unknown) {
+        if (error instanceof ApiError) {
+            return buildError({
+                code: error.code,
+                field: error.field,
+                message: error.message,
+                suggestion: error.suggestion,
+                status: error.status
+            })
+        }
+        
         if (error instanceof ZodError) {
             console.error(error);
             const firstError = error.issues[0];

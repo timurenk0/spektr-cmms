@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { NextResponse as res } from "next/server";
+import buildError, { ApiError } from "../Utils/errorBuilder";
+import { NextResponse } from "next/server";
 
 
 export interface AuthUser {
@@ -39,10 +41,26 @@ export function authorize(user: AuthUser | null, roles: string[] | string): bool
     return roles.includes(user.role);
 }
 
-export async function validateUser(role?: string | string[]) {
+export async function validateUser(role?: string | string[]): Promise<AuthUser> {
     const user = await authService();
-    if (!user) throw new Error("Unauthorized");
-    if (role && !authorize(user, role)) throw new Error("Forbidden");
+    // if (!user) throw new Error("Unauthorized");
+    if (!user) {
+        throw new ApiError({
+            code: "UNAUTHORIZED",
+            message: "Failed to verify user",
+            suggestion: "Try logging in again",
+            status: 401
+        });
+    }
+
+    if (role && !authorize(user, role)) {
+        throw new ApiError({
+            code: "FORBIDDEN",
+            message:" You don't have enough permissions.",
+            suggestion: "Request additional permissions from your manager.",
+            status: 403
+        });
+    }
     
     return user;
 }
