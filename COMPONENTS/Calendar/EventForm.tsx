@@ -21,6 +21,7 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
   const [eventStatus, setEventStatus] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [completionDate, setCompletionDate] = useState(format(event.start!, "yyyy-MM-dd"));
+  const [reason, setReason] = useState("");
   const queryClient = useQueryClient();
 
   console.log(eventStatus);
@@ -28,7 +29,7 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
 
   const uploadDocument = async () => {
     try {
-      if (!file) throw new Error("No file selected");
+      if (!file) throw new Error("No file found");
 
       const formData = new FormData();
       formData.append("file", file);
@@ -57,7 +58,8 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
           method: "PATCH",
           body: JSON.stringify({
             status,
-            performedAt: format(completionDate, "yyyy-MM-dd")
+            performedAt: format(completionDate, "yyyy-MM-dd"),
+            reason: reason.trim()
           }),
           credentials: "include"
         });
@@ -98,16 +100,31 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
 
   const onSubmit = async () => {
     if (!eventStatus) {
+      toast.dismiss();
       toast.error("Assign status first!");
       return;
     }
+
     
     if (eventStatus === "complete") {
+      if (!file) {
+        toast.dismiss();
+        toast.error("Upload file first!");
+        return;
+      }
+
       const doc = await uploadDocument();
       if (!doc) {
-        toast.error("No document found!");
+        toast.dismiss();
+        toast.error("Failed to upload document. Please try again.");
         return;
       }      
+    } else if (eventStatus === "incomplete") {
+      if (reason.trim().length < 3) {
+        toast.dismiss()
+        toast.error("Reason statement should be at least 3 characters long!");
+        return;
+      }
     }
     mutation.mutate(eventStatus);
   }
@@ -167,6 +184,16 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
                     onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
                       const file = e.target.files?.[0];
                       if (!file) throw new Error("No file found");
+
+                      if (file.size > 1024*1024*10) {
+                        toast.dismiss();
+                        toast.error("File size should not exceed 10MB!", {
+                          icon: "⚠️"
+                        });
+                        e.target.value = "";
+                        return;
+                      }
+                      
                       setFile(file);
                     }
                   },
@@ -174,6 +201,25 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
                     endAdornment: <InputAdornment position="end"><FileIcon /></InputAdornment>
                   }
                 }}
+              />
+            </>
+          ) }
+          { eventStatus === "incomplete" && (
+            <>
+              <p>Type the reason why event is marked as incomplete</p>
+              <TextField
+                label="Reason"
+                color="info"
+                margin="dense"
+                value={reason}
+                multiline
+                slotProps={{
+                  htmlInput: { minLength: 3, maxLength: 511 }
+                }}
+                rows={4}
+                required
+                fullWidth
+                onChange={e => setReason(e.target.value)}
               />
             </>
           ) }
