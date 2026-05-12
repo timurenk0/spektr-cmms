@@ -6,6 +6,8 @@ import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import z, { ZodError } from "zod";
 import buildError from "@/BACKEND/Utils/errorBuilder";
 import { type DBError } from "@/BACKEND/Utils/errorBuilder";
+import { DatabaseError } from "@neondatabase/serverless";
+import { DrizzleQueryError } from "drizzle-orm";
 
 
 
@@ -104,29 +106,30 @@ export async function POST(req: NextRequest) {
         }
 
         // Database errors
-        if (error instanceof Error) {
-            error = error.cause as DBError
-            if (error.code === "23505") {
-                const duplicateMatch = (error.detail as string).match(/\(([^)]+)\)=\(([^)]+)\)/);
-
-                if (duplicateMatch) {
-                    const duplicateValue = duplicateMatch[1].split(",")[1].trim();
-                    return buildError({
-                        code: "DUPLICATE_EQUIPMENT",
-                        message: `Equipment with this ${duplicateValue} already exists.`,
-                        suggestion: `Try a different ${duplicateValue}.`,
-                        status: 409
-                    });
+        if (error instanceof DrizzleQueryError) {
+            if (error.cause instanceof DatabaseError) {
+                if (error.cause.code === "23505") {
+                    const duplicateMatch = (error.cause.detail as string).match(/\(([^)]+)\)=\(([^)]+)\)/);
+    
+                    if (duplicateMatch) {
+                        const duplicateValue = duplicateMatch[1].split(",")[1].trim();
+                        return buildError({
+                            code: "DUPLICATE_EQUIPMENT",
+                            message: `Equipment with this ${duplicateValue} already exists.`,
+                            suggestion: `Try a different ${duplicateValue}.`,
+                            status: 409
+                        });
+                    }
+    
                 }
-
+    
+                return buildError({
+                    code: "SERVER_ERROR",
+                    message: "Something went wrong while creating equipment.",
+                    suggestion: "Please try again later.",
+                    status: 500
+                })
             }
-
-            return buildError({
-                code: "SERVER_ERROR",
-                message: "Something went wrong while creating equipment.",
-                suggestion: "Please try again later.",
-                status: 500
-            })
         }
 
         // Server errors
