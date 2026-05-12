@@ -5,7 +5,7 @@ import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { NextRequest, NextResponse as res } from "next/server";
 import uploadAndAddDocument from "./helper";
-import buildError, { ApiError } from "@/BACKEND/Utils/errorBuilder";
+import buildError from "@/BACKEND/Utils/errorBuilder";
 
 
 export async function GET() {

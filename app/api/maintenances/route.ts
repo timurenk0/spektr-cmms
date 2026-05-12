@@ -2,7 +2,7 @@ import { insertMaintenanceSchema } from "@/BACKEND/Database/schema";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
-import buildError, { ApiError } from "@/BACKEND/Utils/errorBuilder";
+import buildError, { CustomApiError } from "@/BACKEND/Utils/errorBuilder";
 import { DatabaseError } from "@neondatabase/serverless";
 import { DrizzleQueryError } from "drizzle-orm";
 import { NextRequest, NextResponse as res } from "next/server";
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
         
         return res.json(JSON.parse(JSON.stringify(newMaintenance)), { status: 201 });
     } catch (error: unknown) {
-        if (error instanceof ApiError) {
+        if (error instanceof CustomApiError) {
             return buildError({
                 code: error.code,
                 field: error.field,

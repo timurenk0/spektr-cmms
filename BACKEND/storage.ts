@@ -18,7 +18,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { differenceInCalendarMonths, differenceInDays } from "date-fns";
 import { createMaintenanceEvents } from "./Middleware/EventManager";
-import { ApiError } from "./Utils/errorBuilder";
+import { CustomApiError } from "./Utils/errorBuilder";
 
 
 type Schema = typeof schema;
@@ -314,7 +314,7 @@ export class DatabaseStorage {
             { duration: insertMaintenance.levelIDuration, hours: insertMaintenance.levelIMonths }
         ].some(level => level.duration && level.duration > 0 && level.hours && level.hours > 0);
         // if (!hasValidLevels) throw new Error("At least one maintenance level must have hours/duration values > 0");
-        if (!hasValidLevels) throw new ApiError({
+        if (!hasValidLevels) throw new CustomApiError({
             code: "VALIDATION_ERROR",
             message: "At least one of levels should have both hours and duration values",
             suggestion: "Double-check the submitted form fields",
@@ -616,9 +616,9 @@ export class DatabaseStorage {
         return (await db.insert(photos).values(insertPhoto).returning())[0];
     }
     
-    async deletePhoto(id: number): Promise<string> {
-        const { url } = (await db.delete(photos).where(eq(photos.id, id)).returning({ url: photos.imageUrl }))[0];
-        return url;
+    async deletePhoto(id: number): Promise<Photo> {
+        const deletedPhoto = (await db.delete(photos).where(eq(photos.id, id)).returning());
+        return deletedPhoto[0];
     }
     /* ======================================================================================================================== */
     

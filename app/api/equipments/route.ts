@@ -4,7 +4,7 @@ import { insertEquipmentSchema } from "@/BACKEND/Database/schema";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { ZodError } from "zod";
-import buildError, { ApiError, buildCustomError } from "@/BACKEND/Utils/errorBuilder";
+import buildError, { CustomApiError, buildCustomError } from "@/BACKEND/Utils/errorBuilder";
 import { DatabaseError } from "@neondatabase/serverless";
 import { DrizzleQueryError } from "drizzle-orm";
 
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
 
         return res.json(JSON.parse(JSON.stringify(newEquipment)), { status: 201 });
     } catch (error: unknown) {
-        if (error instanceof ApiError) {
+        if (error instanceof CustomApiError) {
             return buildError({
                 code: error.code,
                 field: error.field,

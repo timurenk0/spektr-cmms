@@ -12,7 +12,7 @@ type CustomError = {
     status?: number
 }
 
-type CustomApiError = {
+type CustomApiErrorPayload = {
     code: string,
     message: string,
     field?: string,
@@ -24,16 +24,17 @@ export const ERROR_CODES = {
     UNKNOWN_ERROR: "UNKNOWN_ERROR",
     SERVER_ERROR: "SERVER_ERROR",
     VALIDATION_ERROR: "VALIDATION_ERROR",
-    DUPLICATION_ERROR: "DUPLICATION_ERROR"
+    DUPLICATION_ERROR: "DUPLICATION_ERROR",
+    NOT_FOUND_ERROR: "NOT_FOUND_ERROR",
 }
 
-export class ApiError extends Error {
+export class CustomApiError extends Error {
     code: string;
     status: number;
     suggestion?: string;
     field?: string;
 
-    constructor({ code, message, status, suggestion, field }: CustomApiError) {
+    constructor({ code, message, status, suggestion, field }: CustomApiErrorPayload) {
         super(message);
 
         this.code = code;
@@ -48,8 +49,8 @@ export class ApiError extends Error {
  * @param error Any error caught by try-catch block
  * @returns NextResponse with success flag and custom error
  */
-export default function buildError(error: unknown) {
-    if (error instanceof ApiError) return buildCustomError(error);
+export default function buildError(error: unknown): NextResponse {
+    if (error instanceof CustomApiError) return buildCustomError(error);
 
     if (error instanceof ZodError) {
         console.error(error);
@@ -90,14 +91,15 @@ export default function buildError(error: unknown) {
             });
         }
 
-        console.error(error);
-        return buildCustomError({
-            code: ERROR_CODES.UNKNOWN_ERROR,
-            message: "Unexpected server error",
-            suggestion: "Please try again later",
-            status: 500
-        });
     }
+    console.error(error);
+    return buildCustomError({
+        code: ERROR_CODES.UNKNOWN_ERROR,
+        message: "Unexpected server error",
+        suggestion: "Please try again later",
+        status: 500
+    });
+
 }
 
 /**

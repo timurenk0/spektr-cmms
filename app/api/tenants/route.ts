@@ -3,7 +3,7 @@ import { storage } from "@/BACKEND/storage";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { insertTenantSchema } from "@/BACKEND/Database/schema";
-import buildError, { ApiError, buildCustomError, ERROR_CODES } from "@/BACKEND/Utils/errorBuilder";
+import buildError, { buildCustomError, ERROR_CODES } from "@/BACKEND/Utils/errorBuilder";
 import { ZodError } from "zod";
 import { DrizzleQueryError } from "drizzle-orm";
 import { DatabaseError } from "@neondatabase/serverless";

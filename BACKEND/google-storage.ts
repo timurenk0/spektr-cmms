@@ -66,7 +66,7 @@ class GStorage {
             console.log(filePath);
             await bucket.file(filePath).delete();
         } catch (error) {
-            console.error(error);
+            throw error;
         }
     }
 
