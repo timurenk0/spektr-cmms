@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Button, FormControl, FormControlLabel, FormLabel, InputAdornment, InputLabel, MenuItem, Radio, RadioGroup, Select, Skeleton, TextField } from "@mui/material";
 import { EquipmentTypes } from "../utils/equipmentTypes";
-import { TEquipment, TTenant } from "../utils/types";
+import { CustomError, TEquipment, TTenant } from "../utils/types";
 import { ImageIcon } from "lucide-react";
 
 
@@ -176,8 +176,10 @@ export default function AddEquipmentForm(
             console.log(data.error);
 
             if (!response.ok) {
-                const message = data.error || `Request failed: ${response.status} ${response.statusText}`;
-                throw new Error(message);
+                const message = data.error.message;
+                const suggest = data.error.suggestion;
+                const res = message+" "+suggest || `Request failed: ${response.status} ${response.statusText}`;
+                throw new Error(res);
             }
 
             return data;
@@ -200,6 +202,7 @@ export default function AddEquipmentForm(
             //     position: "bottom-right",
             //     icon: "❌"
             // });
+            // console.error(error.code);
             toast.error(`Failed to add equipment: ${error.message}`, {
                 duration: 2000,
                 position: "bottom-right",

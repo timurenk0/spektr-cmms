@@ -1,3 +1,10 @@
+export type CustomError = {
+    code: string,
+    message: string,
+    suggestion?: string,
+    field?: string
+}
+
 export type TActivity = {
     id: number;
     tenantId: number;
