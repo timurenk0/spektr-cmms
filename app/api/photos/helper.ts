@@ -23,7 +23,7 @@ export default async function uploadAndAddPhoto(
                     return true; 
                 })
                 .catch((err) => {
-                    throw new Error(`Fallback delete failed: ${err}`);
+                    throw err;
                 })
         }
 

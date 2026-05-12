@@ -4,7 +4,7 @@ import { insertEquipmentSchema } from "@/BACKEND/Database/schema";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { ZodError } from "zod";
-import buildError, { ApiError } from "@/BACKEND/Utils/errorBuilder";
+import buildError, { ApiError, buildCustomError } from "@/BACKEND/Utils/errorBuilder";
 import { DatabaseError } from "@neondatabase/serverless";
 import { DrizzleQueryError } from "drizzle-orm";
 
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
     
                     if (duplicateMatch) {
                         const duplicateValue = duplicateMatch[1].split(",")[1].trim();
-                        return buildError({
+                        return buildCustomError({
                             code: "DUPLICATE_EQUIPMENT",
                             field: duplicateValue,
                             message: `Equipment with this ${duplicateValue} already exists.`,

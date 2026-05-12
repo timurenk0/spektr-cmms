@@ -5,6 +5,7 @@ import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { NextRequest, NextResponse as res } from "next/server";
 import uploadAndAddDocument from "./helper";
+import buildError, { ApiError } from "@/BACKEND/Utils/errorBuilder";
 
 
 export async function GET() {
@@ -26,21 +27,24 @@ export async function POST(req: NextRequest) {
 
         const body = await req.formData();
 
+        const { file, rawEquipmentId, title, category, notes } = Object.fromEntries(body.entries()) as {
+            file: File,
+            rawEquipmentId: string,
+            title: string,
+            category: string,
+            notes?: string
+        }
+        
         // Fetch the form data
-        const file = body.get("file") as File | null;
         if (!file) return res.json({ error: "Failed to upload file to Google Bucket Storage" }, { status: 500 });
+        if (file.size > 1024*1024*10) return res.json({ error: "File too big" }, { status: 400 });
 
-        const rawEquipmentId = body.get("equipmentId");
-        if (!rawEquipmentId) return res.json({ error: "No equipment ID passed" }, { status: 400 });
         const equipmentId = Number(rawEquipmentId);
         if (isNaN(equipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
         
-        const title = body.get("title")?.toString();
         if (!title) return res.json({ error: "No document title passed" }, { status: 400 });
         
-        const notes = body.get("notes");
         
-        const category = body.get("category")?.toString();
         if (!category) return res.json({ error: "No document category passed" }, { status: 400 });
         
         
@@ -58,8 +62,7 @@ export async function POST(req: NextRequest) {
         await activityLogger(user, "add", `Document uploaded for equipment ${newDocument.equipmentId}`, newDocument.equipmentId);
         
         return res.json(JSON.parse(JSON.stringify(newDocument)), { status: 201 });
-    } catch (error) {
-        const msg = error instanceof Error ? error.message : "Unknown error";
-        return res.json({ error: `Failed to post document: ${msg}` }, { status: 500 });
+    } catch (error: unknown) {
+        return buildError(error);
     }
 }

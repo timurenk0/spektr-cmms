@@ -1,6 +1,7 @@
 # PRIORITY
 - Add user role check on each delete endpoint
 - Add equipment health index degradation
+- Test document and photo upload errors
 
 
 # FEATURES

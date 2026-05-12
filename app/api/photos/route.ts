@@ -4,6 +4,7 @@ import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { NextRequest, NextResponse as res } from "next/server";
 import uploadAndAddPhoto from "./helper";
+import buildError from "@/BACKEND/Utils/errorBuilder";
 
 
 export async function GET() {
@@ -45,6 +46,14 @@ export async function POST(req: NextRequest) {
         const parsedEquipmentId = Number(equipmentId);
         if (isNaN(parsedEquipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
         
+        if (!storage.getEquipment(parsedEquipmentId)) return buildError({
+            code: "NOT_FOUND",
+            field: "equipment_id",
+            message: "Equipment with given id is not found.",
+            suggestion: "Double-check the submitted form fields",
+            status: 404
+        });
+        
         const documentData = {
             equipmentId: parsedEquipmentId,
         }
@@ -54,7 +63,7 @@ export async function POST(req: NextRequest) {
 
         return res.json(JSON.parse(JSON.stringify(newPhoto)), { status: 201 });
     } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : "Unknown error";
-        return res.json({ error: `Failed to post photo: ${msg}` }, { status: 500 });
+        // Catch generic errors
+        return buildError(error);
     }
 }

@@ -22,8 +22,8 @@ export default async function uploadAndAddDocument(
                 .then(()=>{
                     console.log("Fallback successfully deleted the file")
                 })
-                .catch(() => {
-                    throw new Error(`Fallback delete failed: ${error}`)
+                .catch((err) => {
+                    throw err;
                 })
         }
     }
