@@ -31,9 +31,7 @@ export async function POST(req: NextRequest) {
 
         // Parse user data with DB schema validation
         const validatedUser = insertUserSchema.parse({
-            username: body.username,
-            password: body.password,
-            role: body.role,
+            ...body,
             tenantId: newTenant.id
         });
 
