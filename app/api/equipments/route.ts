@@ -3,9 +3,8 @@ import { NextRequest, NextResponse as res } from "next/server";
 import { insertEquipmentSchema } from "@/BACKEND/Database/schema";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
-import z, { ZodError } from "zod";
+import { ZodError } from "zod";
 import buildError from "@/BACKEND/Utils/errorBuilder";
-import { type DBError } from "@/BACKEND/Utils/errorBuilder";
 import { DatabaseError } from "@neondatabase/serverless";
 import { DrizzleQueryError } from "drizzle-orm";
 
@@ -63,7 +62,7 @@ export async function GET(
 export async function POST(req: NextRequest) {
     try {
         // Validate user.
-        // const user = await validateUser("admin");
+        const user = await validateUser("admin");
                 
         // Parse request body to JSON format.
         // Parse equipment data from request body with DB schema for validation.
@@ -74,7 +73,7 @@ export async function POST(req: NextRequest) {
         const newEquipment = await storage.addEquipment(equipmentValidatedData);
         
         // Log the activity for added equipment using helper logger method.
-        // await activityLogger(user, "add", `Equipment ${newEquipment.name} added to the database`, newEquipment.id);
+        await activityLogger(user, "add", `Equipment ${newEquipment.name} added to the database`, newEquipment.id);
 
         return res.json(JSON.parse(JSON.stringify(newEquipment)), { status: 201 });
     } catch (error: any) {
