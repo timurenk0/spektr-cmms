@@ -2,8 +2,11 @@ import { insertMaintenanceSchema } from "@/BACKEND/Database/schema";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
+import buildError from "@/BACKEND/Utils/errorBuilder";
+import { DatabaseError } from "@neondatabase/serverless";
+import { DrizzleQueryError } from "drizzle-orm";
 import { NextRequest, NextResponse as res } from "next/server";
-import z, { ZodError } from "zod";
+import { ZodError } from "zod";
 
 
 export async function GET(req: NextRequest) {
@@ -48,28 +51,52 @@ export async function POST(req: NextRequest) {
         
         return res.json(JSON.parse(JSON.stringify(newMaintenance)), { status: 201 });
     } catch (error: unknown) {
-        let msg = "Unknown error";
-        if (error instanceof Error) {
-            if (error instanceof ZodError) {
-                const err = z.treeifyError(error);
-                if (err.properties) {
-                    if (Object.keys(err.properties).length > 0) {
-                        const errKey = Object.keys(err.properties)[0];
-                        const errVal = (Object.values(err.properties)[0].errors)[0];
-                        console.error(errKey, errVal);
+        if (error instanceof ZodError) {
+            console.error(error);
+            const firstError = error.issues[0];
+            const field = firstError.path.join(".");
 
-                        msg = `\"${errKey}\" field ${(errVal.split(":")[1]).trim()}`
+            switch (field) {
+                case "tenantId":
+                    return buildError({
+                        code: "TENANT_ERROR",
+                        field,
+                        message: "You have chosen inexistent tenant.",
+                        suggestion: "Please contact IT administrator.",
+                        status: 403
+                    })
+                default:
+                    return buildError({
+                        code: "VALIDATION_ERROR",
+                        field,
+                        message: firstError.message,
+                        suggestion: "Double-check the submitted form fields.",
+                        status: 400
+                    })
+            }
+        }
 
-                        if (errKey === "tenantId") {
-                            msg = `User error. Kindly contact your admin to resolve the issue`;
-                        }
-                    }
-                }
-            } else {
-                msg = error.message;
+        if (error instanceof DrizzleQueryError) {
+            console.error(error);
+            if (error.cause instanceof DatabaseError) {
+                console.error(error);
+
+                return buildError({
+                    code: "SERVER_ERROR",
+                    message: "Something went wrong while creating equipment.",
+                    suggestion: "Please try again later.",
+                    status: 500
+                })
             }
         }
         
-        return res.json({ error: msg }, { status: 500 });
+        console.error(error);
+        
+        return buildError({
+            code: "UNKNOWN_ERROR",
+            message: "Unexpected server error.",
+            suggestion: "Please try again later.",
+            status: 500
+        })
     }
 }
