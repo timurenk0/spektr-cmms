@@ -80,7 +80,10 @@ export async function POST(req: NextRequest) {
         if (error instanceof ApiError) {
             return buildError({
                 code: error.code,
-                
+                field: error.field,
+                message: error.message,
+                suggestion: error.suggestion,
+                status: error.status
             })
         }
         

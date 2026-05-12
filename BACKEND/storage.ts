@@ -18,6 +18,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { differenceInCalendarMonths, differenceInDays } from "date-fns";
 import { createMaintenanceEvents } from "./Middleware/EventManager";
+import { ApiError } from "./Utils/errorBuilder";
 
 
 type Schema = typeof schema;
@@ -304,7 +305,7 @@ export class DatabaseStorage {
         return (await db.select().from(maintenances).where(eq(maintenances.equipmentId, id)))[0];
     }
     
-    async addMaintenance(insertMaintenance: InsertMaintenance, transaction?: NeonDatabase<Schema>): Promise<Maintenance> {
+    async addMaintenance(insertMaintenance: InsertMaintenance, equipment: Equipment, transaction?: NeonDatabase<Schema>): Promise<Maintenance> {
         const hasValidLevels = [
             { duration: insertMaintenance.levelADuration, hours: insertMaintenance.levelAHours },
             { duration: insertMaintenance.levelBDuration, hours: insertMaintenance.levelBHours },
@@ -312,7 +313,13 @@ export class DatabaseStorage {
             { duration: insertMaintenance.levelDDuration, hours: insertMaintenance.levelDHours },
             { duration: insertMaintenance.levelIDuration, hours: insertMaintenance.levelIMonths }
         ].some(level => level.duration && level.duration > 0 && level.hours && level.hours > 0);
-        if (!hasValidLevels) throw new Error("At least one maintenance level must have hours/duration values > 0");
+        // if (!hasValidLevels) throw new Error("At least one maintenance level must have hours/duration values > 0");
+        if (!hasValidLevels) throw new ApiError({
+            code: "VALIDATION_ERROR",
+            message: "At least one of levels should have both hours and duration values",
+            suggestion: "Double-check the submitted form fields",
+            status: 400
+        });
         
         const tx = transaction || db;
         return await tx.transaction(async (tx: Transaction) => {
@@ -320,15 +327,12 @@ export class DatabaseStorage {
                 const [maintenance] = await tx.insert(maintenances).values(insertMaintenance).returning();
                 console.log(maintenance);
                 
-                const equipment = await this.getEquipment(maintenance.equipmentId);
-                if (!equipment) throw new Error("Invalid equipment ID");
                 const events = createMaintenanceEvents(maintenance, equipment, undefined, undefined);
                 await tx.insert(maintenanceEvents).values(events).returning();    
                 
                 return maintenance;
             } catch (error) {
-                const msg = error instanceof Error ? error.message : "Unknown error";
-                throw new Error(`Failed to add maintenance: ${msg}`);
+                throw error;
             }
         })
     };

@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         // Validate user.
-        const user = await validateUser("admin");
+        // const user = await validateUser("admin");
 
         // Parse request body to JSON format.
         // Parse maintenance data from request body with DB schema for validation.
@@ -42,12 +42,29 @@ export async function POST(req: NextRequest) {
             tenantId: equipment.tenantId
         }
         const maintenanceValidatedData = insertMaintenanceSchema.parse(data);
+        if (!maintenanceValidatedData) return;
 
+        if (maintenanceValidatedData.serviceStartDate >= maintenanceValidatedData.serviceEndDate) throw new ApiError({
+            code: "VALIDATION_ERROR",
+            field: "service_end_date",
+            message: "Maintenance service can't start after or on the same date as service end date.",
+            suggestion: "Double-check the submitted form fields.",
+            status: 400
+        })
+        
+        if (equipment.totalWorkingHours && !maintenanceValidatedData.dailyWorkingHours) throw new ApiError({
+            code: "VALIDATION_ERROR",
+            field: "daily_working_hours",
+            message: "Equipment with total working hours values MUST have daily working hours in maintenance form.",
+            suggestion: "Double-check the submitted form fields.",
+            status: 400
+        });
+        
         console.log(maintenanceValidatedData);
 
 
         // Add validated maintenance data to the DB.
-        const newMaintenance = await storage.addMaintenance(maintenanceValidatedData);
+        const newMaintenance = await storage.addMaintenance(maintenanceValidatedData, equipment);
         const healthIndex = await storage.calculateHealthIndex(maintenanceValidatedData.equipmentId, maintenanceValidatedData.givenHealthIndex)
 
         await storage.updateEquipment(newMaintenance.equipmentId, {
@@ -55,7 +72,7 @@ export async function POST(req: NextRequest) {
         });        
 
         // Log activity for added maintenance using helper logger method.
-        await activityLogger(user, "add", `Maintenance for equipment ${newMaintenance.equipmentId} added to the database`, newMaintenance.equipmentId);
+        // await activityLogger(user, "add", `Maintenance for equipment ${newMaintenance.equipmentId} added to the database`, newMaintenance.equipmentId);
         
         return res.json(JSON.parse(JSON.stringify(newMaintenance)), { status: 201 });
     } catch (error: unknown) {
@@ -97,7 +114,7 @@ export async function POST(req: NextRequest) {
         if (error instanceof DrizzleQueryError) {
             console.error(error);
             if (error.cause instanceof DatabaseError) {
-                console.error(error);
+                console.error(error.cause);
 
                 return buildError({
                     code: "SERVER_ERROR",
