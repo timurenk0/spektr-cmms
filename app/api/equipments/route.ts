@@ -72,30 +72,22 @@ export async function POST(req: NextRequest) {
 
         return res.json(JSON.parse(JSON.stringify(newEquipment)), { status: 201 });
     } catch (error: any) {
-        let msg = "Unknown error";
-        if (error instanceof Error) {
-            if (error instanceof ZodError) {
-                const err = z.treeifyError(error);
-                if (err.properties) {
-                    if (Object.keys(err.properties).length > 0) {
-                        const errKey = Object.keys(err.properties)[0];
-                        const errVal = (Object.values(err.properties)[0].errors)[0];
-                        console.error(errKey, errVal);
+        if (error instanceof ZodError) {
+            console.error(error);
+            const firstError = error.issues[0];
+            
+            const field = firstError.path.join(".");
+            let msg = firstError.message;
 
-                        msg = `\"${errKey}\" field ${(errVal.split(":")[1]).trim()}`;
-
-                        if (errKey === "tenantId") {
-                            msg = `User error. Kindly contact your admin to resolve the issue`;
-                        }
-                    }
-                }
-                // console.error(z.treeifyError(error).properties)
-            } else {
-                msg = error.message;
+            if (field === "tenantId") {
+                msg = "User error. Kindly contact your admin to resolve the issue";
             }
-        } 
 
-        // const origmsg = error instanceof Error ? error.message : "Unkown error";
-        return res.json({ error: msg }, { status: 500 });
+            return res.json({ error: field ? `"${field}" field ${msg}` : msg });
+        }
+
+        if (error instanceof Error) {
+            return res.json({ error: error.message }, { status: 500 });
+        }
     }
 }
