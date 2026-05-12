@@ -107,7 +107,9 @@ export async function POST(req: NextRequest) {
 
         // Database errors
         if (error instanceof DrizzleQueryError) {
+            console.error(error)
             if (error.cause instanceof DatabaseError) {
+                console.error(error);
                 if (error.cause.code === "23505") {
                     const duplicateMatch = (error.cause.detail as string).match(/\(([^)]+)\)=\(([^)]+)\)/);
     
@@ -123,6 +125,7 @@ export async function POST(req: NextRequest) {
     
                 }
     
+                
                 return buildError({
                     code: "SERVER_ERROR",
                     message: "Something went wrong while creating equipment.",
@@ -131,6 +134,8 @@ export async function POST(req: NextRequest) {
                 })
             }
         }
+        
+        console.error(error)
 
         // Server errors
         return buildError({
