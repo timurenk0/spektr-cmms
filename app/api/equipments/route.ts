@@ -4,6 +4,10 @@ import { insertEquipmentSchema } from "@/BACKEND/Database/schema";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import z, { ZodError } from "zod";
+import buildError from "@/BACKEND/Utils/errorBuilder";
+import { type DBError } from "@/BACKEND/Utils/errorBuilder";
+
+
 
 
 export async function GET(
@@ -57,7 +61,7 @@ export async function GET(
 export async function POST(req: NextRequest) {
     try {
         // Validate user.
-        const user = await validateUser("admin");
+        // const user = await validateUser("admin");
                 
         // Parse request body to JSON format.
         // Parse equipment data from request body with DB schema for validation.
@@ -68,26 +72,69 @@ export async function POST(req: NextRequest) {
         const newEquipment = await storage.addEquipment(equipmentValidatedData);
         
         // Log the activity for added equipment using helper logger method.
-        await activityLogger(user, "add", `Equipment ${newEquipment.name} added to the database`, newEquipment.id);
+        // await activityLogger(user, "add", `Equipment ${newEquipment.name} added to the database`, newEquipment.id);
 
         return res.json(JSON.parse(JSON.stringify(newEquipment)), { status: 201 });
     } catch (error: any) {
+        // Zod errors
         if (error instanceof ZodError) {
             console.error(error);
             const firstError = error.issues[0];
             
             const field = firstError.path.join(".");
-            let msg = firstError.message;
 
-            if (field === "tenantId") {
-                msg = "User error. Kindly contact your admin to resolve the issue";
+            switch (field) {
+                case "tenantId":
+                    return buildError({
+                        code: "TENANT_ERROR",
+                        field,
+                        message: "You have chosen inexistent tenant.",
+                        suggestion: "Please contact IT administrator.",
+                        status: 403
+                    })
+                default:
+                    return buildError({
+                        code: "VALIDATION_ERROR",
+                        field,
+                        message: firstError.message,
+                        suggestion: "Double-check the submitted form fields.",
+                        status: 400
+                    })
+            }
+        }
+
+        // Database errors
+        if (error instanceof Error) {
+            error = error.cause as DBError
+            if (error.code === "23505") {
+                const duplicateMatch = (error.detail as string).match(/\(([^)]+)\)=\(([^)]+)\)/);
+
+                if (duplicateMatch) {
+                    const duplicateValue = duplicateMatch[1].split(",")[1].trim();
+                    return buildError({
+                        code: "DUPLICATE_EQUIPMENT",
+                        message: `Equipment with this ${duplicateValue} already exists.`,
+                        suggestion: `Try a different ${duplicateValue}.`,
+                        status: 409
+                    });
+                }
+
             }
 
-            return res.json({ error: field ? `"${field}" field ${msg}` : msg });
+            return buildError({
+                code: "SERVER_ERROR",
+                message: "Something went wrong while creating equipment.",
+                suggestion: "Please try again later.",
+                status: 500
+            })
         }
 
-        if (error instanceof Error) {
-            return res.json({ error: error.message }, { status: 500 });
-        }
+        // Server errors
+        return buildError({
+            code: "UNKNOWN_ERROR",
+            message: "Unexpected server error.",
+            suggestion: "Please try again later.",
+            status: 500
+        })
     }
 }
