@@ -132,7 +132,7 @@ export const maintenances = pgTable("maintenances", {
   dailyWorkingHours: integer("daily_working_hours"),
   serviceStartDate: date("service_start_date").notNull().defaultNow(),
   serviceEndDate: date("service_end_date").notNull().defaultNow(),
-  levelAHours: integer("level_a_hours").notNull(),
+  levelAHours: integer("level_a_hours").notNull().default(0),
   levelADuration: integer("level_a_duration").notNull().default(0),
   levelBDuration: integer("level_b_duration").notNull().default(0),
   levelBHours: integer("level_b_hours").notNull().default(0),
