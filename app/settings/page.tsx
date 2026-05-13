@@ -121,7 +121,7 @@ const Settings = () => {
     const mutation = useMutation({
         mutationFn: async (values: ProfileFormValues) => {
             if (values.role.toLowerCase() === "admin") {
-                console.error("You think you are the smartest huh?");
+                throw new Error("You think you're the smarted huh?")
             };
 
             const response = await fetch("/api/users", {

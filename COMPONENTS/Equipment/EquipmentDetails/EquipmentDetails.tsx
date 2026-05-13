@@ -5,7 +5,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { useAuth } from "../../utils/authContext";
 import { Button, Paper, Tab } from "@mui/material";
-import { ArrowBigDown, Calendar, ChevronLeft, Clock, Pencil, RotateCcw, Wrench } from "lucide-react";
+import { ArrowBigDown, ArrowBigLeft, Calendar, ChevronLeft, Clock, Pencil, RotateCcw, Wrench } from "lucide-react";
 import Link from "next/link";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import EquipmentOverview from "./OverviewTab/EquipmentOverview";
@@ -71,6 +71,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
   const queryClient = useQueryClient();
   const [statusSelectionOpen, setStatusSelectionOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [isNotFound, setIsNotFound] = useState(false);
 
   const handleTabChange = (event: React.SyntheticEvent, val: string) => {
     setActiveTab(val);
@@ -87,7 +88,8 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
           credentials: "include"
         });
         if (!res.ok) {
-          throw new Error("Failed to fetch equipment unit");
+          setIsNotFound(true);
+          throw new Error("Failed to fetch equipment with given ID");
         }
         
         return await res.json()
@@ -127,8 +129,17 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
   });
   
   const isLoading = (!equipment || isLoadingEquipment) || (!user || isLoadingUser);
-  if (isLoading) return (<h1>Loading...</h1>);
-  
+  if (isLoading) {
+    if (isNotFound) {
+      return (
+        <div>
+          <h1 className="mb-2">Looks like the equipment you're looking for doesn't exist...</h1>
+          <Link href="/equipment" className="bg-green-400 p-2 rounded hover:bg-green-500"><ArrowBigLeft className="inline me-2" />Go back to equipment list</Link>
+        </div>
+      )
+    }
+    return (<h1>Loading...</h1>)  
+  } 
   const [equipmentYears, equipmentMonths] = calculateAge(new Date(equipment.dateOfManufacturing));
   console.log(equipment)
   
