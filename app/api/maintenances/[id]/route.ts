@@ -1,6 +1,7 @@
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
+import buildError, { buildCustomError, ERROR_CODES } from "@/BACKEND/Utils/errorBuilder";
 import { NextRequest, NextResponse as res } from "next/server";
 
 
@@ -19,15 +20,19 @@ export async function PATCH(
         const { reason } = body;
 
         const maintenance = await storage.getMaintenance(maintenanceId);
-        if (!maintenance) return res.json({ error: "Specified maintenance not found" }, { status: 404 });
+        if (!maintenance) return buildCustomError({
+            code: ERROR_CODES.NOT_FOUND_ERROR,
+            message: "Maintenance with given ID not found",
+            suggestion: "Maintenance might already be deleted. Try refreshing the page.",
+            status: 404
+        });
 
         await activityLogger(user, "delete", `Maintenance for equipment ${maintenance.equipmentId} removed | Reason: ${reason}`, maintenance.equipmentId);
 
         await storage.deleteMaintenance(maintenanceId);
 
         return res.json(true, { status: 200 });
-    } catch (error) {
-        const msg = error instanceof Error ? error.message : "Unknown error";
-        return res.json({ error: `Failed to fetch tenants: ${msg}` }, { status: 500 });
+    } catch (error: unknown) {
+        return buildError(error);
     }
 }

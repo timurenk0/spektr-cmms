@@ -77,48 +77,9 @@ export async function POST(req: NextRequest) {
 
         return res.json(JSON.parse(JSON.stringify(newEquipment)), { status: 201 });
     } catch (error: unknown) {
-        if (error instanceof CustomApiError) {
-            return buildError({
-                code: error.code,
-                field: error.field,
-                message: error.message,
-                suggestion: error.suggestion,
-                status: error.status
-            })
-        }
-        
-        // Zod errors        
-        if (error instanceof ZodError) {
-            console.error(error);
-            const firstError = error.issues[0];
-            
-            const field = firstError.path.join(".");
-
-            switch (field) {
-                case "tenantId":
-                    return buildError({
-                        code: "TENANT_ERROR",
-                        field,
-                        message: "You have chosen inexistent tenant.",
-                        suggestion: "Please contact IT administrator.",
-                        status: 403
-                    })
-                default:
-                    return buildError({
-                        code: "VALIDATION_ERROR",
-                        field,
-                        message: firstError.message,
-                        suggestion: "Double-check the submitted form fields.",
-                        status: 400
-                    })
-            }
-        }
-
         // Database errors
         if (error instanceof DrizzleQueryError) {
-            console.error(error)
             if (error.cause instanceof DatabaseError) {
-                console.error(error);
                 if (error.cause.code === "23505") {
                     const duplicateMatch = (error.cause.detail as string).match(/\(([^)]+)\)=\(([^)]+)\)/);
     
@@ -134,25 +95,10 @@ export async function POST(req: NextRequest) {
                     }
     
                 }
-    
-                console.error(error);
-                return buildError({
-                    code: "SERVER_ERROR",
-                    message: "Something went wrong while creating equipment.",
-                    suggestion: "Please try again later.",
-                    status: 500
-                })
             }
         }
-        
-        console.error(error)
 
         // Server errors
-        return buildError({
-            code: "UNKNOWN_ERROR",
-            message: "Unexpected server error.",
-            suggestion: "Please try again later.",
-            status: 500
-        })
+        return buildError(error);
     }
 }

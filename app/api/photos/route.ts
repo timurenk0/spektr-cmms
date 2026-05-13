@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
         if (!storage.getEquipment(parsedEquipmentId)) return buildError({
             code: "NOT_FOUND",
             field: "equipment_id",
-            message: "Equipment with given id is not found.",
+            message: "Equipment with given ID is not found.",
             suggestion: "Double-check the submitted form fields",
             status: 404
         });

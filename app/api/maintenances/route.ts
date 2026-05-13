@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         if (!equipment) return buildError({
             code: "NOT_FOUND",
             field: "equipment_id",
-            message: "Equipment with given id is not found.",
+            message: "Equipment with given ID is not found.",
             suggestion: "Double-check the submitted form fields",
             status: 404
         });
@@ -76,62 +76,6 @@ export async function POST(req: NextRequest) {
         
         return res.json(JSON.parse(JSON.stringify(newMaintenance)), { status: 201 });
     } catch (error: unknown) {
-        if (error instanceof CustomApiError) {
-            return buildError({
-                code: error.code,
-                field: error.field,
-                message: error.message,
-                suggestion: error.suggestion,
-                status: error.status
-            })
-        }
-        
-        if (error instanceof ZodError) {
-            console.error(error);
-            const firstError = error.issues[0];
-            const field = firstError.path.join(".");
-
-            switch (field) {
-                case "tenantId":
-                    return buildError({
-                        code: "TENANT_ERROR",
-                        field,
-                        message: "Your account is linked with inexistent tenant",
-                        suggestion: "Please contact IT administrator.",
-                        status: 403
-                    })
-                default:
-                    return buildError({
-                        code: "VALIDATION_ERROR",
-                        field,
-                        message: firstError.message,
-                        suggestion: "Double-check the submitted form fields.",
-                        status: 400
-                    })
-            }
-        }
-
-        if (error instanceof DrizzleQueryError) {
-            console.error(error);
-            if (error.cause instanceof DatabaseError) {
-                console.error(error.cause);
-
-                return buildError({
-                    code: "SERVER_ERROR",
-                    message: "Something went wrong while creating maintenance.",
-                    suggestion: "Please try again later.",
-                    status: 500
-                })
-            }
-        }
-        
-        console.error(error);
-        
-        return buildError({
-            code: "UNKNOWN_ERROR",
-            message: "Unexpected server error.",
-            suggestion: "Please try again later.",
-            status: 500
-        })
+        return buildError(error);
     }
 }

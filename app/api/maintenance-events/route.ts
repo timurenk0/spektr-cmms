@@ -2,6 +2,7 @@ import { insertMaintenanceEventSchema } from "@/BACKEND/Database/schema";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
+import buildError from "@/BACKEND/Utils/errorBuilder";
 import { NextRequest, NextResponse as res } from "next/server";
 
 
@@ -49,8 +50,7 @@ export async function POST(req: NextRequest) {
 
         await activityLogger(user, "add", `Maintenance events for equipment ${newMaintenanceEvent.equipmentId} added to the database`, newMaintenanceEvent.equipmentId)
         
-    } catch (error) {
-        const msg = error instanceof Error ? [error.message, error.stack] : "Unknown error";
-        return res.json({ error: `Failed to add maintenance events records: ${msg}` }, { status : 500 })
+    } catch (error: unknown) {
+        return buildError(error);
     }
 }

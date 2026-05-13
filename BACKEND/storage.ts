@@ -269,12 +269,15 @@ export class DatabaseStorage {
     async updateEquipment(id: number, updateData: Partial<InsertEquipment>): Promise<Equipment | undefined> {
         const [equipment] = await db.update(equipments).set(updateData).where(eq(equipments.id, id)).returning();
 
-        console.log(equipment);
         return equipment;
     }
     
     async deleteEquipment(id: number): Promise<void> {
-        await db.delete(equipments).where(eq(equipments.id, id));
+        try {
+            await db.delete(equipments).where(eq(equipments.id, id));
+        } catch (error) {
+            throw error;   
+        }
     }
     /* ======================================================================================================================== */
     
@@ -345,8 +348,13 @@ export class DatabaseStorage {
         return maintenance;
     }
     
-    async deleteMaintenance(id: number): Promise<void> {
-        await db.delete(maintenances).where(eq(maintenances.id, id));
+    async deleteMaintenance(id: number): Promise<Maintenance | undefined> {
+        try {
+            const deletedMaintenance = (await db.delete(maintenances).where(eq(maintenances.id, id)).returning())[0];
+            return deletedMaintenance;
+        } catch (error) {
+            throw error;
+        }
     }
     /* ======================================================================================================================== */
     
@@ -478,11 +486,15 @@ export class DatabaseStorage {
         id: number,
         updateData: Partial<InsertMaintenanceEvent>
     ): Promise<MaintenanceEvent | undefined> {
-        const [event] = await db.update(maintenanceEvents).set(updateData).where(eq(maintenanceEvents.id, id)).returning();
-
-        // const updatedEquipment = await this.subtractPenaltyScore(event);
-
-        return event;
+        try {
+            const [event] = await db.update(maintenanceEvents).set(updateData).where(eq(maintenanceEvents.id, id)).returning();
+    
+            // const updatedEquipment = await this.subtractPenaltyScore(event);
+    
+            return event;
+        } catch (error) {
+            throw error;
+        }
     }
 
     async shiftMaintenanceEvents(
@@ -574,8 +586,8 @@ export class DatabaseStorage {
         });
     }
 
-    async deleteComponent(id: number): Promise<void> {
-        await db.delete(components).where(eq(components.id, id));
+    async deleteComponent(id: number): Promise<Component | undefined> {
+        return (await db.delete(components).where(eq(components.id, id)).returning())[0];
     }
     /* ======================================================================================================================== */
     
@@ -595,9 +607,9 @@ export class DatabaseStorage {
         return (await db.insert(documents).values(insertDocument).returning())[0];
     }
     
-    async deleteDocument(id: number): Promise<string> {
-        const { url } = (await db.delete(documents).where(eq(documents.id, id)).returning({ url: documents.fileUrl }))[0];
-        return url;
+    async deleteDocument(id: number): Promise<Document | undefined> {
+        const deletedDocument = await db.delete(documents).where(eq(documents.id, id)).returning();
+        return deletedDocument[0];
     }
     /* ======================================================================================================================== */
     

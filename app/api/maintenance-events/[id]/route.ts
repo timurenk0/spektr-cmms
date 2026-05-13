@@ -2,6 +2,7 @@ import { insertMaintenanceEventSchema } from "@/BACKEND/Database/schema";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
+import buildError, { buildCustomError, ERROR_CODES } from "@/BACKEND/Utils/errorBuilder";
 import { differenceInDays } from "date-fns";
 import { NextRequest, NextResponse as res } from "next/server";
 
@@ -43,7 +44,12 @@ export async function PATCH(
         const body = await req.json();
 
         const event = await storage.getMaintenanceEvent(eventId);
-        if (!event) return res.json({ error: "Specified maintenance event not found" }, { status: 404 });
+        if (!event) return buildCustomError({
+            code: ERROR_CODES.NOT_FOUND_ERROR,
+            message: "Maintenance event with given ID is not found",
+            suggestion: "Maintenance event might already be deleted. Try refreshing the page.",
+            status: 404
+        });
 
 
         if (event.level === "E") {
@@ -84,9 +90,8 @@ export async function PATCH(
         }
         
         return res.json(updatedEvent, { status: 201 });            
-    } catch (error) {
-        const msg = error instanceof Error ? error.message : "Unknown error";
-        return res.json({ error: `Failed to update specified maintenance event: ${msg}` }, { status: 500 });
+    } catch (error: unknown) {
+        return buildError(error);
     }
 }
 

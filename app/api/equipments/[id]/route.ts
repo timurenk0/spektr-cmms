@@ -2,6 +2,7 @@ import { insertEquipmentSchema, InsertMaintenanceEvent, MaintenanceEvent } from 
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
+import buildError, { buildCustomError, ERROR_CODES } from "@/BACKEND/Utils/errorBuilder";
 import { NextRequest, NextResponse as res } from "next/server";
 
 
@@ -33,17 +34,22 @@ export async function PUT(
     { params } : { params: Promise<{ id: string }> }
 ) {
     try {
+        // Validate user.
+        const user = await validateUser("admin");
+        
         // Check whether passed equipment ID is valid.
         const { id } = await params;
         const equipmentId = parseInt(id);
         if (isNaN(equipmentId)) return res.json({ error: "Invalid equipment ID" }, { status: 400 });
 
-        // Validate user.
-        const user = await validateUser("admin");
 
         // Fetch specified equipment by passed ID and check if it exists.
         const equipment = await storage.getEquipment(equipmentId);
-        if (!equipment) return res.json({ error: "Specified equipment not found" }, { status: 404 });
+        if (!equipment) return buildCustomError({
+            code: ERROR_CODES.NOT_FOUND_ERROR,
+            message: "Equipment with given ID is not found",
+            status: 404
+        })
 
         // Parse request body to JSON format.
         // Parse equipment data from the request body with DB schema for validation.
@@ -57,9 +63,8 @@ export async function PUT(
         await activityLogger(user, "update", `Equipment ${updatedEquipment?.name} updated`, equipmentId);
     
         return res.json(updatedEquipment, { status: 200 });       
-    } catch (error) {
-        const msg = error instanceof Error ? error.message : "Unkown error";
-        return res.json({ error: `Failed to update specified equipment: ${msg}` }, { status: 500 });
+    } catch (error: unknown) {
+        return buildError(error);
     }
 }
 
@@ -68,29 +73,38 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        // Validate user.
         const user = await validateUser("admin");
-
+        
         // Check wheter passed equipment ID is valid.
         const { id } = await params;
         const equipmentId = parseInt(id);
         if (isNaN(equipmentId)) return res.json({ error: "Invalid equipment ID" }, { status: 400 });
-
+        
         const body = await req.json();
         console.log(body)
         const { status, reason } = body;
         
-        // Validate user.
         
         // Fetch specified equipment by ID and check if it exists.
         const equipment = await storage.getEquipment(equipmentId);
-        if (!equipment) return res.json({ error: "Specified equipment not found" }, { status: 404 });
+        if (!equipment) return buildCustomError({
+            code: ERROR_CODES.NOT_FOUND_ERROR,
+            message: "Equipment with given ID is not found",
+            status: 404
+        })
         
         if (status && !reason) {
             await activityLogger(user, "update", `Equipment ${equipment.name} status updated to ${status}`, equipmentId);
             
             if (status === "under repair") {
                 const maintenance = await storage.getMainteancesByEquipmentId(equipment.id);
-                if (!maintenance) return res.json({ error: "Can't change status of equipment without ongoing maintenance" }, { status: 400 });
+                if (!maintenance) return buildCustomError({
+                    code: "NO_ACTIVE_MAINTENANCE",
+                    message: "Equipment status cannot be changed to 'under repair' without active maintenance.",
+                    suggestion: "Start a maintenance operation for this equipment first.",
+                    status: 409
+                });
                 
                 const today = new Date().toISOString().slice(0, 10);
                 const event: InsertMaintenanceEvent = {
@@ -108,11 +122,16 @@ export async function PATCH(
                 };
                 
                 await storage.addMaintenanceEvents([event]);
-                await activityLogger(user, "add", `Emergency repair for equipment ${equipment.name} started!`, equipment.id);
+                // await activityLogger(user, "add", `Emergency repair for equipment ${equipment.name} started!`, equipment.id);
             }
             
             if (status === "operational" && await storage.getEmergencyMaintenanceEventByEquipmentId(equipment.id)) { 
-                return res.json({ error: "First finish ongoing emergency repair!" }, { status: 403 });
+                return buildCustomError({
+                    code: "EMERGENCY_MAINTENANCE_ACTIVE",
+                    message: "Equipment cannot be marked operational yet.",
+                    suggestion: "Finish the ongoing emergency repair for current equipment first.",
+                    status: 409
+                });
             }
             
             const newEquipment = await storage.updateEquipment(equipmentId, { status });
@@ -121,14 +140,13 @@ export async function PATCH(
         }
 
         // Log the activity for deleted equipment using helper logger method.
-        await activityLogger(user, "delete", `Equipment ${equipment.name} removed | Reason: ${reason}`, equipmentId);       
+        // await activityLogger(user, "delete", `Equipment ${equipment.name} removed | Reason: ${reason}`, equipmentId);       
 
         // Delete specified equipment.
         await storage.deleteEquipment(equipmentId);
         
         return res.json(true, { status: 200 });        
-    } catch (error) {
-        const msg = error instanceof Error ? error.message : "Unkown error";
-        return res.json({ error: `Failed to delete specified equipment: ${msg}` }, { status: 500 })
+    } catch (error: unknown) {
+        return buildError(error);
     }
 }
