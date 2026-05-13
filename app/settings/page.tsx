@@ -127,9 +127,9 @@ const Settings = () => {
             const response = await fetch("/api/users", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify(values)
+                body: JSON.stringify(values),
             });
             
             const data = await response.json().catch(() => null);
@@ -265,6 +265,7 @@ const Settings = () => {
                                     required
                                     {...form.register("password")}
                                     onBlur={() => setShowPw(false)}
+                                    onChange={e => setRandomPw(e.target.value)}
                                 />
                                 <button type="button" className="underline text-blue-500 text-sm me-auto cursor-pointer" onClick={() => setRandomPw(generatePassword())}>Generate Password</button>
                             </div>
