@@ -34,13 +34,14 @@ const formSchema = z.object({
 type ProfileFormValues = z.infer<typeof formSchema>;
 
 
-const generatePassword = (length = 8) => {
+const generatePassword = (setter: (x: "username" | "password" | "role" | "tenant", y: string) => void, length = 8) => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}<>?';
   let password = '';
   for (let i = 0; i < length; i++) {
     password += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return password;
+
+  setter("password", password);  
 }
 
 const Settings = () => {
@@ -52,7 +53,6 @@ const Settings = () => {
     const [value, setValue] = useState("personal");
     const [role, setRole] = useState("user");
     const [showPw, setShowPw] = useState(false);
-    const [randomPw, setRandomPw] = useState("");
     const [availableRoles, setAvailableRoles] = useState<string[]>([]);
     const [availableTenants, setAvailableTenants] = useState<string[]>([]);
     
@@ -130,6 +130,7 @@ const Settings = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(values),
+                credentials: "include"
             });
             
             const data = await response.json().catch(() => null);
@@ -212,8 +213,6 @@ const Settings = () => {
     
 
     
-    console.log(role);
-    
     return (
         <>
         <div className="mb-6">
@@ -257,7 +256,6 @@ const Settings = () => {
                                     onFocus={() => setShowPw(true)}
                                     label="Password"
                                     color="info"
-                                    value={randomPw}
                                     margin="dense"
                                     slotProps={{
                                         htmlInput: { maxLength: 255 }
@@ -265,9 +263,8 @@ const Settings = () => {
                                     required
                                     {...form.register("password")}
                                     onBlur={() => setShowPw(false)}
-                                    onChange={e => setRandomPw(e.target.value)}
                                 />
-                                <button type="button" className="underline text-blue-500 text-sm me-auto cursor-pointer" onClick={() => setRandomPw(generatePassword())}>Generate Password</button>
+                                <button type="button" className="underline text-blue-500 text-sm me-auto cursor-pointer" onClick={() => (generatePassword(form.setValue))}>Generate Password</button>
                             </div>
                             
                             <div>
