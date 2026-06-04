@@ -774,7 +774,8 @@ export class DatabaseStorage {
         const idealHealthIndex = 100 - differenceInCalendarMonths(Date(), dateOfManufacturing) * monthlyHealthDrop;
 
         
-        const trueHealthIndex = givenHealthIndex > idealHealthIndex ? idealHealthIndex : givenHealthIndex;
+        // const trueHealthIndex = givenHealthIndex > idealHealthIndex ? idealHealthIndex : givenHealthIndex;
+        const trueHealthIndex = Math.min(givenHealthIndex, idealHealthIndex);
         console.log("Ideal | True", idealHealthIndex, trueHealthIndex);
 
         return trueHealthIndex;

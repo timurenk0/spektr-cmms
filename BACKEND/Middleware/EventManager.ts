@@ -42,18 +42,17 @@ export function createMaintenanceEvents(
     const eventMap: Record<string, InsertMaintenanceEvent> = {};
     const daily = maintenance.dailyWorkingHours;
     const events: InsertMaintenanceEvent[] = [];
+    const day = 1000 * 3600 * 24;
+    const OVERDUE_THRESHOLD = 3;
 
     for (let [k, v] of Object.entries(levels)) {
         if (v.duration === 0 || v.hours === 0) continue;
 
-        
-        const day = 1000 * 3600 * 24;
-        const OVERDUE_THRESHOLD = 3;
         let eventStart = new Date(start.getTime());
-        let eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
         
         if (k === "I") {            
             while (eventStart <= end) {
+                const eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
                 const status = differenceInDays(new Date(), eventStart) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
                 
                 const event: InsertMaintenanceEvent = {
@@ -74,31 +73,40 @@ export function createMaintenanceEvents(
                 events.push(event);
                 
                 eventStart = subDays(addMonths(eventStart, v.hours ), 1);
-                eventEnd = new Date(eventStart.getTime() + (day * v.duration) - 1);
-                
-                if (eventStart > end) {
-                    continue;
-                }
             }
             continue;
         }
         
         if (!daily) throw new Error("No daily working hours value passed");
-        const dayInterval = v.hours / daily;
+        const dayInterval = Math.ceil(v.hours / daily);
         
         while (eventStart <= end) {
             const status = differenceInDays(new Date(), eventStart) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
-            let closestDate = Object.keys(eventMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime()).findLast(e => e <= eventStart.toISOString().slice(0, 10) && (k !== "I" && eventMap[e].level > k));
+            const sortedDates = Object.keys(eventMap)
+                .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
-            if (closestDate && (eventStart.getTime() - new Date(closestDate).getTime())/day < dayInterval) {
-                eventStart = addDays(new Date(closestDate), dayInterval); 
-                eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
+            const closestDate = sortedDates.findLast(e => 
+                e <= eventStart.toISOString().slice(0, 10) && 
+                eventMap[e].level > k
+            );
+            
+            // if (closestDate && (eventStart.getTime() - new Date(closestDate).getTime())/day < dayInterval) {
+            //     eventStart = addDays(new Date(closestDate), dayInterval); 
+            //     eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
 
-                continue;
+            //     continue;
+            // }
+            if (closestDate) {
+                const daysSince = differenceInDays(eventStart, new Date(closestDate));
+                if (daysSince < dayInterval) {
+                    eventStart = addDays(new Date(closestDate), dayInterval);
+                    continue;
+                }
             }
-            if (eventStart > end) {
-                continue;
-            }
+            
+            if (eventStart > end) break;
+
+            const eventEnd = new Date(eventStart.getTime() + (day * v.duration) - 1);
 
             const event: InsertMaintenanceEvent = {
                 equipmentId: maintenance.equipmentId,
@@ -117,7 +125,6 @@ export function createMaintenanceEvents(
             events.push(event);
             eventMap[eventStart.toISOString().slice(0, 10)] = event;
             eventStart = addDays(eventStart, dayInterval);
-            eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
         }
     }
     
