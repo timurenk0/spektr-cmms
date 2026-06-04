@@ -24,7 +24,7 @@ export default function Providers({ children, initialUser }: { children: React.R
                     if (error instanceof Error && error.message.includes("401")) return false;
                     return failureCount < 2;
                 },
-                retryDelay: (retryIdx) => Math.min(1000 * 2 ** retryIdx, 30000)
+                retryDelay: (retryIdx) => Math.min(1000 * 2 ** retryIdx, 30000),
            }
         }
     }));

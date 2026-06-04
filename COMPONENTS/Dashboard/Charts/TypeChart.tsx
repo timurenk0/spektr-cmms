@@ -21,7 +21,7 @@ import {
 const TypeChart = () => {
     const [category, setCategory] = useState<string>("");
 
-    const { data: equipments, isLoading: isLoadingEquipment } = useQuery<{ equips: TEquipment[], count: number }>({
+    const { data: equipments = {equips: [], count:0}, isLoading: isLoadingEquipment } = useQuery<{ equips: TEquipment[], count: number }>({
         queryKey: ["/api/equipments"]
     });
 

@@ -6,7 +6,7 @@ import { ThemeProvider } from "@mui/material";
 import theme from "@/theme";
 import { CssBaseline } from "@mui/material";
 import { useEffect, useState } from "react";
-import { redirect, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "./utils/authContext";
 
 
@@ -15,11 +15,22 @@ const Body = ({children}: Readonly<{children: React.ReactNode}>) => {
 
     const { user, isLoading } = useAuth();
 
+    const router = useRouter();
     const pathname = usePathname();
     const hideLayout = pathname === "/login";
 
-    if ((!isLoading && !user) && !hideLayout) {
-        redirect("/login")
+    useEffect(() => {
+        if (!isLoading && !user && !hideLayout) {
+            router.replace("/login");
+        }
+    }, [isLoading, user, hideLayout, router])
+    
+    if (isLoading) {
+        return null;
+    }
+
+    if (!user && !hideLayout) {
+        return null;
     }
     
     let pageName = pathname.length > 1 ? pathname.slice(1, 2).toUpperCase() + pathname.slice(2).toLowerCase() : "Dashboard";
@@ -29,13 +40,7 @@ const Body = ({children}: Readonly<{children: React.ReactNode}>) => {
     }
 
     console.log(pageName);
-    
-
-    useEffect(() => {
-        setMounted(true);
-    }, [])
-
-    if (!mounted) return null;
+   
 
   return (
     <ThemeProvider theme={theme}>

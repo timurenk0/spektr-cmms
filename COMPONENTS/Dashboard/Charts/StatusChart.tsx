@@ -17,7 +17,7 @@ import {
 
 const StatusChart = () => {
 
-   const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ operational: number, underRepair: number, outOfService: number }>({
+   const { data: equipments = {operational: 0, underRepair: 0, outOfService: 0}, isLoading: isLoadingEquipments } = useQuery<{ operational: number, underRepair: number, outOfService: number }>({
     queryKey: ["equipments-status"],
     queryFn: async () => {
         const res = await fetch("/api/stats/equipment-status");

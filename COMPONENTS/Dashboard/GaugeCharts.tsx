@@ -7,7 +7,7 @@ import { Skeleton } from "@mui/material"
 
 
 const GaugeCharts = () => {
-    const { data, isLoading } = useQuery({
+    const { data = {}, isLoading } = useQuery({
         queryKey: ["dashboard-gauges"],
         queryFn: async () => {
             const res = await fetch("/api/stats/kpis");

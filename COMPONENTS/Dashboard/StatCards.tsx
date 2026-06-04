@@ -7,7 +7,7 @@ import toast from "react-hot-toast"
 import { Skeleton } from "@mui/material"
 
 const StatCards = () => {    
-  const { data, isLoading } = useQuery({
+  const { data = {}, isLoading } = useQuery({
     queryKey: ["dashboard-cards"],
     queryFn: async () => {
       const res = await fetch("/api/stats/dashboard-cards");

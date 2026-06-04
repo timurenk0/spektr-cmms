@@ -141,7 +141,7 @@ const AddMaintenanceForm = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Controller
           name="equipmentId"
-          defaultValue={availableEquipment[0].id}
+          defaultValue={""}
           control={form.control}
           render={({ field }) => (
             <FormControl fullWidth>
@@ -162,6 +162,7 @@ const AddMaintenanceForm = ({
                   setIsHours(eq.totalWorkingHours)
                 }}
                 >
+                  {/* <MenuItem disabled>Select Equipment</MenuItem> */}
                 {availableEquipment.map((eq) => (
                   <MenuItem key={eq.id} value={eq.id}>{eq.name}</MenuItem>
                 ))}
