@@ -33,7 +33,7 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
 
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("equipmentId", event._def.extendedProps.equipmentId);
+      formData.append("rawEquipmentId", event._def.extendedProps.equipmentId);
       formData.append("title", `Maintenance report ${completionDate}`);
       formData.append("category", "maintenance");
       formData.append("notes", event._def.extendedProps.description);
@@ -43,9 +43,10 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
         body: formData,
         credentials: "include"
       });
-      if (!res.ok) throw new Error("Failed to upload event certificate");
+      const data = await res.json();
+      if (!res.ok) throw new Error(`Failed to upload event certificate: ${data.error}`);
 
-      return await res.json();
+      return data;
     } catch (error) {
       throw error;
     } 

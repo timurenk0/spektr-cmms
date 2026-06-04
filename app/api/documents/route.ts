@@ -34,12 +34,15 @@ export async function POST(req: NextRequest) {
             category: string,
             notes?: string
         }
+
+        console.log(rawEquipmentId);
         
         // Fetch the form data
         if (!file) return res.json({ error: "Failed to upload file to Google Bucket Storage" }, { status: 500 });
         if (file.size > 1024*1024*10) return res.json({ error: "File too big" }, { status: 400 });
 
         const equipmentId = Number(rawEquipmentId);
+        console.log(equipmentId);
         if (isNaN(equipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
         
         if (!title) return res.json({ error: "No document title passed" }, { status: 400 });
@@ -54,7 +57,7 @@ export async function POST(req: NextRequest) {
             category,
             notes,
         };
-
+        
         const newDocument = await uploadAndAddDocument(file, documentData);
 
         if (!newDocument) return res.json({ error: "Failed to upload the document" }, { status: 500 });
