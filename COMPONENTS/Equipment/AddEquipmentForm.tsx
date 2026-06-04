@@ -11,7 +11,7 @@ import Image from "next/image"
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Button, FormControl, FormControlLabel, FormLabel, InputAdornment, InputLabel, MenuItem, Radio, RadioGroup, Select, Skeleton, TextField } from "@mui/material";
-import { EquipmentTypes } from "../utils/equipmentTypes";
+import { EquipmentCategories } from "../utils/equipmentCategories";
 import { CustomError, TEquipment, TTenant } from "../utils/types";
 import { ImageIcon } from "lucide-react";
 
@@ -118,8 +118,8 @@ export default function AddEquipmentForm(
         }
     });
 
-    // Watch type field for categorr dependancy
-    const watchType = form.watch("type");
+    // Watch category field for type dependancy
+    const watchCategory = form.watch("category");
 
     // Populate form if equipment ID is passed (edit mode).
     useEffect(() => {
@@ -138,17 +138,17 @@ export default function AddEquipmentForm(
         }
     }, [equipment, form]);
 
-    // Change category when type is selected
+    // Change type when category is selected
     useEffect(() => {
-        if (watchType) {
+        if (watchCategory) {
         const currentCategory = form.getValues("category");
-        const validCategories = EquipmentTypes.find(type => type.id === watchType)?.categories || [];
+        const validTypes = EquipmentCategories.find(c => c.id === watchCategory)?.types || [];
 
-        if (!validCategories.includes(currentCategory)) {
-            form.setValue("category", validCategories[0]);
+        if (!validTypes.includes(currentCategory)) {
+            form.setValue("type", validTypes[0]);
         }
         }
-    }, [watchType, form]);
+    }, [watchCategory, form]);
 
     const mutation = useMutation({
         mutationFn: async (values: EquipmentFormValues) => {
@@ -258,7 +258,7 @@ export default function AddEquipmentForm(
                 render={({ field }) => (
                     <FormControl fullWidth>
                         <InputLabel id="select-tenant" color="info" required sx={{ margin: "8px 0" }}>Select Owner</InputLabel>
-                        <Select labelId="select-tenant" label="Select Type" {...field} color="info" required sx={{ margin: "8px 0" }}>
+                        <Select labelId="select-tenant" label="Select Owner" {...field} color="info" required sx={{ margin: "8px 0" }}>
                             {tenants.map(t => (
                                 <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
                             ))}
@@ -340,32 +340,32 @@ export default function AddEquipmentForm(
                 )}
             />
             <Controller
-                name="type"
+                name="category"
                 control={form.control}
                 defaultValue=""
                 render={({ field }) => (
                     <FormControl fullWidth>
-                        <InputLabel id="select-type" color="info" required sx={{ margin: "8px 0" }}>Select Type</InputLabel>
-                        <Select labelId="select-type" label="Select Type" {...field} color="info" required sx={{ margin: "8px 0" }}>
-                            {EquipmentTypes.map(type => (
-                                <MenuItem key={type.id} value={type.id}>{type.id}</MenuItem>
+                        <InputLabel id="select-category" color="info" required sx={{ margin: "8px 0" }}>Select Category</InputLabel>
+                        <Select labelId="select-category" label="Select Category" {...field} color="info" required sx={{ margin: "8px 0" }}>
+                            {EquipmentCategories.map(c => (
+                                <MenuItem key={c.id} value={c.id}>{c.id}</MenuItem>
                             ))}
                         </Select>
                     </FormControl>
                 )}
             />
             <Controller
-                name="category"
+                name="type"
                 control={form.control}
                 defaultValue=""
-                disabled={!watchType}
+                disabled={!watchCategory}
                 render={({ field }) => (
                     <FormControl fullWidth>
-                        <InputLabel id="select-category" color="info" required sx={{ margin: "8px 0" }} disabled={!watchType}>Select Category</InputLabel>
-                        <Select labelId="select-category" label="Select Category" {...field} color="info" required sx={{ margin: "8px 0" }}>
-                            {watchType && EquipmentTypes.find(type => type.id === watchType)
-                                ?.categories.map(cat => (
-                                    <MenuItem key={cat} value={cat} defaultValue={cat}>{cat}</MenuItem>
+                        <InputLabel id="select-type" color="info" required sx={{ margin: "8px 0" }} disabled={!watchCategory}>Select Type</InputLabel>
+                        <Select labelId="select-type" label="Select Type" {...field} color="info" required sx={{ margin: "8px 0" }}>
+                            {watchCategory && EquipmentCategories.find(c => c.id === watchCategory)
+                                ?.types.map(t => (
+                                    <MenuItem key={t} value={t} defaultValue={t}>{t}</MenuItem>
                                 ))}
                         </Select>
                     </FormControl>

@@ -4,7 +4,7 @@
 import { Box, Button, Card, CardActionArea, CardContent, FormControl, Input, InputAdornment, InputLabel, MenuItem, Paper, Select, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { EquipmentTypes } from "../utils/equipmentTypes";
+import { EquipmentCategories } from "../utils/equipmentCategories";
 import EquipmentListEl from "./EquipmentListEl";
 import ListSkeleton from "../SKELETONS/ListSkeleteon";
 import { useAuth } from "../utils/authContext";
@@ -94,28 +94,28 @@ const EquipmentList = () => {
 
   return (
     <>
-      {filters.type && (<h1 className="ps-1 pb-1">Equipment Type: <span className="font-semibold underline">{filters.type}</span></h1>)}
+      {filters.category && (<h1 className="ps-1 pb-1">Equipment Category: <span className="font-semibold underline">{filters.category}</span></h1>)}
       <div className="flex gap-2 mb-3">
-        {EquipmentTypes.map((type, idx) => (
-          !filters.type ? (
+        {EquipmentCategories.map((c, idx) => (
+          !filters.category ? (
             <Card key={idx} className="w-full">
-              <CardActionArea onClick={() => updateFilters("type", type.id)}>
+              <CardActionArea onClick={() => updateFilters("category", c.id)}>
                 <CardContent className="text-green-600 flex justify-center">
-                  {type.icon}
-                  <p className="ms-2 text-black">{type.id}</p>
+                  {c.icon}
+                  <p className="ms-2 text-black">{c.id}</p>
                 </CardContent>
               </CardActionArea>
             </Card>
           ) : (
-            type.id === filters.type && type.categories.map((category, idx) => (
+            c.id === filters.category && c.types.map((t, idx) => (
               <Card key={idx} className="w-full">
                 <CardActionArea
-                  onClick={() => updateFilters("category", category)}
+                  onClick={() => updateFilters("type", t)}
                   className="h-full"
-                  sx={{backgroundColor: `${category === filters.category && "rgb(0, 190, 0)"}`}}
+                  sx={{backgroundColor: `${t === filters.type && "rgb(0, 190, 0)"}`}}
                 >
-                  <CardContent className={`text-green-600 ${category === filters.category && "text-white"}`}>
-                    <p className="text-black text-sm text-center">{category}</p>
+                  <CardContent className={`text-green-600 ${t === filters.type && "text-white"}`}>
+                    <p className="text-black text-sm text-center">{t}</p>
                   </CardContent>
                 </CardActionArea>
               </Card>

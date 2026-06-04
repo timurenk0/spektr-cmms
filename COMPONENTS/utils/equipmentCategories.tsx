@@ -1,18 +1,16 @@
 import { Building2, Cog, FlaskConical, Thermometer, Trash2, Truck, Wrench, Zap } from "lucide-react";
 
-export const EquipmentTypes = [
+export const EquipmentCategories = [
     {
         id: "Mechanical",
         icon: <Wrench className="min-h-4 min-w-4" />,
-        categories: [
-            "Pumps",
-            "Motors",
+        types: [
+            "Pumps / Blowers / Fans",
+            "Engines",
             "Compressors",
             "Gearboxes / Reducers",
-            "Blowers & Fans",
+            "Pressure Units",
             "Valves",
-            "Actuators",
-            "Conveyors",
             "Hydraulic Systems",
             "Pneumatic Systems",
         ],
@@ -20,7 +18,7 @@ export const EquipmentTypes = [
     {
         id: "Electrical",
         icon: <Zap className="min-h-4 min-w-4" />,
-        categories: [
+        types: [
             "Transformers",
             "Generators",
             "Switchgear",
@@ -35,12 +33,11 @@ export const EquipmentTypes = [
     {
         id: "HVAC",
         icon: <Thermometer className="min-h-4 min-w-4" />,
-        categories: [
+        types: [
             "Chillers",
             "Boilers",
             "Air Handling Units (AHUs)",
             "Cooling Towers",
-            "Heat Exchangers",
             "Water Heaters",
             "Dehumidifiers",
             "Air Compressors",
@@ -49,45 +46,44 @@ export const EquipmentTypes = [
     {
         id: "Production",
         icon: <Cog className="min-h-4 min-w-4" />,
-        categories: [
-            "CNC Machines",
-            "Lathes / Mills",
-            "Presses",
-            "Injection Molding Machines",
+        types: [
+            "Machines",
+            "Heat Exchangers",
+            "Tanks",
             "Mixers / Agitators",
             "Furnaces / Ovens",
-            "Packaging Machines",
-            "Filling Machines",
-            "Extruders",
+            "Turbines",
+            "Filtration / Settler Units",
         ],
     },
+    // {
+        // id: "Test",
+        // icon: <FlaskConical className="min-h-4 min-w-4" />,
+        // types: [
+        //     "Flow Meters",
+        //     "Gauges",
+        //     "Detectors",
+        //     "Test Benches",
+        //     "Testers",
+        // ],
+    // },
     {
-        id: "Test",
-        icon: <FlaskConical className="min-h-4 min-w-4" />,
-        categories: [
-            "Flow Meters",
-            "Gauges",
-            "Detectors",
-            "Test Benches",
-            "Testers",
-        ],
-    },
-    {
-        id: "Material",
+        id: "Material Handling",
         icon: <Truck className="min-h-4 min-w-4" />,
-        categories: [
-            "Forklifts",
-            "Pallet Jacks",
-            "Cranes / Hoists",
-            "Elevators / Lifts",
-            "AGVs (Automated Guided Vehicles)",
-            "Racking Systems",
+        types: [
+                  "Forklifts / Pallet Trucks",
+      "Tractors / Heavy Vehicles",
+      "Cranes / Hoists",
+      "Elevators / Conveyors",
+      "Rigging Equipment",
+      "Racking Systems",
+      "Containers"
         ],
     },
     {
         id: "Facility",
         icon: <Building2 className="min-h-4 min-w-4" />,
-        categories: [
+        types: [
             "Fire Protection Systems",
             "Elevators / Escalators",
             "Security Systems",
@@ -99,7 +95,7 @@ export const EquipmentTypes = [
     {
         id: "Cleaning",
         icon: <Trash2 className="min-h-4 min-w-4" />,
-        categories: [
+        types: [
             "Industrial Vacuums",
             "Scrubbers / Sweepers",
             "Waste Compactors",
