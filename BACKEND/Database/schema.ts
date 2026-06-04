@@ -106,7 +106,7 @@ export const equipments = pgTable(
   (table) => [
     check(
       "requirements_check",
-      sql`requirements IN ('calibration & testing', 'maintenance', 'both')`
+      sql`requirements IN ('calibration and/or testing', 'maintenance', 'both')`
     ),
     check(
       "status_check",

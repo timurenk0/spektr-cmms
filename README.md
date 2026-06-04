@@ -8,8 +8,8 @@
 - Change JWT_SECRET to something more serious
 - First app visit tries to access dashboard API 
 - When moving events serviceEndDate not checked
+
 - Remove interval maintenance in maintenance requriements equipment
-- Calibration and/or testing instead of &
 - Equipment list in maintenance form show nothing
 - Interval maintenance add 2 maintenances (+ explanation why tf (description)) + another color for calendar
 - Overdue overdue events are the same color

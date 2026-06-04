@@ -95,7 +95,10 @@ const TypeChart = () => {
     const refreshChart = () => {
         setCategory("");
     }
-    
+
+    const chartData = category ? equipmentTypeData : equipmentCategoryData;
+    const maxCount = Math.max(...chartData.map(i => i.count), 1);
+
   return (
     <Paper>
             <h3 className="px-6 pt-4 font-semibold">Equipment by {!category ? "Category" : `Type (category=${category})`}</h3>
@@ -126,8 +129,10 @@ const TypeChart = () => {
                         onClick={(e) => {!category ? setCategory(e.value) : ""}}
                     />
                     <YAxis
-                        tickCount={category ? Math.max(...equipmentTypeData.map(d => d.count)) + 1 : Math.max(...equipmentCategoryData.map(d => d.count)) + 1}
+                        domain={[0, Math.max(maxCount, 5)]}
+                        tickCount={6}
                         interval={0}
+                        allowDecimals={false}
                     />
                     <Tooltip/>
                     <Legend/>

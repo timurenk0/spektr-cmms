@@ -71,13 +71,13 @@ export const EquipmentCategories = [
         id: "Material Handling",
         icon: <Truck className="min-h-4 min-w-4" />,
         types: [
-                  "Forklifts / Pallet Trucks",
-      "Tractors / Heavy Vehicles",
-      "Cranes / Hoists",
-      "Elevators / Conveyors",
-      "Rigging Equipment",
-      "Racking Systems",
-      "Containers"
+            "Forklifts / Pallet Trucks",
+            "Tractors / Heavy Vehicles",
+            "Cranes / Hoists",
+            "Elevators / Conveyors",
+            "Rigging Equipment",
+            "Racking Systems",
+            "Containers"
         ],
     },
     {

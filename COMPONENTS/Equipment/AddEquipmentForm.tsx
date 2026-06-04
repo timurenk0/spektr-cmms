@@ -23,7 +23,7 @@ const formSchema = insertEquipmentSchema.extend({
 type EquipmentFormValues = z.infer<typeof formSchema>;
 
 const equipmentLocations = ["Base", "Project"];
-const equipmentRequirements = ["Calibration & Testing", "Maintenance", "Both"]
+const equipmentRequirements = ["Calibration and/or Testing", "Maintenance", "Both"]
 
 
 export default function AddEquipmentForm(
