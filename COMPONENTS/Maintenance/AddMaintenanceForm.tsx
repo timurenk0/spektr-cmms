@@ -141,7 +141,7 @@ const AddMaintenanceForm = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Controller
           name="equipmentId"
-          defaultValue={""}
+          defaultValue={undefined}
           control={form.control}
           render={({ field }) => (
             <FormControl fullWidth>
