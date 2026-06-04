@@ -100,7 +100,7 @@ const EquipmentList = () => {
           !filters.category ? (
             <Card key={idx} className="w-full">
               <CardActionArea onClick={() => updateFilters("category", c.id)}>
-                <CardContent className="text-green-600 flex justify-center">
+                <CardContent className="text-green-600 flex justify-center items-center text-center">
                   {c.icon}
                   <p className="ms-2 text-black">{c.id}</p>
                 </CardContent>
