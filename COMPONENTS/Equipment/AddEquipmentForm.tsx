@@ -513,7 +513,7 @@ export default function AddEquipmentForm(
                     </FormControl>
                 )}
               />
-              { (requirements && requirements !== "calibration & testing") && (
+              { (requirements && requirements !== "calibration and/or testing") && (
                 <Controller
                     name="totalWorkingHours"
                     control={form.control}

@@ -63,7 +63,7 @@ const EquipmentListEl = ({ equipment, userRole }: { equipment: TEquipment, userR
     const router = useRouter();
 
   return (
-        <TableRow sx={{ "& .MuiTableCell-root": { textAlign: "center", cursor: "pointer", padding: "0 32px" } }} hover onClick={() => router.push(`/equipment/${equipment.id}`)}>
+        <TableRow sx={{ "& .MuiTableCell-root": { textAlign: "center", cursor: "pointer", padding: "4px 32px" } }} hover onClick={() => router.push(`/equipment/${equipment.id}`)}>
             {/* Equipment image and name */}
             <TableCell>
                 <div className="flex items-center">

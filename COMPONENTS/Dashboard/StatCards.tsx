@@ -46,22 +46,22 @@ const StatCards = () => {
 
   const completeSlides = [
     {
-      title: "1 week",
+      title: "Last 7 days",
       uniqueEquipmentCount: data.ceq1,
       totalTasksCount: data.cmt1,
     },
     {
-      title: "2 weeks",
+      title: "Last 14 days",
       uniqueEquipmentCount: data.ceq2,
       totalTasksCount: data.cmt2,
     },
     {
-      title: "3 weeks",
+      title: "Last 21 days",
       uniqueEquipmentCount: data.ceq3,
       totalTasksCount: data.cmt3,
     },
     {
-      title: "4 weeks",
+      title: "Last 28 days",
       uniqueEquipmentCount: data.ceq4,
       totalTasksCount: data.cmt4,
     },
@@ -69,22 +69,22 @@ const StatCards = () => {
   
   const upcomingSlides = [
     {
-      title: "1 week",
+      title: "7 days",
       uniqueEquipmentCount: data.ueq1,
       totalTasksCount: data.umt1,
     },
     {
-      title: "2 weeks",
+      title: "14 days",
       uniqueEquipmentCount: data.ueq2,
       totalTasksCount: data.umt2,
     },
     {
-      title: "3 weeks",
+      title: "21 days",
       uniqueEquipmentCount: data.ueq3,
       totalTasksCount: data.umt3,
     },
     {
-      title: "4 weeks",
+      title: "28 days",
       uniqueEquipmentCount: data.ueq4,
       totalTasksCount: data.umt4,
     },

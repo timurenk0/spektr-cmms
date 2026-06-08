@@ -290,7 +290,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
               <Tab label="Overview" value="overview" />
               <Tab label="Documents" value="documents" />
               <Tab label="Photos" value="photo" />
-              <Tab label="Crit. Components" value="components" />
+              <Tab label="Spare Parts" value="components" />
               <Tab label="Activities" value="activity" />
             </TabList>
             <TabPanel value="overview">

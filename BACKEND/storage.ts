@@ -390,7 +390,7 @@ export class DatabaseStorage {
             status: maintenanceEvents.status,
             reason: maintenanceEvents.reason,
             isOverdue: sql<boolean>`
-                CURRENT_DATE - ${maintenanceEvents.start} > 3
+                CURRENT_DATE - ${maintenanceEvents.start} > 3 AND ${maintenanceEvents.status} != 'complete'
             `,
             color: sql<string>`
                 CASE
@@ -399,21 +399,21 @@ export class DatabaseStorage {
                             WHEN 'A' THEN 'oklch(43.2% 0.095 166.913)'
                             WHEN 'B' THEN 'oklch(68.1% 0.162 75.834)'
                             WHEN 'C' THEN 'oklch(42.4% 0.199 265.638)'
-                            WHEN 'D' THEN 'oklch(43.8% 0.218 303.724)'
+                            WHEN 'D' THEN 'oklch(71.4% 0.203 305.504)'
                             WHEN 'E' THEN 'oklch(0.559643 0.192567 35.8054)'
-                            WHEN 'I' THEN 'oklch(59.2% 0.249 0.584)'
+                            WHEN 'I' THEN 'oklch(.704 .14 182.503)'
                             ELSE '#4D96FF'
                         END
-                    WHEN CURRENT_DATE - ${maintenanceEvents.start}  > 3 THEN '#22222275'
+                    WHEN CURRENT_DATE - ${maintenanceEvents.start}  > 3 AND ${maintenanceEvents.status} != 'complete' THEN '#22222275'
                     WHEN ${maintenanceEvents.status} = 'incomplete' THEN '#FF0000'
                     WHEN ${maintenanceEvents.status} = 'complete' THEN
                         CASE ${maintenanceEvents.level}
                             WHEN 'A' THEN 'oklch(76.5% 0.177 163.223)'
                             WHEN 'B' THEN 'oklch(85.2% 0.199 91.936)'
                             WHEN 'C' THEN 'oklch(70.7% 0.165 254.624)'
-                            WHEN 'D' THEN 'oklch(71.4% 0.203 305.504)'
+                            WHEN 'D' THEN 'oklch(43.8% 0.218 303.724)'
                             WHEN 'E' THEN 'oklch(0.4915 0.1306 49.65)'
-                            WHEN 'I' THEN 'oklch(71.8% 0.202 349.761)'
+                            WHEN 'I' THEN 'oklch(.511 .096 186.391)'
                             ELSE '#4D96FF'
                         END
                 END

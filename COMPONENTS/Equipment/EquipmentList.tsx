@@ -98,7 +98,7 @@ const EquipmentList = () => {
       <div className="flex gap-2 mb-3">
         {EquipmentCategories.map((c, idx) => (
           !filters.category ? (
-            <Card key={idx} className="w-full">
+            <Card key={idx} className="w-full flex items-center justify-center">
               <CardActionArea onClick={() => updateFilters("category", c.id)}>
                 <CardContent className="text-green-600 flex justify-center items-center text-center">
                   {c.icon}
