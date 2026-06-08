@@ -46,7 +46,7 @@ const GaugeCharts = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <GaugeChart value={data.msc} title="Maintenance Schedule Compliance (MSC)" subtitle="Target > 90%" statClass="msc" />
-        <GaugeChart value={data.pmp} title="Planned Maintenance Percentage (PMP)" subtitle="Target > 85%" statClass="pmp" />
+        <GaugeChart value={data.err} title="Emergency Repairs Ratio (ERR)" subtitle="Target < 5%" statClass="err" />
         <GaugeChart value={data.tcm} title="Timely Completed Maintenances (TCM)" subtitle="Target > 90%" statClass="tcm" />
         <GaugeChart value={data.ehi} title="Equipment Health Index (EHI)" subtitle="Target > 75%" statClass="ehi" />
     </div>

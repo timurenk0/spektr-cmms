@@ -41,11 +41,11 @@ const GaugeChart = ({
                 if (value < 70 && value >= 50) return "oklch(76.9% 0.188 70.08)";
                 if (value < 50) return "#FF0000";
                 break;
-            case "pmp":
-                if (value >= 85) return "oklch(62.7% 0.194 149.214)";
-                if (value < 85 && value >= 60) return "oklch(85.2% 0.199 91.936)";
-                if (value < 60 && value >= 30) return "oklch(76.9% 0.188 70.08)";
-                if (value < 30) return "#FF0000";
+            case "err":
+                if (value < 5) return "oklch(62.7% 0.194 149.214)";
+                if (value < 25 && value >= 5) return "oklch(85.2% 0.199 91.936)";
+                if (value < 50 && value >= 25) return "oklch(76.9% 0.188 70.08)";
+                if (value >= 50) return "#FF0000";
                 break;
             case "tcm":
                 if (value >= 90) return "oklch(62.7% 0.194 149.214)";

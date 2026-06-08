@@ -733,10 +733,10 @@ export class DatabaseStorage {
                 COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete') AS complete
             FROM maintenance_events ${whereClause};
         `);
-        const pmp = await db.execute(sql`
+        const err = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete' AND level != 'E') as planned,
-                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete') as total
+                COUNT(*) FILTER (WHERE start_date <= now() AND level = 'E') AS error,
+                COUNT(*) FILTER (WHERE start_date <= now()) AS total
             FROM maintenance_events ${whereClause};
         `);
         const tcm = await db.execute(sql`
@@ -751,7 +751,7 @@ export class DatabaseStorage {
 
         return {
             msc: (100*(Number(msc.rows[0].complete) / Number(msc.rows[0].total))) || 0,
-            pmp: (100*(Number(pmp.rows[0].planned) / Number(pmp.rows[0].total))) || 0,
+            err: (100*(Number(err.rows[0].error) / Number(err.rows[0].total))) || 0,
             tcm: (100*(Number(tcm.rows[0].timely) / Number(tcm.rows[0].total))) || 0,
             ehi: Number(ehi.rows[0].avg) || 0
         };
