@@ -4,14 +4,14 @@ import { CircleQuestionMark } from "lucide-react";
 
 interface TooltipsProps {
     msc: string,
-    pmp: string,
+    err: string,
     tcm: string,
     ehi: string,
 }
 
 const TOOLTIPS: TooltipsProps = {
     "msc": "Number of completed events over the total number of events",
-    "pmp": "Number of completed planned events over the total number of completed events",
+    "err": "Ratio of emergency maintenance events over total number of maintenance events",
     "tcm": "Number of events completed on time over the number of completed events",
     "ehi": "Average health index of all assets"
 }

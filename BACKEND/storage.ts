@@ -314,7 +314,8 @@ export class DatabaseStorage {
             { duration: insertMaintenance.levelBDuration, hours: insertMaintenance.levelBHours },
             { duration: insertMaintenance.levelCDuration, hours: insertMaintenance.levelCHours },
             { duration: insertMaintenance.levelDDuration, hours: insertMaintenance.levelDHours },
-            { duration: insertMaintenance.levelIDuration, hours: insertMaintenance.levelIMonths }
+            { duration: insertMaintenance.levelIDuration1, hours: insertMaintenance.levelIMonths1 },
+            { duration: insertMaintenance.levelIDuration2, hours: insertMaintenance.levelIMonths2 },
         ].some(level => level.duration && level.duration > 0 && level.hours && level.hours > 0);
         // if (!hasValidLevels) throw new Error("At least one maintenance level must have hours/duration values > 0");
         if (!hasValidLevels) throw new CustomApiError({
@@ -359,7 +360,7 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
     
     /* ============================================== Maintenance Events Methods ============================================== */
-    async getMaintenanceEvents(tenantId: number, status: "any" | "pending" | "complete" | "incomplete",  start?: string, end?: string): Promise<(MaintenanceEvent & { color: string, isOverdue: boolean })[]> {
+    async getMaintenanceEvents(tenantId: number, status: "any" | "pending" | "complete" | "incomplete",  start?: string, end?: string): Promise<MaintenanceEvent[]> {
         const conditions = [and(eq(maintenanceEvents.tenantId, tenantId))];
 
         if (start && end) {
@@ -462,8 +463,14 @@ export class DatabaseStorage {
         };
     }
     
-    async getMaintenanceEvent(id: number): Promise<MaintenanceEvent | undefined> {
-        return (await db.select().from(maintenanceEvents).where(eq(maintenanceEvents.id, id)))[0];
+    async getMaintenanceEvent(id: number): Promise<(MaintenanceEvent & { isOverdue: boolean }) | undefined> {
+        const event = (await db.select({
+            ...getTableColumns(maintenanceEvents),
+            isOverdue: sql<boolean>`
+                CURRENT_DATE - ${maintenanceEvents.start} > 3 AND ${maintenanceEvents.status} != 'complete'
+            `,
+        }).from(maintenanceEvents).where(eq(maintenanceEvents.id, id)))[0]
+        return event;
     }
     
     async getMaintenanceEventsByEquipmentId(id: number, level?: string): Promise<MaintenanceEvent[]> {
@@ -693,8 +700,8 @@ export class DatabaseStorage {
 
         const emergency = await db.execute(sql`
             SELECT
-                COUNT(DISTINCT equipment_id) FILTER (WHERE level = 'E') AS eeq,
-                COUNT(*) FILTER (WHERE level = 'E') AS emt
+                COUNT(*) FILTER (WHERE level = 'E' and status = 'pending') AS eeq,
+                COUNT(*) FILTER (WHERE level = 'E' AND status = 'complete') AS emt
             FROM maintenance_events ${whereClause}
         `);
     
@@ -729,24 +736,24 @@ export class DatabaseStorage {
         
         const msc = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE start_date <= now()) AS total,
-                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete') AS complete
+                COALESCE(COUNT(*) FILTER (WHERE start_date <= now())) AS total,
+                COALESCE(COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete')) AS complete
             FROM maintenance_events ${whereClause};
         `);
         const err = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE start_date <= now() AND level = 'E') AS error,
-                COUNT(*) FILTER (WHERE start_date <= now()) AS total
+                COALESCE(COUNT(*) FILTER (WHERE start_date <= now() AND level = 'E')) AS error,
+                COALESCE(COUNT(*) FILTER (WHERE start_date <= now())) AS total
             FROM maintenance_events ${whereClause};
         `);
         const tcm = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete' AND performed_at IS NOT NULL AND performed_at - scheduled_at <= 2) as timely,
-                COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete') as total 
+                COALESCE(COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete' AND performed_at IS NOT NULL AND performed_at - scheduled_at <= 2)) as timely,
+                COALESCE(COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete')) as total 
             FROM maintenance_events ${whereClause};
         `);
         const ehi = await db.execute(sql`
-            SELECT AVG(health_index) FROM equipments ${whereClause};
+            SELECT COALESCE(AVG(health_index)) as avg FROM equipments ${whereClause};
         `)
 
         return {
@@ -771,7 +778,7 @@ export class DatabaseStorage {
 
         const monthlyHealthDrop = Number((100 / usefulLifeSpan).toFixed(2));
 
-        const idealHealthIndex = 100 - differenceInCalendarMonths(Date(), dateOfManufacturing) * monthlyHealthDrop;
+        let idealHealthIndex = Math.max(0, 100 - differenceInCalendarMonths(Date(), dateOfManufacturing) * monthlyHealthDrop);
 
         
         // const trueHealthIndex = givenHealthIndex > idealHealthIndex ? idealHealthIndex : givenHealthIndex;
@@ -779,6 +786,32 @@ export class DatabaseStorage {
         console.log("Ideal | True", idealHealthIndex, trueHealthIndex);
 
         return trueHealthIndex;
+    }
+
+    async subtractPenaltyScore(event: (MaintenanceEvent & { isOverdue: boolean })) {
+        const levelCoeffs: Record<string, number> = {
+            "A": 1,
+            "B": 2,
+            "C": 3,
+            "D": 4,
+            "I1": 1,
+            "I2": 2,
+        }
+        const statusCoeffs: Record<string, number> = {
+            "complete": 0,
+            "overdue": 0.5,
+            "incomplete": 1
+        }
+
+        const BASE_PENALTY_SCORE = 0.2;
+        const eventStatus = event.status === "incomplete" ? "incomplete" : event.isOverdue ? "overdue" : event.status;
+        
+        const penalty = BASE_PENALTY_SCORE * levelCoeffs[event.level] * (statusCoeffs[eventStatus] || 0);
+
+        console.log(penalty);
+
+        // update event in the db
+        return await db.update(equipments).set({ healthIndex: sql`${equipments.healthIndex} - ${penalty}` }).where(eq(equipments.id, event.equipmentId));
     }
 
     // async subtractPenaltyScore(

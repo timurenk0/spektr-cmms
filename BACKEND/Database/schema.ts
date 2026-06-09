@@ -140,8 +140,12 @@ export const maintenances = pgTable("maintenances", {
   levelCHours: integer("level_c_hours").notNull().default(0),
   levelDDuration: integer("level_d_duration").notNull().default(0),
   levelDHours: integer("level_d_hours").notNull().default(0),
-  levelIDuration: integer("level_i_duration").notNull().default(0),
-  levelIMonths: integer("level_i_months").notNull().default(0),
+  levelIDuration1: integer("level_i_duration_1").notNull().default(0),
+  levelIMonths1: integer("level_i_months_1").notNull().default(0),
+  levelIDescription1: varchar("level_i_description_1", { length: 255 }),
+  levelIDuration2: integer("level_i_duration_2").notNull().default(0),
+  levelIMonths2: integer("level_i_months_2").notNull().default(0),
+  levelIDescription2: varchar("level_i_description_2", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 export const insertMaintenanceSchema = createInsertSchema(maintenances).omit({
@@ -157,7 +161,7 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   tenantId: integer("tenant_id").notNull().references(()=>tenants.id, { onDelete: "cascade" }),
   title: varchar("title", { length: 255 }).notNull(),
   description: varchar("description", { length: 511 }).notNull(),
-  level: char("level").notNull(),
+  level: varchar("level", { length: 2 }).notNull(),
   status: varchar("status", { length: 255 }).notNull(),
   start: date("start_date").notNull(),
   end: date("end_date"), // nullable for emergency events
@@ -165,7 +169,7 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   scheduledAt: date("scheduled_at").notNull().defaultNow(),
   performedAt: date("performed_at")
 }, (table) => [ 
-    check("level_check", sql`level IN ('A', 'B', 'C', 'D', 'E', 'I')`),
+    check("level_check", sql`level IN ('A', 'B', 'C', 'D', 'E', 'I1', 'I2')`),
     check("status_check", sql`status IN ('complete', 'incomplete', 'pending')`),
     index("idx_maintenance_events_maintenance_id").on(table.maintenanceId),
     index("idx_me_tenant_equipment_id").on(table.tenantId, table.equipmentId, table.start),

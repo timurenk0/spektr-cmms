@@ -11,6 +11,8 @@ export async function GET(
        const equipmetnId = parseInt(id);
        if (isNaN(equipmetnId)) return res.json({ error: "Invalid equipment ID" }, { status: 400 });
        
+       console.log(equipmetnId);
+       
        const documents = await storage.getDocuments(equipmetnId);
        if (!documents) return res.json({ message: "No documents found for specified equipment" }, { status: 404 });
 

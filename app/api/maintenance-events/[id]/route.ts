@@ -20,6 +20,8 @@ export async function GET(
        const event = await storage.getMaintenanceEvent(eventId);
 
        if (!event) return res.json({ error: "Specified maintenance event not found" }, { status: 400 });
+
+    //    console.log(await storage.subtractPenaltyScore(event));
        
        return res.json(event, { status: 200 });
     } catch (error: unknown) {
@@ -71,12 +73,7 @@ export async function PATCH(
                             "incomplete"
 
         
-        const eventValidatedData = insertMaintenanceEventSchema.partial().parse({
-            ...body,
-            isOverdue: eventStatus === "overdue"
-        });
-
-        const updatedEvent = await storage.updateMaintenanceEvent(eventId, eventValidatedData);
+        const updatedEvent = await storage.updateMaintenanceEvent(eventId, body);
 
         if (!updatedEvent) {
             return res.json({ error: "Specified maintenance event not found" }, { status: 404 });
@@ -88,6 +85,9 @@ export async function PATCH(
             const shiftedEvents = await storage.shiftMaintenanceEvents(updatedEvent);
             if (shiftedEvents.length < 1) return res.json({ message: "Nothing to shift..." }, { status: 201 });
         }
+        
+        // Update equipment health score
+        await storage.subtractPenaltyScore({...updatedEvent, isOverdue: eventStatus === "overdue"});
         
         return res.json(updatedEvent, { status: 201 });            
     } catch (error: unknown) {

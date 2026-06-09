@@ -62,8 +62,10 @@ const AddMaintenanceForm = ({
       levelCDuration: 0,
       levelDHours: 0,
       levelDDuration: 0,
-      levelIMonths: 0,
-      levelIDuration: 0,
+      levelIMonths1: 0,
+      levelIDuration1: 0,
+      levelIMonths2: 0,
+      levelIDuration2: 0,
       serviceStartDate: format(new Date(), "yyyy-MM-dd"),
       serviceEndDate: format(new Date(), "yyyy-MM-dd")
     }
@@ -409,11 +411,11 @@ const AddMaintenanceForm = ({
             </div>
            </div>
            <div className="border p-4 rounded-md bg-pink-50 col-span-2">
-            <h3 className="font-medium text-lg">Level I Maintenance</h3>
+            <h3 className="font-medium text-lg">Interval-based Maintenance 1</h3>
             <p className="font-medium text-xs mb-3 italic">*Maintenance independent of equipment working hours</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
               <Controller
-                name="levelIMonths"
+                name="levelIMonths1"
                 control={form.control}
                 defaultValue={0}
                 render={({ field }) => (
@@ -432,7 +434,7 @@ const AddMaintenanceForm = ({
                 )}
               />
               <Controller
-                name="levelIDuration"
+                name="levelIDuration1"
                 control={form.control}
                 defaultValue={0}
                 render={({ field }) => (
@@ -449,55 +451,181 @@ const AddMaintenanceForm = ({
                     helperText="Expected maintenance duration in days"
                   />
                 )}
+              />
+              <TextField
+                color="info"
+                margin="dense"
+                label="Short description"
+                fullWidth
+                slotProps={{ htmlInput: { maxLength: 255 } }}
+                {...form.register("levelIDescription1")}
+                className="col-span-2"
+              />
+            </div>
+           </div>
+           <div className="border p-4 rounded-md bg-pink-50 col-span-2">
+            <h3 className="font-medium text-lg">Interval-based Maintenance 2</h3>
+            <p className="font-medium text-xs mb-3 italic">*Maintenance independent of equipment working hours</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <Controller
+                name="levelIMonths2"
+                control={form.control}
+                defaultValue={0}
+                render={({ field }) => (
+                  <TextField
+                    type="number"
+                    label="Interval In Months"
+                    color="info"
+                    margin="dense"
+                    slotProps={{ htmlInput: { min: 0 } }}
+                    fullWidth
+                    required
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    helperText="Interval between maintenance tasks in months"
+                  />
+                )}
+              />
+              <Controller
+                name="levelIDuration2"
+                control={form.control}
+                defaultValue={0}
+                render={({ field }) => (
+                  <TextField
+                    type="number"
+                    label="Duration (days)"
+                    color="info"
+                    margin="dense"
+                    slotProps={{ htmlInput: { min: 0 } }}
+                    fullWidth
+                    required
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    helperText="Expected maintenance duration in days"
+                  />
+                )}
+              />
+              <TextField
+                color="info"
+                label="Short description"
+                margin="dense"
+                slotProps={{ htmlInput: { maxLength: 255 } }}
+                fullWidth
+                {...form.register("levelIDescription2")}
               />
             </div>
            </div>
          </>
          ) : (
-           <div className="border p-4 rounded-md bg-pink-50 col-span-2">
-            <h3 className="font-medium text-lg">Level I Maintenance</h3>
-            <p className="font-medium text-xs mb-3 italic">*Maintenance independent of equipment working hours</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <Controller
-                name="levelIMonths"
-                control={form.control}
-                defaultValue={0}
-                render={({ field }) => (
-                  <TextField
-                    type="number"
-                    label="Interval In Months"
-                    color="info"
-                    margin="dense"
-                    slotProps={{ htmlInput: { min: 0 } }}
-                    fullWidth
-                    required
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    helperText="Interval between maintenance tasks in months"
-                  />
-                )}
-              />
-              <Controller
-                name="levelIDuration"
-                control={form.control}
-                defaultValue={0}
-                render={({ field }) => (
-                  <TextField
-                    type="number"
-                    label="Duration (days)"
-                    color="info"
-                    margin="dense"
-                    slotProps={{ htmlInput: { min: 0 } }}
-                    fullWidth
-                    required
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    helperText="Expected maintenance duration in days"
-                  />
-                )}
-              />
-            </div>
-           </div>
+           <>
+             <div className="border p-4 rounded-md bg-pink-50 col-span-2">
+              <h3 className="font-medium text-lg">Interval-based Maintenance 1</h3>
+              <p className="font-medium text-xs mb-3 italic">*Maintenance independent of equipment working hours</p>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                <Controller
+                  name="levelIMonths1"
+                  control={form.control}
+                  defaultValue={0}
+                  render={({ field }) => (
+                    <TextField
+                      type="number"
+                      label="Interval In Months"
+                      color="info"
+                      margin="dense"
+                      slotProps={{ htmlInput: { min: 0 } }}
+                      fullWidth
+                      required
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      helperText="Interval between maintenance tasks in months"
+                    />
+                  )}
+                />
+                <Controller
+                  name="levelIDuration1"
+                  control={form.control}
+                  defaultValue={0}
+                  render={({ field }) => (
+                    <TextField
+                      type="number"
+                      label="Duration (days)"
+                      color="info"
+                      margin="dense"
+                      slotProps={{ htmlInput: { min: 0 } }}
+                      fullWidth
+                      required
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      helperText="Expected maintenance duration in days"
+                    />
+                  )}
+                />
+                <TextField
+                  label="Short description"
+                  color="info"
+                  margin="dense"
+                  fullWidth
+                  className="col-span-2"
+                  slotProps={{ htmlInput: { max: 255 } }}
+                  {...form.register("levelIDescription1")}
+                />
+              </div>
+             </div>
+             <div className="border p-4 rounded-md bg-pink-50 col-span-2">
+              <h3 className="font-medium text-lg">Interval-based Maintenance 2</h3>
+              <p className="font-medium text-xs mb-3 italic">*Maintenance independent of equipment working hours</p>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                <Controller
+                  name="levelIMonths2"
+                  control={form.control}
+                  defaultValue={0}
+                  render={({ field }) => (
+                    <TextField
+                      type="number"
+                      label="Interval In Months"
+                      color="info"
+                      margin="dense"
+                      slotProps={{ htmlInput: { min: 0 } }}
+                      fullWidth
+                      required
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      helperText="Interval between maintenance tasks in months"
+                    />
+                  )}
+                />
+                <Controller
+                  name="levelIDuration2"
+                  control={form.control}
+                  defaultValue={0}
+                  render={({ field }) => (
+                    <TextField
+                      type="number"
+                      label="Duration (days)"
+                      color="info"
+                      margin="dense"
+                      slotProps={{ htmlInput: { min: 0 } }}
+                      fullWidth
+                      required
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      helperText="Expected maintenance duration in days"
+                    />
+                  )}
+                />
+                <TextField
+                  label="Short description"
+                  color="info"
+                  margin="dense"
+                  fullWidth
+                  className="col-span-2"
+                  slotProps={{ htmlInput: { max: 255 } }}
+                  {...form.register("levelIDescription2")}
+                />
+              </div>
+             </div>
+             
+           </>
          )}
 
          <div className="col-span-2 flex justify-end gap-x-2">

@@ -17,9 +17,13 @@ export function createMaintenanceEvents(
     if (start >= end) throw new Error("Service start date can't be greater than service end date");
 
     const levels = {
-        "I": {
-            hours: maintenance.levelIMonths,
-            duration: maintenance.levelIDuration
+        "I2": {
+            hours: maintenance.levelIMonths2,
+            duration: maintenance.levelIDuration2
+        },
+        "I1": {
+            hours: maintenance.levelIMonths1,
+            duration: maintenance.levelIDuration1
         },
         "D": {
             hours: maintenance.levelDHours,
@@ -50,7 +54,7 @@ export function createMaintenanceEvents(
 
         let eventStart = new Date(start.getTime());
         
-        if (k === "I") {            
+        if (k === "I2" || k === "I1") {            
             while (eventStart <= end) {
                 const eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
                 const status = differenceInDays(new Date(), eventStart) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
@@ -60,7 +64,7 @@ export function createMaintenanceEvents(
                     maintenanceId: maintenance.id,
                     tenantId: maintenance.tenantId,
                     title: `${equipment.assetId} level ${k}`,
-                    description: `Level ${k} maintenance works for equipment ${equipment.name} ${equipment.manufacturer}. Scheduled at: ${eventStart.toISOString().slice(0, 10)}`,
+                    description: k === "I2" ? maintenance.levelIDescription2 || "" : maintenance.levelIDescription1 || "",
                     start: eventStart.toISOString().slice(0, 10),
                     end: eventEnd.toISOString().slice(0, 10),
                     level: k,
