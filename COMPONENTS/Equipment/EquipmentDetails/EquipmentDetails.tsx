@@ -110,19 +110,21 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
         }),
         credentials: "include"
       });
+      const data = await res.json();
       if (!res.ok) {
-        throw new Error("Failed to update equipment status");
+        throw new Error(`${data.error.message} CODE: ${data.error.code}`);
       }
       
-      return await res.json();
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
       toast.success("Successfully updated equipment status");
       return; 
     },
-    onError: (err) => {
-      toast.error("Failed to update equipment status");
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      toast.error(msg);
       console.error(err);
       return; 
     }
@@ -138,19 +140,27 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
           }),
           credentials: "include"
         });
-        if (!res.ok) throw new Error(`Failed to PATCH equipment overhaul status ${res.status}`);
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(`${data.error.message}. CODE: ${data.error.code}`);
+        }
 
         return await res.json();
       } catch (error) {
         throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log(data);
       queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
+      toast.success(`Overhaul ${data ? "initialised" : "finished"} successfully`)
     },
     onError: (err: unknown) => {
       const msg = err instanceof Error ? err.message : "Unknown error";
-      toast.error(`Failed to update equipment overhaul status: ${msg}`);
+      toast.error(msg);
+      console.error(err);
+      return;
     }
   });
   
@@ -177,7 +187,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
             <div className="flex items-center">
               <div className="mr-6 relative">
                 <Image src={equipment.equipmentImage} width={200} height={200} className="max-w-[200px] max-h-[200px] rounded-md object-cover border" alt="Equipment image" />
-                {equipment.hadOverhaul && <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-red-600/50 p-2 text-xs text-white font-bold">ONGOING OVERHAUL</h1>}
+                {user.role === "admin" && equipment.hadOverhaul && <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-red-600/50 p-2 text-xs text-white font-bold">ONGOING OVERHAUL</h1>}
               </div>
               <div>
                 <div className="flex items-center gap-x-2">
@@ -236,7 +246,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                         </div>
                       )}
                   </div>
-                  <div className="flex flex-col items-center">
+                  {user.role == "admin" && (<div className="flex flex-col items-center">
                     <span className="text-xs text-gray-500 mb-1">Overhaul</span>
                     <button
                       className="rounded-full bg-red-600 text-white text-xs font-bold px-2 py-1 hover:bg-red-700 cursor-pointer"
@@ -244,7 +254,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                     >
                         {equipment.hadOverhaul ? "Finish" : "Start"} Overhaul?
                     </button>
-                  </div>
+                  </div>)}
                 </div>
               </div>
             </div>

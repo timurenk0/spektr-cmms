@@ -22,6 +22,7 @@ const DeleteEquipmentForm = (
                     const response = await fetch(`/api/equipments/${id}`, {
                         method: "PATCH",
                         body: JSON.stringify({
+                            isDeleted: true,
                             reason
                         }),
                         credentials: "include"

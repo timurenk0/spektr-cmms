@@ -83,7 +83,7 @@ export async function PATCH(
         
         const body = await req.json();
         console.log(body)
-        const { status, reason, hadOverhaul } = body;
+        const { isDeleted, status, reason, hadOverhaul } = body;
         
         
         // Fetch specified equipment by ID and check if it exists.
@@ -94,16 +94,19 @@ export async function PATCH(
             status: 404
         });
 
-        console.log(body);
+        if (isDeleted && reason) {
+            await storage.deleteEquipment(equipmentId);
+            await activityLogger(user, "delete", `Equipment ${equipmentId} deleted. Reason: ${reason}`, equipmentId);
+            return res.json(true, { status: 201 });
+        }
         
-        if (!reason && (hadOverhaul !== undefined || hadOverhaul !== null)) {
+        if (hadOverhaul !== undefined) {
             await storage.updateEquipment(equipmentId, { hadOverhaul, status: hadOverhaul ? "out of service" : "operational" });
+            await activityLogger(user, "update", `Overhaul ${hadOverhaul ? "initiated" : "finished"} for equipment ${equipmentId}`, equipmentId);
             return res.json(hadOverhaul, { status: 201 });
         }
         
-        if (status && !reason) {
-            await activityLogger(user, "update", `Equipment ${equipment.name} status updated to ${status}`, equipmentId);
-            
+        if (status) {
             if (status === "under repair") {
                 const maintenance = await storage.getMainteancesByEquipmentId(equipment.id);
                 if (!maintenance) return buildCustomError({
@@ -141,18 +144,12 @@ export async function PATCH(
                 });
             }
             
-            const newEquipment = await storage.updateEquipment(equipmentId, { status });
-            if (!newEquipment) return res.json({ error: "Failed to update equipment status" }, { status: 500 })
-            return res.json(true, { status: 200 });
+            await storage.updateEquipment(equipmentId, { status });
+            await activityLogger(user, "update", `Equipment ${equipment.name} status updated to ${status}`, equipmentId);
+            return res.json(true, { status: 201 });
         }
 
-        // Log the activity for deleted equipment using helper logger method.
-        // await activityLogger(user, "delete", `Equipment ${equipment.name} removed | Reason: ${reason}`, equipmentId);       
-
-        // Delete specified equipment.
-        await storage.deleteEquipment(equipmentId);
-        
-        return res.json(true, { status: 200 });        
+        return res.json({ message: "Nothing to change (edge case)" }, { status: 200 });        
     } catch (error: unknown) {
         return buildError(error);
     }

@@ -54,8 +54,8 @@ export async function validateUser(role?: string | string[]): Promise<AuthUser> 
     if (role && !authorize(user, role)) {
         throw new CustomApiError({
             code: "FORBIDDEN",
-            message:" You don't have enough permissions.",
-            suggestion: "Request additional permissions from your manager.",
+            message:" You don't have enough permissions",
+            suggestion: "Request additional permissions from your manager",
             status: 403
         });
     }
