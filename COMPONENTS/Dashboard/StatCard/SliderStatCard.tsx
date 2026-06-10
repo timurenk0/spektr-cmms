@@ -32,10 +32,10 @@ const VARIATIONS: Record<string, Record<string, string | React.ReactNode>> = {
     },
     upcoming: {
         status: "Due Next",
-        border: "border-amber-500",
-        bg: "bg-amber-100",
-        text: "text-amber-100",
-        icon: <CalendarCheck className="text-amber-500 h-6 w-6" />
+        border: "border-indigo-500",
+        bg: "bg-indigo-100",
+        text: "text-indigo-100",
+        icon: <CalendarCheck className="text-indigo-500 h-6 w-6" />
     }
 }
 
@@ -107,7 +107,7 @@ const SliderStatCard = ({ variant, slides }: SliderStatCardProps) => {
                 onClick={handlePrev} 
                 disabled={currentSlide === 0} 
                 className="disabled:opacity-50"
-                color={variant==="complete" ? "success" : "warning"}
+                color={variant==="complete" ? "success" : "info"}
             >
                 Prev
             </Button>
@@ -115,7 +115,7 @@ const SliderStatCard = ({ variant, slides }: SliderStatCardProps) => {
                 onClick={handleNext} 
                 disabled={currentSlide === slides.length - 1} 
                 className="disabled:opacity-50"
-                color={variant==="complete" ? "success" : "warning"}
+                color={variant==="complete" ? "success" : "info"}
             >
                 Next
             </Button>

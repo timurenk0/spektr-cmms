@@ -34,16 +34,16 @@ const VARIATIONS = {
         header2: "Total Maintenance Tasks"
     },
     overdue: {
-        border: "border-red-500",
-        bg: "bg-red-100",
-        icon: <Clock className="text-red-500 w-6 h-6" />,
+        border: "border-amber-500",
+        bg: "bg-amber-100",
+        icon: <Clock className="text-amber-500 w-6 h-6" />,
         header1: "Equipment With Overdue Maintenance",
         header2: "Overdue Maintenance Tasks",
     },
     emergency: {
-        border: "border-purple-500",
-        bg: "bg-purple-100",
-        icon: <AlertTriangle className="text-purple-500 w-6 h-6" />,
+        border: "border-red-500",
+        bg: "bg-red-100",
+        icon: <AlertTriangle className="text-red-500 w-6 h-6" />,
         header1: "Ongoing Emergency Repairs",
         header2: "Completed Emergency Repairs"
     }
