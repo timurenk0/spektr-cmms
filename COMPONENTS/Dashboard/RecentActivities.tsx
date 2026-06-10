@@ -34,9 +34,9 @@ const RecentActivities = ({ equipmentId } : { equipmentId?: number }) => {
         </div>
     )}
         <div className="p-4">
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-3 gap-4">
                 {activities.length > 0 ? activities.map(activity => (
-                    <div key={activity.id} className="flex">
+                    <div key={activity.id} className="flex shadow-sm shadow-black/25 py-2 rounded-md">
                         <div className="shrink-0 w-8">
                             <div className={`w-2 h-2 ${getActivityColor(activity.action)} rounded-full mt-2 mx-auto`}></div>
                         </div>
