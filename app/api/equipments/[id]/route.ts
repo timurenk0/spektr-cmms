@@ -83,7 +83,7 @@ export async function PATCH(
         
         const body = await req.json();
         console.log(body)
-        const { status, reason } = body;
+        const { status, reason, hadOverhaul } = body;
         
         
         // Fetch specified equipment by ID and check if it exists.
@@ -92,7 +92,14 @@ export async function PATCH(
             code: ERROR_CODES.NOT_FOUND_ERROR,
             message: "Equipment with given ID is not found",
             status: 404
-        })
+        });
+
+        console.log(body);
+        
+        if (!reason && (hadOverhaul !== undefined || hadOverhaul !== null)) {
+            await storage.updateEquipment(equipmentId, { hadOverhaul, status: hadOverhaul ? "out of service" : "operational" });
+            return res.json(hadOverhaul, { status: 201 });
+        }
         
         if (status && !reason) {
             await activityLogger(user, "update", `Equipment ${equipment.name} status updated to ${status}`, equipmentId);

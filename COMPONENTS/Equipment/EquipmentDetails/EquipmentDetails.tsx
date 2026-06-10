@@ -128,6 +128,32 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
     }
   });
   
+  const overhaulMutation = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/api/equipments/${equipmentId}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            hadOverhaul: !equipment?.hadOverhaul
+          }),
+          credentials: "include"
+        });
+        if (!res.ok) throw new Error(`Failed to PATCH equipment overhaul status ${res.status}`);
+
+        return await res.json();
+      } catch (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      toast.error(`Failed to update equipment overhaul status: ${msg}`);
+    }
+  });
+  
   const isLoading = (!equipment || isLoadingEquipment) || (!user || isLoadingUser);
   if (isLoading) {
     if (isNotFound) {
@@ -149,16 +175,17 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
         <div className="px-8 py-6 border-b border-gray-200">
           <div className="flex items-start justify-between">
             <div className="flex items-center">
-              <div className="mr-6">
+              <div className="mr-6 relative">
                 <Image src={equipment.equipmentImage} width={200} height={200} className="max-w-[200px] max-h-[200px] rounded-md object-cover border" alt="Equipment image" />
+                {equipment.hadOverhaul && <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-red-600/50 p-2 text-xs text-white font-bold">ONGOING OVERHAUL</h1>}
               </div>
               <div>
-                <h1 className="text-2xl font-bold flex items-center">
-                  {equipment.name}
-                  {equipment.status === "operational" && (
-                    <div className="ml-2 w-3 h-3 rounded-full bg-green-500"></div>
-                  )}
-                </h1>
+                <div className="flex items-center gap-x-2">
+                  <h1 className="text-2xl font-bold">
+                    {equipment.name}
+                  </h1>
+                  <div className={`w-3 h-3 rounded-full ${statusColors[equipment.status]}`}></div>
+                </div>
                 <div title={equipment.manufacturer+" "+equipment.model} className="text-sm text-gray-600 mt-1 mb-1 max-w-lg truncate">
                   {equipment.manufacturer}{" "}{equipment.model}
                 </div>
@@ -208,6 +235,15 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                           </ul>
                         </div>
                       )}
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className="text-xs text-gray-500 mb-1">Overhaul</span>
+                    <button
+                      className="rounded-full bg-red-600 text-white text-xs font-bold px-2 py-1 hover:bg-red-700 cursor-pointer"
+                      onClick={() => {alert("This action will change equipment status to 'out of service' and add an overhaul maintenance event to the calendar. Are you sure?"); overhaulMutation.mutate()}}
+                    >
+                        {equipment.hadOverhaul ? "Finish" : "Start"} Overhaul?
+                    </button>
                   </div>
                 </div>
               </div>

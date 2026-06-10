@@ -67,9 +67,10 @@ const EquipmentListEl = ({ equipment, userRole }: { equipment: TEquipment, userR
             {/* Equipment image and name */}
             <TableCell>
                 <div className="flex items-center">
-                    <div className="h-28 w-28 overflow-hidden flex items-center">
+                    <div className="h-28 w-28 overflow-hidden flex items-center relative">
                         {/* add max-h-[128px] to image if you want the image to resize */}
                         <Image loading="lazy" className="max-w-28" src={equipment.equipmentImage ? equipment.equipmentImage : "/window.svg"} width={112} height={112} alt="Equipment image" />
+                        {equipment.hadOverhaul && <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-red-600/50 p-2 text-xs text-white font-bold">ONGOING OVERHAUL</h1>}
                     </div>
                     <div className="ml-2 flex-1 text-left">
                         <div className="text-xs font-medium truncate max-w-32" title={equipment.name}>

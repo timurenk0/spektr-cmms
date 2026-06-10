@@ -60,6 +60,8 @@ export type TEquipment = {
     department: string;
     equipmentImage: string;
     healthIndex: number | null;
+    nextHealthIndexUpdate: string | undefined | null;
+    hadOverhaul: boolean;
     notes: string | null;
     uploadedAt: string;
     lastEvent: string | null;
