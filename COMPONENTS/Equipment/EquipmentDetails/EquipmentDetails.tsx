@@ -112,13 +112,14 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(`${data.error.message} CODE: ${data.error.code}`);
+        throw new Error(`${data.error.message}. CODE: ${data.error.code}`);
       }
       
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-gauges"] });
       toast.success("Successfully updated equipment status");
       return; 
     },
@@ -146,7 +147,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
           throw new Error(`${data.error.message}. CODE: ${data.error.code}`);
         }
 
-        return await res.json();
+        return data;
       } catch (error) {
         throw error;
       }
@@ -154,6 +155,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
     onSuccess: (data) => {
       console.log(data);
       queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-gauges"] });
       toast.success(`Overhaul ${data ? "initialised" : "finished"} successfully`)
     },
     onError: (err: unknown) => {

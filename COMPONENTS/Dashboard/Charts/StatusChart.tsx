@@ -45,7 +45,7 @@ const StatusChart = () => {
                             cy="50%"
                             labelLine
                             label={({ name, value, percent }) => 
-                                `${value>0 ? name+":": ""} ${value>0?value+" | "+(percent ? percent*100 : 0).toFixed(0)+"%" : ""}`
+                                `${value>0 ? name+":": ""} ${value>0?value+" | "+(percent ? percent*100 : 0).toFixed(1)+"%" : ""}`
                         }
                         outerRadius={80}
                         fill="#8884d8"
@@ -89,25 +89,30 @@ const StatusChart = () => {
                         data={statusData}
                         cx="50%"
                         cy="50%"
-                        labelLine
-                        label={({ name, value, percent }) => 
-                            `${value>0 ? name+":": ""} ${value>0?value+" | "+(percent ? percent*100 : 0).toFixed(0)+"%" : ""}`
-                    }
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    >
-                        {statusData.map((entry, index) => (
-                            <Cell
-                                key={`cell-${index}`}
-                                fill={COLORS[index % COLORS.length]}
-                            >
-
-                            </Cell>
-                        ))}
+                        // labelLine
+                        // label={({ name, value, percent }) => 
+                        //     `${value>0 ? name+":": ""} ${value>0?value+" | "+(percent ? percent*100 : 0).toFixed(1)+"%" : ""}`
+                        // }
+                        label={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        >
+                            {statusData.map((entry, index) => (
+                                <Cell
+                                    key={`cell-${index}`}
+                                    fill={COLORS[index % COLORS.length]}
+                                >
+                                </Cell>
+                            ))}
                     </Pie>
                     <Tooltip />
-                    <Legend />
+                    <Legend
+                        formatter={(val) => {
+                            const item = statusData.find(s => s.name === val);
+                            return `${val} - ${item?.value ?? 0}`
+                        }}
+                    />
                 </PieChart>
             </ResponsiveContainer>
         </div>

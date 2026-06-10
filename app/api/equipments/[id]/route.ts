@@ -105,14 +105,24 @@ export async function PATCH(
             await activityLogger(user, "update", `Overhaul ${hadOverhaul ? "initiated" : "finished"} for equipment ${equipmentId}`, equipmentId);
             return res.json(hadOverhaul, { status: 201 });
         }
+
+        if (status && status === "operational" && equipment.hadOverhaul) {
+            return buildCustomError({
+                code: "ONGOING_OVERHAUL",
+                field: "status",
+                message: "Can't change equipment status to operational during overhaul",
+                suggestion: "Complete overhaul event in the calendar and equipment status will automatically switch to operational",
+                status: 400
+            });
+        }
         
         if (status) {
             if (status === "under repair") {
                 const maintenance = await storage.getMainteancesByEquipmentId(equipment.id);
                 if (!maintenance) return buildCustomError({
                     code: "NO_ACTIVE_MAINTENANCE",
-                    message: "Equipment status cannot be changed to 'under repair' without active maintenance.",
-                    suggestion: "Start a maintenance operation for this equipment first.",
+                    message: "Equipment status cannot be changed to 'under repair' without active maintenance",
+                    suggestion: "Start a maintenance operation for this equipment first",
                     status: 409
                 });
                 

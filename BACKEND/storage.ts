@@ -146,7 +146,7 @@ export class DatabaseStorage {
             .where(
                 and(
                 eq(maintenanceEvents.equipmentId, equipments.id),
-                lt(maintenanceEvents.start, sql`NOW()`),
+                lt(maintenanceEvents.start, sql`CURRENT_DATE`),
                 ),
             )
             .orderBy(desc(maintenanceEvents.start))
@@ -162,7 +162,7 @@ export class DatabaseStorage {
             .where(
                 and(
                 eq(maintenanceEvents.equipmentId, equipments.id),
-                gt(maintenanceEvents.start, sql`NOW()`),
+                gt(maintenanceEvents.start, sql`CURRENT_DATE`),
                 ),
             )
             .orderBy(asc(maintenanceEvents.start))
@@ -215,7 +215,7 @@ export class DatabaseStorage {
                                         .where(
                                             and(
                                                 eq(maintenanceEvents.equipmentId, id),
-                                                lt(maintenanceEvents.start, sql`NOW()`)
+                                                lt(maintenanceEvents.start, sql`CURRENT_DATE`)
                                             )
                                         )
                                         .orderBy(desc(maintenanceEvents.start))
@@ -228,7 +228,7 @@ export class DatabaseStorage {
                                         .where(
                                             and(
                                                 eq(maintenanceEvents.equipmentId, id),
-                                                gt(maintenanceEvents.start, sql`NOW()`)
+                                                gt(maintenanceEvents.start, sql`CURRENT_DATE`)
                                             )
                                         )
                                         .orderBy(asc(maintenanceEvents.start))
@@ -287,7 +287,7 @@ export class DatabaseStorage {
             equipmentId: maintenanceEvents.equipmentId,
             totalCount: sql<number>`COUNT(*)`.as("total_count"),
             completeCount: sql<number>`COUNT(*) FILTER (WHERE ${maintenanceEvents.status} = 'complete')`.as("complete_count"),
-            overdueCount: sql<number>`COUNT(*) FILTER (WHERE now() - ${maintenanceEvents.scheduledAt} > interval '3 days')`.as("overdue_count"),
+            overdueCount: sql<number>`COUNT(*) FILTER (WHERE CURRENT_DATE - ${maintenanceEvents.scheduledAt} > interval '3 days')`.as("overdue_count"),
             pendingCount: sql<number>`COUNT(*) FILTER (WHERE ${maintenanceEvents.status} = 'pending')`.as("pending_count"),
         }).from(maintenanceEvents).groupBy(maintenanceEvents.equipmentId).as("event_counts")
         
@@ -383,7 +383,7 @@ export class DatabaseStorage {
             end: sql<string>`
                 COALESCE(
                     ${maintenanceEvents.end}::text,
-                    to_char(now(), 'YYYY-MM-DD')
+                    to_char(CURRENT_DATE, 'YYYY-MM-DD')
                 )
             `,
             scheduledAt: maintenanceEvents.scheduledAt,
@@ -661,40 +661,40 @@ export class DatabaseStorage {
 
         const overdue = await db.execute(sql`
             SELECT
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date < now()) AS oeq,
-                COUNT(*) FILTER (WHERE start_date < now()) AS omt
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date < CURRENT_DATE) AS oeq,
+                COUNT(*) FILTER (WHERE start_date < CURRENT_DATE) AS omt
             FROM maintenance_events ${whereClause}
         `);
 
         const complete = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week' AND status = 'complete') AS cmt1,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week' AND status = 'complete') AS ceq1,
+                COUNT(*) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '1 week' AND status = 'complete') AS cmt1,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '1 week' AND status = 'complete') AS ceq1,
 
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 week' AND status = 'complete') AS cmt2,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 week' AND status = 'complete') AS ceq2,
+                COUNT(*) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '2 week' AND status = 'complete') AS cmt2,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '2 week' AND status = 'complete') AS ceq2,
 
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 week' AND status = 'complete') AS cmt3,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 week' AND status = 'complete') AS ceq3,
+                COUNT(*) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '3 week' AND status = 'complete') AS cmt3,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '3 week' AND status = 'complete') AS ceq3,
 
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 week' AND status = 'complete') AS cmt4,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 week' AND status = 'complete') AS ceq4
+                COUNT(*) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '4 week' AND status = 'complete') AS cmt4,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '4 week' AND status = 'complete') AS ceq4
             FROM maintenance_events ${whereClause};
         `);
 
         const upcoming = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week') AS umt1,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '1 week') AS ueq1,
+                COUNT(*) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '1 week') AS umt1,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '1 week') AS ueq1,
 
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 weeks') AS umt2,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '2 weeks') AS ueq2,
+                COUNT(*) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '2 weeks') AS umt2,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '2 weeks') AS ueq2,
 
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 weeks') AS umt3,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '3 weeks') AS ueq3,
+                COUNT(*) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '3 weeks') AS umt3,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '3 weeks') AS ueq3,
 
-                COUNT(*) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 weeks') AS umt4,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= now() AND start_date < now() + interval '4 weeks') AS ueq4 
+                COUNT(*) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '4 weeks') AS umt4,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '4 weeks') AS ueq4 
             FROM maintenance_events ${whereClause};
         `);
 
@@ -736,20 +736,20 @@ export class DatabaseStorage {
         
         const msc = await db.execute(sql`
             SELECT
-                COALESCE(COUNT(*) FILTER (WHERE start_date <= now())) AS total,
-                COALESCE(COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete')) AS complete
+                COALESCE(COUNT(*) FILTER (WHERE start_date <= CURRENT_DATE)) AS total,
+                COALESCE(COUNT(*) FILTER (WHERE start_date <= CURRENT_DATE AND status = 'complete')) AS complete
             FROM maintenance_events ${whereClause};
         `);
         const err = await db.execute(sql`
             SELECT
-                COALESCE(COUNT(*) FILTER (WHERE start_date <= now() AND level = 'E')) AS error,
-                COALESCE(COUNT(*) FILTER (WHERE start_date <= now())) AS total
+                COALESCE(COUNT(*) FILTER (WHERE start_date <= CURRENT_DATE AND level = 'E')) AS error,
+                COALESCE(COUNT(*) FILTER (WHERE start_date <= CURRENT_DATE)) AS total
             FROM maintenance_events ${whereClause};
         `);
         const tcm = await db.execute(sql`
             SELECT
-                COALESCE(COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete' AND performed_at IS NOT NULL AND performed_at - scheduled_at <= 2)) as timely,
-                COALESCE(COUNT(*) FILTER (WHERE start_date <= now() AND status = 'complete')) as total 
+                COALESCE(COUNT(*) FILTER (WHERE start_date <= CURRENT_DATE AND status = 'complete' AND performed_at IS NOT NULL AND performed_at - scheduled_at <= 2)) as timely,
+                COALESCE(COUNT(*) FILTER (WHERE start_date <= CURRENT_DATE AND status = 'complete')) as total 
             FROM maintenance_events ${whereClause};
         `);
         const ehi = await db.execute(sql`
