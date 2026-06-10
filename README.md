@@ -10,6 +10,7 @@
     - add separate hadOverhaul or overhaulCounter to keep track of remainingLifeSpan and max allowed health score
 
 # FEATURES
+- Trim EVERY form input
 - Search bar for maintenance list
 - Change the TabList in theme to "legacy" version
 - Prettify activities log

@@ -36,11 +36,11 @@ const RecentActivities = ({ equipmentId } : { equipmentId?: number }) => {
         <div className="p-4">
             <div className="grid grid-cols-3 gap-4">
                 {activities.length > 0 ? activities.map(activity => (
-                    <div key={activity.id} className="flex shadow-sm shadow-black/25 py-2 rounded-md">
+                    <div key={activity.id} className="flex shadow-sm shadow-black/25 py-2 rounded-md items-center">
                         <div className="shrink-0 w-8">
-                            <div className={`w-2 h-2 ${getActivityColor(activity.action)} rounded-full mt-2 mx-auto`}></div>
+                            <div className={`w-2 h-2 ${getActivityColor(activity.action)} rounded-full mx-auto`}></div>
                         </div>
-                        <div className="grow">
+                        <div className="flex flex-col justify-between">
                             <p className="text-sm">{activity.description}</p>
                             <p className="text-xs text-gray-500">
                                 {format(activity.createdAt, "MMM dd, yyyy | HH:mm:ss | ")}
