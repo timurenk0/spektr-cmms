@@ -211,6 +211,8 @@ export const insertTenantSchema = createInsertSchema(tenants).omit({
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   tenantId: integer("tenant_id").notNull().references(()=>tenants.id, { onDelete: "cascade" }),
+  firstName: varchar("first_name", { length: 255 }).notNull(),
+  lastName: varchar("last_name", { length: 255 }).notNull(),
   username: varchar("username", { length: 255 }).notNull().unique(),
   password: varchar("password", { length: 255 }).notNull(),
   role: varchar("role", { length: 255 }).notNull().default("user"),

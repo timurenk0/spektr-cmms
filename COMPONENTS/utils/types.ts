@@ -121,4 +121,6 @@ export type TUser = {
     tenantId: number;
     username: string;
     role: string;
+    firstName: string;
+    lastName: string;
 }

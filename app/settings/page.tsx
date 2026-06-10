@@ -9,27 +9,19 @@ import { TabContext, TabList, TabPanel } from "@mui/lab"
 import { Button, FormControl, InputLabel, MenuItem, Paper, Select, Tab, TextField } from "@mui/material"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import toast from "react-hot-toast"
 import z from "zod"
 import AddRoleForm from "./forms/AddRoleForm"
 import { useAuth } from "@/COMPONENTS/utils/authContext"
+import { insertUserSchema } from "@/BACKEND/Database/schema";
 
 
-const formSchema = z.object({
-    username: z.string().min(4, {
-        error: "Username must be at least 4 characters long."
-    }),
-    password: z.string().min(8, {
-        error: "Password must be at least 8 characters long."
-    }),
-    role: z.string().min(1, {
-        error: "Role is required."
-    }),
-    tenant: z.string().min(1, {
-        error: "Company owner is required"
-    })
+const formSchema = insertUserSchema.omit({
+    tenantId: true
+}).extend({
+    tenant: z.string().min(1, { error: "Tenant field cannot be empty" }).max(255, { error: "Tenant name can be 255 characters long max" }) 
 });
 type ProfileFormValues = z.infer<typeof formSchema>;
 
@@ -52,6 +44,8 @@ const Settings = () => {
     
     const [value, setValue] = useState("personal");
     const [role, setRole] = useState("user");
+    const [fName, setFName] = useState("");
+    const [lName, setLName] = useState("");
     const [showPw, setShowPw] = useState(false);
     const [availableRoles, setAvailableRoles] = useState<string[]>([]);
     const [availableTenants, setAvailableTenants] = useState<string[]>([]);
@@ -59,6 +53,7 @@ const Settings = () => {
     const handleValueChange = (event: React.SyntheticEvent, val: string) => {
         setValue(val)
     }
+
     
     const { data: userRoles, isLoading: isLoadingUserRoles } = useQuery<string[]>({
         queryKey: ["roles"],
@@ -114,13 +109,15 @@ const Settings = () => {
             username: "",
             password: "",
             role: "",
-            tenant: ""
+            tenant: "",
+            firstName: "",
+            lastName: ""
         }
     });
     
     const mutation = useMutation({
         mutationFn: async (values: ProfileFormValues) => {
-            if (values.role.toLowerCase() === "admin") {
+            if (values.role?.toLowerCase() === "admin") {
                 throw new Error("You think you're the smarted huh?")
             };
 
@@ -230,8 +227,8 @@ const Settings = () => {
                 <TabPanel value="personal">
                     <div className="grid grid-cols-2">
                         <div>
-                            <p>First name: Timur</p>
-                            <p>Last name: Zheltenkov</p>
+                            <p>First name: {user.firstName}</p>
+                            <p>Last name: {user.lastName}</p>
                             <p>Position: Web Developer</p>
                         </div>
                     </div>
@@ -239,7 +236,35 @@ const Settings = () => {
                 { user && user.role === "admin" && (
                 <TabPanel value="add user">
                     <form onSubmit={form.handleSubmit(onSubmit, (error) => console.error(error))}>
-                        <div className="grid grid-cols-4 gap-4 pb-10">
+                        <div className="grid grid-cols-3 gap-4 pb-10">
+                            <TextField
+                                label="First Name"
+                                color="info"
+                                margin="dense"
+                                slotProps={{
+                                    htmlInput: { maxLength: 255 }
+                                }}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                    e.preventDefault();
+                                    setFName(e.target.value.trim());
+                                    form.setValue("firstName", e.target.value.trim());
+                                }}
+                                required
+                            />
+                            <TextField
+                                label="Last Name"
+                                color="info"
+                                margin="dense"
+                                slotProps={{
+                                    htmlInput: { maxLength: 255 }
+                                }}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                    e.preventDefault();
+                                    setLName(e.target.value.trim());
+                                    form.setValue("lastName", e.target.value.trim());
+                                }}
+                                required
+                            />
                             <TextField
                                 label="Username"
                                 color="info"
@@ -247,8 +272,15 @@ const Settings = () => {
                                 slotProps={{
                                     htmlInput: { maxLength: 255 }
                                 }}
+                                onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+                                    e.preventDefault();
+                                    if (!e.target.value && fName && lName) {
+                                        e.target.value = `${fName} ${lName}`
+                                    }
+                                    form.setValue("username", e.target.value.trim())
+                                }}
                                 required
-                                {...form.register("username")}
+                                // {...form.register("username")}
                             />
                             <div className="flex flex-col">
                                 <TextField

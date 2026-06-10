@@ -28,16 +28,18 @@ type Transaction = PgTransaction<NeonQueryResultHKT, Schema, ExtractTablesWithRe
 export class DatabaseStorage {
     // User methods
     /* ===================================================== User Methods ===================================================== */
-    async getUsers(): Promise<Pick<User, "id" | "username" | "role">[]> {
+    async getUsers(): Promise<Pick<User, "id" | "username" | "role" | "firstName" | "lastName">[]> {
         return await db.select({
             id: users.id,
             username: users.username,
+            firstName: users.firstName,
+            lastName: users.lastName,
             role: users.role            
         }).from(users);
     };
 
-    async getUser(id: number): Promise<Pick<User, "id" | "username" | "role"> | undefined> {
-        return (await db.select({id: users.id, username: users.username, role: users.role}).from(users).where(eq(users.id, id)))[0];
+    async getUser(id: number): Promise<Pick<User, "id" | "username" | "role" | "firstName" | "lastName"> | undefined> {
+        return (await db.select({id: users.id, username: users.username, role: users.role, firstName: users.firstName, lastName: users.lastName}).from(users).where(eq(users.id, id)))[0];
     }
 
     async getUserRoles(): Promise<string[]> {
@@ -78,6 +80,8 @@ export class DatabaseStorage {
                     id: user.id,
                     username: user.username,
                     role: user.role,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
                     tenantId: user.tenantId,
                     iat: Math.floor(Date.now() / 1000)
                 },
