@@ -9,7 +9,7 @@
 - usefulLifeSpan to remainingLifeSpan + overhaul logic
 
 # FEATURES
-- Rethink equipment health index calculation logic
+- Search bar for maintenance list
 - Change the TabList in theme to "legacy" version
 - Prettify activities log
 
