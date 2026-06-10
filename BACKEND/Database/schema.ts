@@ -101,6 +101,7 @@ export const equipments = pgTable(
     equipmentImage: text("equipment_image").notNull(),
     healthIndex: doublePrecision("health_index"),
     nextHealthIndexUpdate: date("next_health_index_update"),
+    hadOverhaul: boolean("had_overhaul").notNull().default(false),
     notes: varchar("notes", { length: 511 }),
     uploadedAt: timestamp("uploaded_at").notNull().defaultNow()
   },
@@ -170,7 +171,7 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   scheduledAt: date("scheduled_at").notNull().defaultNow(),
   performedAt: date("performed_at")
 }, (table) => [ 
-    check("level_check", sql`level IN ('A', 'B', 'C', 'D', 'E', 'I1', 'I2')`),
+    check("level_check", sql`level IN ('A', 'B', 'C', 'D', 'E', 'I1', 'I2', 'O')`),
     check("status_check", sql`status IN ('complete', 'incomplete', 'pending')`),
     index("idx_maintenance_events_maintenance_id").on(table.maintenanceId),
     index("idx_me_tenant_equipment_id").on(table.tenantId, table.equipmentId, table.start),
