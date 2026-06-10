@@ -1,9 +1,8 @@
 # PRIORITY
-- Add equipment health index degradation
+- Add equipment health index degradation (monthly) (at the end of the month or every month since the equipment was added?)
 - Test document and photo upload errors
 
 # ISSUES
-- Dashobard emergency stat card shows complete emergency repairs incorrectly
 - Change JWT_SECRET to something more serious
 - When moving events serviceEndDate not checked (meh who cares anyways it's their problem)
 

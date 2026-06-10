@@ -100,6 +100,7 @@ export const equipments = pgTable(
     department: varchar("department", { length: 255 }).notNull(),
     equipmentImage: text("equipment_image").notNull(),
     healthIndex: doublePrecision("health_index"),
+    nextHealthIndexUpdate: date("next_health_index_update"),
     notes: varchar("notes", { length: 511 }),
     uploadedAt: timestamp("uploaded_at").notNull().defaultNow()
   },

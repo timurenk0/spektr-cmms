@@ -99,7 +99,7 @@ const StatCards = () => {
             <StatCard variant="overdue" value1={data.oeq} value2={data.omt} />
             <SliderStatCard variant="complete" slides={completeSlides} />
             <SliderStatCard variant="upcoming" slides={upcomingSlides} />
-            <StatCard variant="emergency" value1={data.eeq} value2={data.emt} />
+            <StatCard variant="emergency" value1={data.epn} value2={data.ecm} />
           </>
     </div>
   )

@@ -700,8 +700,8 @@ export class DatabaseStorage {
 
         const emergency = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE level = 'E' and status = 'pending') AS eeq,
-                COUNT(*) FILTER (WHERE level = 'E' AND status = 'complete') AS emt
+                COUNT(*) FILTER (WHERE level = 'E' and status = 'pending') AS epn,
+                COUNT(*) FILTER (WHERE level = 'E' AND status = 'complete') AS ecm
             FROM maintenance_events ${whereClause}
         `);
     
@@ -714,7 +714,7 @@ export class DatabaseStorage {
             cmt1: Number(complete.rows[0].cmt1),
             ceq2: Number(complete.rows[0].ceq2),
             cmt2: Number(complete.rows[0].cmt2),
-            ceq3: Number(complete.rows[0].ceq3),
+            ceq3: Number(complete.rows[0].ceq3), 
             cmt3: Number(complete.rows[0].cmt3),
             ceq4: Number(complete.rows[0].ceq4),
             cmt4: Number(complete.rows[0].cmt4),
@@ -726,8 +726,8 @@ export class DatabaseStorage {
             umt3: Number(upcoming.rows[0].umt3),
             ueq4: Number(upcoming.rows[0].ueq4),
             umt4: Number(upcoming.rows[0].umt4),
-            eeq: Number(emergency.rows[0].eeq),
-            emt: Number(emergency.rows[0].emt)
+            epn: Number(emergency.rows[0].epn),
+            ecm: Number(emergency.rows[0].ecm)
         }
     }
 
@@ -812,6 +812,38 @@ export class DatabaseStorage {
 
         // update event in the db
         return await db.update(equipments).set({ healthIndex: sql`${equipments.healthIndex} - ${penalty}` }).where(eq(equipments.id, event.equipmentId));
+    }
+
+    async subtractMonthlyHealthDrop(tenantId: number) {
+        
+        await db.execute(sql`
+            UPDATE equipments
+            SET
+                health_index = GREATEST(
+                    0,
+                    health_index
+                    - (
+                        EXTRACT(YEAR FROM AGE(CURRENT_DATE, next_health_index_update)) * 12
+                        + EXTRACT(MONTH FROM AGE(CURRENT_DATE, next_health_index_update))
+                        + 1
+                    ) * (100.0 / useful_life_span)
+                ),
+
+                next_health_index_update =
+                    next_health_index_update +
+                    (
+                        (
+                            EXTRACT(YEAR FROM AGE(CURRENT_DATE, next_health_index_update)) * 12
+                            + EXTRACT(MONTH FROM AGE(CURRENT_DATE, next_health_index_update))
+                            + 1
+                        ) * INTERVAL '1 month'
+                    )
+
+                
+            WHERE
+                health_index IS NOT NULL
+                AND next_health_index_update <= CURRENT_DATE
+            AND (${tenantId} = 1 OR tenant_id = ${tenantId})`)
     }
 
     // async subtractPenaltyScore(

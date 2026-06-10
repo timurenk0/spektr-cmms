@@ -52,6 +52,8 @@ export async function GET(
             filters.search
         )
 
+        await storage.subtractMonthlyHealthDrop(user.tenantId);
+
         return res.json(equipments, { status: 200 });
     } catch (error) {
         const msg = error instanceof Error ? error.message : "Unkown error";
