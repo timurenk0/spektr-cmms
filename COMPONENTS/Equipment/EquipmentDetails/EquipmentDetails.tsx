@@ -156,6 +156,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
       console.log(data);
       queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-gauges"] });
+      queryClient.invalidateQueries({ queryKey: ["equipment-list"] })
       toast.success(`Overhaul ${data ? "initialised" : "finished"} successfully`)
     },
     onError: (err: unknown) => {

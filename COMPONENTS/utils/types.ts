@@ -84,8 +84,12 @@ export type TMaintenance = {
     levelCDuration: number;
     levelDHours: number;
     levelDDuration: number;
-    levelIMonths: number;
-    levelIDuration: number;
+    levelI1Months: number;
+    levelI1Duration: number;
+    levelI1Description: string;
+    levelI2Months: number;
+    levelI2Duration: number;
+    levelI2Description: string;
 }
 
 export type TMaintenanceEvent = {

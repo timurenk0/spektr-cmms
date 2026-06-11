@@ -11,7 +11,9 @@ import { ZodError } from "zod";
 
 export async function GET(req: NextRequest) {
     try {
-        const maintenances = await storage.getMaintenances();
+        const user = await validateUser();
+        
+        const maintenances = await storage.getMaintenances(user.tenantId);
         return res.json(maintenances, { status: 200 });
     } catch (error) {
         const msg = error instanceof Error ? error.message : "Unknown error";

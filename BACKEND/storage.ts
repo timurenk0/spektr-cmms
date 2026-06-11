@@ -13,12 +13,12 @@ import * as schema from "./Database/schema";
 import { db } from "./Database/db";
 import { eq, and, asc, desc, sql, not, ExtractTablesWithRelations, lt, gte, lte, ilike, or, getTableColumns, gt, count } from "drizzle-orm";
 import type { NeonDatabase, NeonQueryResultHKT } from "drizzle-orm/neon-serverless";
-import type { PgTransaction } from "drizzle-orm/pg-core";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { differenceInCalendarMonths, differenceInDays } from "date-fns";
 import { createMaintenanceEvents } from "./Middleware/EventManager";
 import { CustomApiError } from "./Utils/errorBuilder";
+import { PgTransaction } from "drizzle-orm/pg-core";
 
 
 type Schema = typeof schema;
@@ -286,14 +286,25 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
     
     /* ================================================ Maintenance Methods =================================================== */
-    async getMaintenances(): Promise<(Maintenance & { totalCount: number, completeCount: number, overdueCount: number, pendingCount: number })[]> {
+    async getMaintenances(tenantId: number): Promise<(Maintenance & { totalCount: number, completeCount: number, overdueCount: number, pendingCount: number })[]> {
+        const isAdmin = tenantId === 1;
+
+        // Proper Drizzle conditions (not raw WHERE strings)
+        const maintenanceEventCondition = isAdmin 
+            ? undefined 
+            : eq(maintenanceEvents.tenantId, tenantId);
+
+        const maintenanceCondition = isAdmin 
+            ? undefined 
+            : eq(maintenances.tenantId, tenantId);
+        
         const eventCounts = db.select({
             equipmentId: maintenanceEvents.equipmentId,
             totalCount: sql<number>`COUNT(*)`.as("total_count"),
             completeCount: sql<number>`COUNT(*) FILTER (WHERE ${maintenanceEvents.status} = 'complete')`.as("complete_count"),
-            overdueCount: sql<number>`COUNT(*) FILTER (WHERE CURRENT_DATE - ${maintenanceEvents.scheduledAt} > interval '3 days')`.as("overdue_count"),
+            overdueCount: sql<number>`COUNT(*) FILTER (WHERE CURRENT_DATE - ${maintenanceEvents.scheduledAt} > 3)`.as("overdue_count"),
             pendingCount: sql<number>`COUNT(*) FILTER (WHERE ${maintenanceEvents.status} = 'pending')`.as("pending_count"),
-        }).from(maintenanceEvents).groupBy(maintenanceEvents.equipmentId).as("event_counts")
+        }).from(maintenanceEvents).where(maintenanceEventCondition).groupBy(maintenanceEvents.equipmentId).as("event_counts")
         
         return await db.select({
             ...getTableColumns(maintenances),
@@ -301,7 +312,7 @@ export class DatabaseStorage {
             completeCount: sql<number>`COALESCE(event_counts.complete_count, 0)`.as("completeCount"),
             overdueCount: sql<number>`COALESCE(event_counts.overdue_count, 0)`.as("overdueCount"),
             pendingCount: sql<number>`COALESCE(event_counts.pending_count, 0)`.as("pendingCount"),
-        }).from(maintenances).leftJoin(eventCounts, eq(maintenances.equipmentId, eventCounts.equipmentId));
+        }).from(maintenances).where(maintenanceCondition).leftJoin(eventCounts, eq(maintenances.equipmentId, eventCounts.equipmentId));
     }
     
     async getMaintenance(id: number): Promise<Maintenance | undefined> {
