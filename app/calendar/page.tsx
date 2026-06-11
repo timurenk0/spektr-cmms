@@ -31,6 +31,7 @@ type MEvent = {
 }
 
 const MyCalendar = () => {
+  const { user, isLoading: isLoadingUser } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<EventClickArg["event"] | null>();
   
   const fetchEvents = useCallback(
@@ -55,7 +56,6 @@ const MyCalendar = () => {
     },
     []
   );
-  const { user, isLoading: isLoadingUser } = useAuth();
 
 
   const loading = (!user || isLoadingUser);

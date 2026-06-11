@@ -376,7 +376,8 @@ export class DatabaseStorage {
     
     /* ============================================== Maintenance Events Methods ============================================== */
     async getMaintenanceEvents(tenantId: number, status: "any" | "pending" | "complete" | "incomplete",  start?: string, end?: string): Promise<MaintenanceEvent[]> {
-        const conditions = [and(eq(maintenanceEvents.tenantId, tenantId))];
+        const tenantCondition = tenantId === 1 ? undefined : eq(maintenanceEvents.tenantId, tenantId);
+        const conditions = [tenantCondition];
 
         if (start && end) {
             conditions.push(gte(maintenanceEvents.start, start), lte(maintenanceEvents.start, end));

@@ -466,7 +466,7 @@ const AddMaintenanceForm = ({
            <div className="border p-4 rounded-md bg-pink-50 col-span-2">
             <h3 className="font-medium text-lg">Interval-based Maintenance 2</h3>
             <p className="font-medium text-xs mb-3 italic">*Maintenance independent of equipment working hours</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
               <Controller
                 name="levelIMonths2"
                 control={form.control}
@@ -511,6 +511,7 @@ const AddMaintenanceForm = ({
                 margin="dense"
                 slotProps={{ htmlInput: { maxLength: 255 } }}
                 fullWidth
+                className="col-span-2"
                 {...form.register("levelIDescription2")}
               />
             </div>
