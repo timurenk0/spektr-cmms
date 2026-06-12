@@ -83,7 +83,7 @@ export async function PATCH(
         
         const body = await req.json();
         console.log(body)
-        const { isDeleted, status, reason, hadOverhaul } = body;
+        const { isDeleted, status, reason, hadOverhaul, finishDate } = body;
         
         
         // Fetch specified equipment by ID and check if it exists.
@@ -100,23 +100,70 @@ export async function PATCH(
             return res.json(true, { status: 201 });
         }
         
-        if (hadOverhaul !== undefined) {
-            await storage.updateEquipment(equipmentId, { hadOverhaul, status: hadOverhaul ? "out of service" : "operational" });
-            await activityLogger(user, "update", `Overhaul ${hadOverhaul ? "initiated" : "finished"} for equipment ${equipmentId}`, equipmentId);
+        if (hadOverhaul) { 
+                if (!finishDate) {
+                    return buildCustomError({
+                        code: ERROR_CODES.VALIDATION_ERROR,
+                        field: "finishDate",
+                        message: "Finish date value not passed",
+                        suggestion: "Double-check form input fields",
+                        status: 400
+                    });
+                }
+
+                const maintenance = await storage.getMainteancesByEquipmentId(equipment.id);
+                if (!maintenance) return buildCustomError({
+                    code: "NO_ACTIVE_MAINTENANCE",
+                    message: "Equipment status cannot be changed to 'under repair' without active maintenance",
+                    suggestion: "Start a maintenance operation for this equipment first",
+                    status: 409
+                });
+
+                await storage.addMaintenanceEvents([
+                    {
+                        tenantId: equipment.tenantId,
+                        equipmentId: equipment.id,
+                        maintenanceId: maintenance.id,
+                        level: "O",
+                        title: `${equipment.assetId} overhaul`,
+                        description: `Overhaul maintenance for equipment ${equipment.name}`,
+                        start: new Date().toISOString().slice(0, 10),
+                        end: finishDate,
+                        status: "pending",
+                    }
+                ])
+
+            await storage.updateEquipment(equipmentId, { hadOverhaul, status: "out of service" });
+            await activityLogger(user, "update", `Overhaul initiated for equipment ${equipmentId}`, equipmentId);
             return res.json(hadOverhaul, { status: 201 });
         }
 
-        if (status && status === "operational" && equipment.hadOverhaul) {
-            return buildCustomError({
-                code: "ONGOING_OVERHAUL",
-                field: "status",
-                message: "Can't change equipment status to operational during overhaul",
-                suggestion: "Complete overhaul event in the calendar and equipment status will automatically switch to operational",
-                status: 400
-            });
-        }
-        
         if (status) {
+            if (status === "operational" && !await storage.getEmergencyMaintenanceEventByEquipmentId(equipment.id) && !await storage.getOverhaulMaintenanceEventByEquipmentId(equipment.id)) {
+                await storage.updateEquipment(equipmentId, { status: "operational", hadOverhaul: false });
+                await activityLogger(user, "update", `Equipment ${equipmentId} status set as Operational`);
+
+                return res.json(true, { status: 201 });
+            }
+            if (await storage.getEmergencyMaintenanceEventByEquipmentId(equipment.id)) {
+                return buildCustomError({
+                    code: "ONGOING_EMERGENCY",
+                    field: "status",
+                    message: "Can't change equipment status during emergency maintenance",
+                    suggestion: "Complete emergency maintenance event in the calendar first",
+                    status: 400
+                });
+            }
+            if (equipment.hadOverhaul) {
+                return buildCustomError({
+                    code: "ONGOING_OVERHAUL",
+                    field: "status",
+                    message: "Can't change equipment status during overhaul",
+                    suggestion: "Complete overhaul event in the calendar first",
+                    status: 400
+                });
+            }
+
             if (status === "under repair") {
                 const maintenance = await storage.getMainteancesByEquipmentId(equipment.id);
                 if (!maintenance) return buildCustomError({
@@ -144,17 +191,8 @@ export async function PATCH(
                 await storage.addMaintenanceEvents([event]);
                 // await activityLogger(user, "add", `Emergency repair for equipment ${equipment.name} started!`, equipment.id);
             }
-            
-            if (status === "operational" && await storage.getEmergencyMaintenanceEventByEquipmentId(equipment.id)) { 
-                return buildCustomError({
-                    code: "EMERGENCY_MAINTENANCE_ACTIVE",
-                    message: "Equipment cannot be marked operational yet.",
-                    suggestion: "Finish the ongoing emergency repair for current equipment first.",
-                    status: 409
-                });
-            }
-            
-            await storage.updateEquipment(equipmentId, { status });
+
+            equipment.status !== "out of service" && await storage.updateEquipment(equipmentId, { status });
             await activityLogger(user, "update", `Equipment ${equipment.name} status updated to ${status}`, equipmentId);
             return res.json(true, { status: 201 });
         }

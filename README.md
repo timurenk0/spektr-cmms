@@ -1,5 +1,6 @@
 # PRIORITY
-- Test document and photo upload errors
+- Event shift logic to shift and count from the event endDate, not start (think about continuous non-several-day events) 
+- Automatic equipment status handling after overhaul/emergency event submission
 
 # ISSUES
 - Change JWT_SECRET to something more serious

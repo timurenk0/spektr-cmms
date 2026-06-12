@@ -53,11 +53,10 @@ export default function buildError(error: unknown): NextResponse {
     if (error instanceof CustomApiError) return buildCustomError(error);
 
     if (error instanceof ZodError) {
-        console.error(error);
-
+        
         const firstError = error.issues[0];
         const field = firstError.path.join(".");
-
+        
         switch (field) {
             case "tenantId":
                 return buildCustomError({
@@ -68,6 +67,7 @@ export default function buildError(error: unknown): NextResponse {
                     status: 403
                 })
             default:
+                console.error(error);
                 return buildCustomError({
                     code: ERROR_CODES.VALIDATION_ERROR,
                     field,

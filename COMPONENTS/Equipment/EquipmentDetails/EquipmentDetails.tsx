@@ -18,6 +18,8 @@ import { DetailBadge } from "@/COMPONENTS/ui/badges/DetailBadge";
 import EquipmentComponents from "./ComponentTab/EquipmentComponents";
 import { differenceInMonths, format } from "date-fns";
 import toast from "react-hot-toast";
+import SlideDialog from "@/COMPONENTS/ui/SlideDialog";
+import OverhaulForm from "./OverhaulForm";
 
 
 function calculateAge(manufDate: Date): number[] {
@@ -249,23 +251,28 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                         </div>
                       )}
                   </div>
-                  {user.role == "admin" && (<div className="flex flex-col items-center">
-                    <span className="text-xs text-gray-500 mb-1">Overhaul</span>
-                    <button
-                      className="rounded-full bg-red-600 text-white text-xs font-bold px-2 py-1 hover:bg-red-700 cursor-pointer"
-                      onClick={() => {alert("This action will change equipment status to 'out of service' and add an overhaul maintenance event to the calendar. Are you sure?"); overhaulMutation.mutate()}}
-                    >
-                        {equipment.hadOverhaul ? "Finish" : "Start"} Overhaul?
-                    </button>
-                  </div>)}
                 </div>
               </div>
             </div>
-            <Link href="/equipment">
-              <Button variant="outlined" color="inherit">
-                <ChevronLeft height={16} width={16} className="mr-1" /> Back to List
-              </Button>
-            </Link>
+            <div className="flex gap-4">
+              <Link href="/equipment">
+                <Button variant="outlined" color="inherit">
+                  <ChevronLeft height={16} width={16} className="mr-1" /> Back to List
+                </Button>
+              </Link>
+              
+              {!equipment.hadOverhaul && (
+                <SlideDialog
+                  title="Overhaul"
+                  Btn={( props ) => (
+                    <Button color="error" {...props}>{equipment.hadOverhaul ? "Finish" : "Start"} Overhaul</Button>
+                  )}
+                  DialogForm={(props) => (
+                    <OverhaulForm {...props} equipmentId={equipmentId} />
+                  )}
+                />
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-5 gap-4 mt-8">

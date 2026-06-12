@@ -444,6 +444,10 @@ export class DatabaseStorage {
         return (await db.select().from(maintenanceEvents).where(and(eq(maintenanceEvents.equipmentId, id), eq(maintenanceEvents.level, "E"), eq(maintenanceEvents.status, "pending"))))[0];
     }
 
+    async getOverhaulMaintenanceEventByEquipmentId(id: number): Promise<MaintenanceEvent | undefined> {
+        return (await db.select().from(maintenanceEvents).where(and(eq(maintenanceEvents.equipmentId, id), eq(maintenanceEvents.level, "O"), eq(maintenanceEvents.status, "pending"))))[0];
+    }
+
     async getMaintenanceEventsInfo(): Promise<{total: number, upcoming: number, overdue: number, complete: number, incomplete: number}> {
         const today = new Date().toISOString().slice(0, 10); 
         
