@@ -93,7 +93,17 @@ export async function PATCH(
 
         await activityLogger(user, "update", `Maintenance event ${updatedEvent.id} updated`, updatedEvent.equipmentId);
 
-        if (updatedEvent.status === "complete" && differenceInDays(updatedEvent.start, updatedEvent.performedAt!) !== 0) {
+        if (!updatedEvent.end || !updatedEvent.performedAt) {
+            return buildCustomError({
+                code: ERROR_CODES.VALIDATION_ERROR,
+                field: "end or performedAt",
+                message: "End date or performedAt value for given maintenance event is missing",
+                suggestion: "Almost certainly a bug. Report to the developer",
+                status: 500
+            });
+        }
+        
+        if (updatedEvent.status === "complete" && differenceInDays(updatedEvent.end, updatedEvent.performedAt) !== 0) {
             const shiftedEvents = await storage.shiftMaintenanceEvents(updatedEvent);
             if (shiftedEvents.length < 1) return res.json({ message: "Nothing to shift..." }, { status: 201 });
         }

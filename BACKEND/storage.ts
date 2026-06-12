@@ -528,10 +528,10 @@ export class DatabaseStorage {
         event: MaintenanceEvent
     ): Promise<MaintenanceEvent[]> {
         // Assuming updated complete event is passed
-        if (!event.performedAt) {
+        if (!event.performedAt || !event.end) {
             throw new Error("Can't shift incomplete events.")
         }
-        const shift = differenceInDays(event.performedAt, event.start);
+        const shift = differenceInDays(event.performedAt, event.end);
         if (shift === 0) {
             return [];
         }
