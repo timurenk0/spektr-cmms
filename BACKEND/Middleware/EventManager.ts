@@ -113,7 +113,7 @@ export function createMaintenanceEvents(
             if (closestDate) {
                 const daysSince = Math.floor(differenceInDays(eventStart, new Date(closestDate)));
                 if (daysSince < dayInterval) {
-                    eventStart = addDays(new Date(closestDate), dayInterval);
+                    eventStart = addDays(new Date(eventMap[closestDate].end!), dayInterval);
                     continue;
                 }
             }
