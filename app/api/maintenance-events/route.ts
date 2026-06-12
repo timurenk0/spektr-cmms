@@ -15,8 +15,11 @@ export async function GET(req: NextRequest) {
         const searchParams = req.nextUrl.searchParams;
         const status = searchParams.get("status") as Status;
 
-        const start = searchParams.get("start");
-        const end = searchParams.get("end");
+        const start = searchParams.get("start") as string;
+        const end = searchParams.get("end") as string;
+
+        console.log(new Date(start));
+        console.log(new Date(end));
 
         if (status) {
             if (!["any", "complete", "incomplete", "pending"].includes(status)) return res.json("Invalid status value", { status: 400 });
@@ -31,6 +34,10 @@ export async function GET(req: NextRequest) {
             return res.json(response, { status: 200 });
         }
 
+        if (start !== undefined || end !== undefined) {
+            const events = await storage.getMaintenanceEvents(user.tenantId, "any", start, end);
+            return res.json(events, { status: 200 });
+        }
         
         const response = await storage.getMaintenanceEvents(user.tenantId, "any");
         return res.json(response, { status: 200 });

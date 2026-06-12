@@ -6,29 +6,12 @@ import timeGridPlugin from "@fullcalendar/timegrid"
 import interactionPlugin from "@fullcalendar/interaction";
 import tippy from "tippy.js";
 import { useCallback, useState } from "react";
-import React from "react";
-import { EventClickArg, EventInput, EventSourceFuncArg } from "@fullcalendar/core/index.js";
+import { DateInput, EventClickArg, EventInput, EventSourceFuncArg } from "@fullcalendar/core/index.js";
 import { useAuth } from "@/COMPONENTS/utils/authContext";
 import EventForm from "@/COMPONENTS/Calendar/EventForm";
-import { useQuery } from "@tanstack/react-query";
+import { addDays } from "date-fns";
 
 
-
-type MEvent = {
-  id: number,
-  tenantId: number,
-  equipmentId: number,
-  maintenanceId: number,
-  title: string,
-  description: string,
-  level: string,
-  start: string,
-  end: string,
-  scheduledAt: string,
-  performedAt: string | null,
-  status: string,
-  color: string
-}
 
 const MyCalendar = () => {
   const { user, isLoading: isLoadingUser } = useAuth();
@@ -41,10 +24,11 @@ const MyCalendar = () => {
         const data = await res.json();
   
         successCallback(data.map((d: EventInput) => {
+          d.end = addDays(new Date(String(d.end)), 1).toISOString().slice(0, 10);
           if (d.level === "E") {
             switch (d.status) {
               case "pending": d.classNames = ["police-tape"]; d.textColor = "#000"; break;
-              default: d.classNames = ["police-tape-complete"];d.textColor = "#000" ; break;
+              default: d.classNames = ["police-tape-complete"];d.textColor = "#000" ;  break;
             }
           }
           return d
@@ -83,6 +67,7 @@ const MyCalendar = () => {
           contentHeight={"100vh"}
           stickyHeaderDates
           dayMaxEvents={2}
+          duration={3}
           eventDidMount={(info) => {
             tippy(info.el, {
               content: `

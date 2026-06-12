@@ -100,7 +100,7 @@ export type TMaintenanceEvent = {
     title: string;
     description: string;
     status: "complete" | "incomplete" | "pending";
-    level: "A" | "B" | "C" | "D" | "E" | "I";
+    level: "A" | "B" | "C" | "D" | "E" | "I1" | "I2" | "O";
     start: string;
     end: string;
     reason: string | null;

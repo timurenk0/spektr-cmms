@@ -137,6 +137,7 @@ const AddMaintenanceForm = ({
   const equipmentUnderMaintenance = maintenances.map(m => m.equipmentId);
   const availableEquipment = equipments.equips.filter(eq => !equipmentUnderMaintenance.includes(eq.id) && eq.status !== "out of service");
 
+
   
   return (
     <form className="space-y-4 px-1" onSubmit={form.handleSubmit(onSubmit, (error) => console.log(error))}>

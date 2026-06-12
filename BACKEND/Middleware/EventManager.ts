@@ -1,6 +1,16 @@
-import { add, addDays, addMonths, differenceInDays, subDays } from "date-fns";
+import { add, addMonths, subDays } from "date-fns";
 import { Equipment, InsertMaintenanceEvent, Maintenance, MaintenanceEvent } from "../Database/schema";
 import { storage } from "../storage";
+
+
+function differenceInDays(date1: Date, date2: Date): number {
+    return (date1.getTime() - date2.getTime()) / (1000 * 3600 * 24);
+}
+
+function addDays(date: Date, days: number): Date {
+    return new Date(date.getTime() + days * 1000 * 3600 * 24);
+}
+
 
 export function createMaintenanceEvents(
     maintenance: Maintenance,
@@ -57,7 +67,7 @@ export function createMaintenanceEvents(
         if (k === "I2" || k === "I1") {            
             while (eventStart <= end) {
                 const eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
-                const status = differenceInDays(new Date(), eventStart) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
+                const status = Math.floor(differenceInDays(new Date(), eventStart)) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
                 
                 const event: InsertMaintenanceEvent = {
                     equipmentId: maintenance.equipmentId,
@@ -85,7 +95,7 @@ export function createMaintenanceEvents(
         const dayInterval = Math.ceil(v.hours / daily);
         
         while (eventStart <= end) {
-            const status = differenceInDays(new Date(), eventStart) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
+            const status = Math.floor(differenceInDays(new Date(), eventStart)) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
             const sortedDates = Object.keys(eventMap)
                 .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
@@ -101,7 +111,7 @@ export function createMaintenanceEvents(
             //     continue;
             // }
             if (closestDate) {
-                const daysSince = differenceInDays(eventStart, new Date(closestDate));
+                const daysSince = Math.floor(differenceInDays(eventStart, new Date(closestDate)));
                 if (daysSince < dayInterval) {
                     eventStart = addDays(new Date(closestDate), dayInterval);
                     continue;
