@@ -183,6 +183,7 @@ export class DatabaseStorage {
                     assetId: equipments.assetId,
                     equipmentImage: equipments.equipmentImage,
                     status: equipments.status,
+                    hadOverhaul: equipments.hadOverhaul,
                     lastEvent: lastEventSubquery.lastEvent,
                     nextEvent: nextEventSubquery.nextEvent,
                     totalWorkingHours: equipments.totalWorkingHours
@@ -358,10 +359,38 @@ export class DatabaseStorage {
     
     async updateMaintenance(
         id: number,
-        updateData: Partial<InsertMaintenance>
+        updateData: Partial<InsertMaintenance>,
+        equipment: Equipment,
+        transaction?: NeonDatabase<Schema>
     ): Promise<Maintenance | undefined> {
-        const [maintenance] = await db.update(maintenances).set(updateData).where(eq(maintenances.id, id)).returning();
-        return maintenance;
+        const hasValidLevels = [
+            { duration: updateData.levelADuration, hours: updateData.levelAHours },
+            { duration: updateData.levelBDuration, hours: updateData.levelBHours },
+            { duration: updateData.levelCDuration, hours: updateData.levelCHours },
+            { duration: updateData.levelDDuration, hours: updateData.levelDHours },
+            { duration: updateData.levelIDuration1, hours: updateData.levelIMonths1 },
+            { duration: updateData.levelIDuration2, hours: updateData.levelIMonths2 },
+        ].some(level => level.duration && level.duration > 0 && level.hours && level.hours > 0);
+        if (!hasValidLevels) throw new CustomApiError({
+            code: "VALIDATION_ERROR",
+            message: "At least one of levels should have both hours and duration values",
+            suggestion: "Double-check the submitted form fields",
+            status: 400
+        });
+
+        const tx = transaction || db;
+        return await tx.transaction(async (tx: Transaction) => {
+            try {
+                const [maintenance] = await db.update(maintenances).set(updateData).where(eq(maintenances.id, id)).returning();
+            
+                const events = createMaintenanceEvents(maintenance, equipment, undefined, undefined);
+                await tx.insert(maintenanceEvents).values(events).returning();
+
+                return maintenance;
+            } catch (error) {
+                throw error;
+            }   
+        })
     }
     
     async deleteMaintenance(id: number): Promise<Maintenance | undefined> {

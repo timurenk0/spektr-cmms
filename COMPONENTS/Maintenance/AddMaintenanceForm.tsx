@@ -74,6 +74,7 @@ const AddMaintenanceForm = ({
   // Populate form if maintenance ID is passed (edit mode)
   useEffect(() => {
     if (maintenance) {
+      if (maintenance.dailyWorkingHours) setIsHours(maintenance.dailyWorkingHours);
       form.reset({...maintenance});
     }
   }, [maintenance, form]);
@@ -81,7 +82,7 @@ const AddMaintenanceForm = ({
   const mutation = useMutation({
     mutationFn: async (values: MaintenanceFormValues) => {
       const url = `/api/maintenances${maintenanceId ? `/${maintenanceId}` : ""}`;
-      const method = maintenanceId ? "PUT" : "POST";
+      const method = maintenanceId ? "PATCH" : "POST";
       
       const response = await fetch(url, {
         method,
@@ -137,6 +138,13 @@ const AddMaintenanceForm = ({
   const equipmentUnderMaintenance = maintenances.map(m => m.equipmentId);
   const availableEquipment = equipments.equips.filter(eq => !equipmentUnderMaintenance.includes(eq.id) && eq.status !== "out of service");
 
+  if (maintenance) {
+    availableEquipment.push(equipments.equips.find(e => e.id === maintenance.equipmentId)!);
+  }
+
+  if (maintenanceId && !maintenance) {
+    return "Loading..."
+  }
 
   
   return (
@@ -144,7 +152,7 @@ const AddMaintenanceForm = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Controller
           name="equipmentId"
-          defaultValue={undefined}
+          disabled={!!maintenanceId}
           control={form.control}
           render={({ field }) => (
             <FormControl fullWidth>
@@ -153,12 +161,13 @@ const AddMaintenanceForm = ({
                 labelId="select-equipment"
                 label="Select Equipment"
                 {...field}
+                value={field.value ?? ""}
                 color="info"
                 required
                 sx={{ margin: "8px 0" }}
                 onChange={(e) => {
                   field.onChange(e)
-                  
+
                   const eq = availableEquipment.find(eq => eq.id === e.target.value);
                   if (!eq) throw new Error("No equipment found");
 

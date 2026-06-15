@@ -1,9 +1,10 @@
 import SlideDialog from "@/COMPONENTS/ui/SlideDialog";
 import { TEquipment, TMaintenance } from "@/COMPONENTS/utils/types";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material"
-import { Trash } from "lucide-react";
+import { Edit, Trash } from "lucide-react";
 import Image from "next/image";
 import { DeleteMaintenanceForm } from "../DeleteMaintenanceForm";
+import AddMaintenanceForm from "../AddMaintenanceForm";
 
 const AllMaintenanceList = ({
   userRole,
@@ -15,7 +16,7 @@ const AllMaintenanceList = ({
   equipments: TEquipment[],
 }) => {
 
-  
+
   return (
     <Table stickyHeader>
       <TableHead>
@@ -56,7 +57,16 @@ const AllMaintenanceList = ({
             <TableCell>{m.overdueCount}</TableCell>
             { userRole === "admin" && (
               <TableCell>
-                <div className="flex justify-center">
+                <div className="flex justify-center gap-2">
+                  <SlideDialog
+                    title="Edit Maintenance Schedule"
+                    Btn={(props) => (
+                      <button {...props}><Edit size={20} className="text-blue-400 hover:text-blue-800 cursor-pointer" /></button>
+                    )}
+                    DialogForm={(props) => (
+                      <AddMaintenanceForm {...props} maintenanceId={m.id} />
+                    )}
+                  />
                   <SlideDialog
                     title="Delete Maintenance Record"
                     Btn={(props) => (
