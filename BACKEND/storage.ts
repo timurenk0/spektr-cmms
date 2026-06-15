@@ -635,8 +635,8 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
     
     /* ================================================== Components Methods ================================================== */
-    async getComponents(): Promise<Component[]> {
-        return await db.select().from(components);
+    async getComponents(id: number): Promise<Component[]> {
+        return await db.select().from(components).where(eq(components.equipmentId, id));
     }
 
     async addComponent(insertComponent: InsertComponent): Promise<Component> {

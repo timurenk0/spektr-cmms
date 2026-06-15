@@ -6,9 +6,15 @@ import buildError from "@/BACKEND/Utils/errorBuilder";
 import { NextRequest, NextResponse as res } from "next/server";
 
 
-export async function GET() {
+export async function GET(
+    req: NextRequest
+) {
     try {
-        const components = await storage.getComponents();
+        const equipmentId = parseInt(req.nextUrl.searchParams.get("equipmentId") ?? "0");
+
+        if (Number.isNaN(equipmentId)) throw new Error("Equipment ID not a number");
+
+        const components = await storage.getComponents(equipmentId);
 
         return res.json(components, { status: 200 });
     } catch (error) {
