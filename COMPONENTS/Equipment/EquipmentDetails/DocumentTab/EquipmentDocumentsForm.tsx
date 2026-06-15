@@ -26,6 +26,7 @@ const documentCategories: Record<string, string> = {
     "Pre-mob Reports": "premob",
     "Fault Reports": "fault",
     "Emergency Repair Reports": "emergency",
+    "Inspection Reports": "inspection",
     "Other": "other"
 }
 

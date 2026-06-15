@@ -7,6 +7,7 @@ import { ZodError } from "zod";
 import buildError, { CustomApiError, buildCustomError } from "@/BACKEND/Utils/errorBuilder";
 import { DatabaseError } from "@neondatabase/serverless";
 import { DrizzleQueryError } from "drizzle-orm";
+import { equipmentsService } from "./service";
 
 
 
@@ -29,7 +30,7 @@ export async function GET(
             throw new Error("page value must be a positive integer");
         }
 
-        const concise = sp.get("concise") === "true";
+        const concise = !!(sp.get("concise") === "true");
 
         const filters = {
             location: sp.get("location") || undefined,
@@ -39,20 +40,13 @@ export async function GET(
             search: sp.get("search") || undefined,
         }
         
-        console.log(filters);
-
-        const equipments = await storage.getEquipments(
-            user.tenantId,
-            concise ? "true" : undefined,
+        const equipments = await equipmentsService.getFilteredEquipmentsForTenant({
+            tenantId: user.tenantId,
+            concise,
             limit, page,
-            filters.location,
-            filters.status,
-            filters.type,
-            filters.category,
-            filters.search
-        )
-
-        await storage.subtractMonthlyHealthDrop(user.tenantId);
+            ...filters
+            }
+        );
 
         return res.json(equipments, { status: 200 });
     } catch (error) {

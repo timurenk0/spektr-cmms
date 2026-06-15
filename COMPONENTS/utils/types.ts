@@ -35,7 +35,7 @@ export type TDocument = {
     fileUrl: string;
     fileType: string;
     fileName: string | null;
-    category: string;
+    category: "manual" | "maintenance" | "certificate" | "premob" | "fault" | "emergency" | "inspection" | "other";
     uploadedAt: string;
     notes: string | null;
 }

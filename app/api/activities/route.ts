@@ -1,6 +1,6 @@
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
-import { storage } from "@/BACKEND/storage";
 import { NextRequest, NextResponse as res } from "next/server";
+import { activitiesService } from "./service";
 
 
 export async function GET(
@@ -8,11 +8,11 @@ export async function GET(
 ) {
     try {
         const user = await validateUser();
-        const equipmentId= parseInt(req.nextUrl.searchParams.get("equipmentId") ?? "0");
 
+        const equipmentId = Number(req.nextUrl.searchParams.get("equipmentId"));
         if (isNaN(equipmentId)) throw new Error("Invalid equipment ID");
         
-        const activities = equipmentId ? await storage.getActivities(user.tenantId, 999, equipmentId) : await storage.getActivities(user.tenantId);
+        const activities = await activitiesService.getActivities(user.tenantId, equipmentId);
 
         return res.json(activities, { status: 200 });
     } catch (error: unknown) {

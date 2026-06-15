@@ -119,7 +119,7 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
 
     /* ================================================ Equipment Methods ===================================================== */
-    async getEquipments(tenant: number, concise?:string, limit?: number, page?: number, location?: string, status?: string, type?: string, category?: string, search?: string): Promise<{equips: (Partial<Equipment>)[], totalCount: number}> {
+    async getEquipments(tenant: number, concise?:boolean, limit?: number, page?: number, location?: string, status?: string, type?: string, category?: string, search?: string): Promise<{equips: (Partial<Equipment>)[], totalCount: number}> {
         const filters = [];
 
         if (tenant !== 1) {
@@ -176,7 +176,7 @@ export class DatabaseStorage {
 
         let query = db
             .select(
-                concise === "true" ? {
+                concise ? {
                     id: equipments.id,
                     tenantId: equipments.tenantId,
                     name: equipments.name,
@@ -650,8 +650,13 @@ export class DatabaseStorage {
         });
     }
 
-    async deleteComponent(id: number): Promise<Component | undefined> {
-        return (await db.delete(components).where(eq(components.id, id)).returning())[0];
+    async deleteComponent(id: number): Promise<Component> {
+        try {
+            return (await db.delete(components).where(eq(components.id, id)).returning())[0];
+        } catch (error) {
+            console.error(error);
+            throw new Error("Failed to delete component", { cause: "DB" });    
+        }
     }
     /* ======================================================================================================================== */
     

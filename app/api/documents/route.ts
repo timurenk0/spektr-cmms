@@ -1,18 +1,17 @@
-import { insertDocumentSchema } from "@/BACKEND/Database/schema";
-import { Gstorage } from "@/BACKEND/google-storage";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
-import { storage } from "@/BACKEND/storage";
-import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { NextRequest, NextResponse as res } from "next/server";
-import uploadAndAddDocument from "./helper";
-import buildError from "@/BACKEND/Utils/errorBuilder";
+import buildError, { CustomApiError, ERROR_CODES } from "@/BACKEND/Utils/errorBuilder";
+import { documentsService } from "./service";
+import { activitiesService } from "../activities/service";
 
 
-export async function GET() {
+export async function GET(
+    req: NextRequest
+) {
     try {
-        const documents = await storage.getDocuments();
-
-        if (!documents || documents.length === 0) return res.json({ message: "No documents found" }, { status: 404 });
+        const equipmentId = Number(req.nextUrl.searchParams.get("equipmentId"));
+        if (isNaN(equipmentId)) throw new Error("Equipment ID is not a number");
+        const documents = await documentsService.getDocumentsForEquipment(equipmentId);
         
         return res.json(documents, { status: 200 });        
     } catch (error) {
@@ -27,38 +26,59 @@ export async function POST(req: NextRequest) {
 
         const body = await req.formData();
 
-        const { file, rawEquipmentId, title, category, notes } = Object.fromEntries(body.entries()) as {
+        console.log(body);
+        
+        const { file, equipmentId, title, category, notes } = Object.fromEntries(body.entries()) as {
             file: File,
-            rawEquipmentId: string,
+            equipmentId: string,
             title: string,
-            category: string,
+            category: "manual" | "maintenance" | "certificate" | "premob" | "fault" | "emergency" | "inspection" | "other",
             notes?: string
         }
 
-        console.log(rawEquipmentId);
         
-        const equipmentId = Number(rawEquipmentId);
-        console.log(equipmentId);
-        if (Number.isInteger(equipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
-        
-        if (!title) return res.json({ error: "No document title passed" }, { status: 400 });
-        
-        
-        if (!category) return res.json({ error: "No document category passed" }, { status: 400 });
+        const parsedEquipmentId = Number(equipmentId);
+        if (isNaN(parsedEquipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
+        if (!title) throw new CustomApiError({
+            code: ERROR_CODES.VALIDATION_ERROR,
+            field: "title",
+            message: "Title can't be empty",
+            suggestion: "Double-check the input fields",
+            status: 400
+        })
+        if (!category) throw new CustomApiError({
+            code: ERROR_CODES.VALIDATION_ERROR,
+            field: "category",
+            message: "Category can't be empty",
+            suggestion: "Double-check the input fields",
+            status: 400
+        })
+        if (file.size > 1024 * 1024 * 10) throw new CustomApiError({
+            code: ERROR_CODES.VALIDATION_ERROR,
+            field: "file",
+            message: "File size too big",
+            suggestion: "File size can't exceed 10MB. Choose another document",
+            status: 400
+        });
         
         
         const documentData = {
-            equipmentId,
+            file,
+            equipmentId: parsedEquipmentId,
             title,
             category,
             notes,
         };
         
-        const newDocument = await uploadAndAddDocument(file, documentData);
-
+        const newDocument = await documentsService.addDocument(documentData);
         if (!newDocument) return res.json({ error: "Failed to upload the document" }, { status: 500 });
         
-        await activityLogger(user, "add", `Document uploaded for equipment ${newDocument.equipmentId}`, newDocument.equipmentId);
+        await activitiesService.addActivity({
+            user,
+            action: "add",
+            description: `Document uploaded for equipment ${newDocument.equipmentId}`,
+            equipmentId: newDocument.equipmentId
+        });
         
         return res.json(JSON.parse(JSON.stringify(newDocument)), { status: 201 });
     } catch (error: unknown) {

@@ -57,7 +57,7 @@ class GStorage {
     }
 
     /**
-     * Delets the specified document/photo by public URL stored in the database
+     * Deletes the specified document/photo by public URL stored in the database
      * @param url Public URL of a document/photo stored in the database
      */
     async deleteObject(url: string): Promise<void> {
