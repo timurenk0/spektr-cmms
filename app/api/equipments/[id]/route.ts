@@ -101,37 +101,40 @@ export async function PATCH(
         }
         
         if (hadOverhaul) { 
-                if (!finishDate) {
-                    return buildCustomError({
-                        code: ERROR_CODES.VALIDATION_ERROR,
-                        field: "finishDate",
-                        message: "Finish date value not passed",
-                        suggestion: "Double-check form input fields",
-                        status: 400
-                    });
-                }
-
-                const maintenance = await storage.getMainteancesByEquipmentId(equipment.id);
-                if (!maintenance) return buildCustomError({
-                    code: "NO_ACTIVE_MAINTENANCE",
-                    message: "Equipment status cannot be changed to 'under repair' without active maintenance",
-                    suggestion: "Start a maintenance operation for this equipment first",
-                    status: 409
+            if (!finishDate) {
+                return buildCustomError({
+                    code: ERROR_CODES.VALIDATION_ERROR,
+                    field: "finishDate",
+                    message: "Finish date value not passed",
+                    suggestion: "Double-check form input fields",
+                    status: 400
                 });
+            }
 
-                await storage.addMaintenanceEvents([
-                    {
-                        tenantId: equipment.tenantId,
-                        equipmentId: equipment.id,
-                        maintenanceId: maintenance.id,
-                        level: "O",
-                        title: `${equipment.assetId} overhaul`,
-                        description: `Overhaul maintenance for equipment ${equipment.name}`,
-                        start: new Date().toISOString().slice(0, 10),
-                        end: finishDate,
-                        status: "pending",
-                    }
-                ])
+            const maintenance = await storage.getMainteancesByEquipmentId(equipment.id);
+            if (!maintenance) return buildCustomError({
+                code: "NO_ACTIVE_MAINTENANCE",
+                message: "Equipment status cannot be changed to 'under repair' without active maintenance",
+                suggestion: "Start a maintenance operation for this equipment first",
+                status: 409
+            });
+
+            await storage.cancelCurrentMaintenanceForEquipment(equipment.id);
+            
+            await storage.addMaintenanceEvents([
+                {
+                    tenantId: equipment.tenantId,
+                    equipmentId: equipment.id,
+                    maintenanceId: maintenance.id,
+                    level: "O",
+                    title: `${equipment.assetId} overhaul`,
+                    description: `Overhaul maintenance for equipment ${equipment.name}`,
+                    start: new Date().toISOString().slice(0, 10),
+                    end: finishDate,
+                    status: "pending",
+                }
+            ]);
+
 
             await storage.updateEquipment(equipmentId, { hadOverhaul, status: "out of service" });
             await activityLogger(user, "update", `Overhaul initiated for equipment ${equipmentId}`, equipmentId);

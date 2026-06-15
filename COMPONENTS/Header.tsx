@@ -1,13 +1,7 @@
 import { Menu } from 'lucide-react'
-import React from 'react'
 
 
-interface HeaderProps {
-    title: string,
-}
-
-
-const Header = ({ title } : HeaderProps) => {
+const Header = ({ title }: { title: string }) => {
   return (
     <header className='bg-white shadow-sm top-0 z-10'>
         <div className="flex items-center justify-between p-4">
@@ -36,10 +30,13 @@ const Header = ({ title } : HeaderProps) => {
                         <p>Level D Event</p>
                     </div>
                     <div className="bg-teal-200 px-2 rounded-lg">
-                        <p>Level I Event</p>
+                        <p>Interval Event</p>
                     </div>
                     <div className="police-tape px-2 rounded-lg">
-                        <p>Level E Event</p>
+                        <p>Emergency Event</p>
+                    </div>
+                    <div className="bg-violet-200 px-2 rounded-lg">
+                        <p>Overhaul Event</p>
                     </div>
                 </div>
             )}

@@ -1,6 +1,7 @@
 # PRIORITY
+- Move all document upload to backend to ensure submission atomicity (no duplicate requests from frontend atleast)
 - Event shift logic to shift and count from the event endDate, not start (think about continuous non-several-day events) 
-- Automatic equipment status handling after overhaul/emergency event submission
+- Disable maintenance event submission button after first click (document upload duplication issue)
 
 # ISSUES
 - Change JWT_SECRET to something more serious

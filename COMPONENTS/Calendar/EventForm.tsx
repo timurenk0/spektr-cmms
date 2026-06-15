@@ -225,7 +225,7 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
             </>
           ) }
         <DialogActions>
-          <Button type="submit" variant="text" onClick={onSubmit}>
+          <Button type="submit" variant="text" onClick={onSubmit} disabled={mutation.isPending}>
             {mutation.isPending ? "Submitting..." : "Submit"}
           </Button>
           <Button variant="text" color="error" onClick={onClose}>

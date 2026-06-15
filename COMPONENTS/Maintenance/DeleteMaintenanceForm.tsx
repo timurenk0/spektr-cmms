@@ -39,9 +39,10 @@ export const DeleteMaintenanceForm = (
                 }
             },
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: [`/api/maintenances`] });
-                queryClient.invalidateQueries({ queryKey: [`/api/maintenances-events`] });
-                queryClient.invalidateQueries({ queryKey: [`/api/activities`] });
+                queryClient.invalidateQueries({ queryKey: ["/api/maintenances"] });
+                queryClient.invalidateQueries({ queryKey: ["/api/maintenance-events/info"] });
+                queryClient.invalidateQueries({ queryKey: ["/api/maintenances-events"] });
+                queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
                 toast.success("Maintenance deleted successfully", {
                     duration: 2000,
                     position: "bottom-right",

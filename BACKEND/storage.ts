@@ -418,7 +418,9 @@ export class DatabaseStorage {
                             WHEN 'C' THEN 'oklch(42.4% 0.199 265.638)'
                             WHEN 'D' THEN 'oklch(71.4% 0.203 305.504)'
                             WHEN 'E' THEN 'oklch(0.559643 0.192567 35.8054)'
-                            WHEN 'I' THEN 'oklch(.704 .14 182.503)'
+                            WHEN 'I1' THEN 'oklch(.704 .14 182.503)'
+                            WHEN 'I2' THEN 'oklch(.704 .14 182.503)'
+                            WHEN 'O' THEN 'oklch(60.6% 0.25 292.717)'
                             ELSE '#4D96FF'
                         END
                     WHEN CURRENT_DATE - ${maintenanceEvents.start}  > 3 AND ${maintenanceEvents.status} != 'complete' THEN '#22222275'
@@ -430,7 +432,9 @@ export class DatabaseStorage {
                             WHEN 'C' THEN 'oklch(70.7% 0.165 254.624)'
                             WHEN 'D' THEN 'oklch(43.8% 0.218 303.724)'
                             WHEN 'E' THEN 'oklch(0.4915 0.1306 49.65)'
-                            WHEN 'I' THEN 'oklch(.511 .096 186.391)'
+                            WHEN 'I1' THEN 'oklch(.511 .096 186.391)'
+                            WHEN 'I2' THEN 'oklch(.511 .096 186.391)'
+                            WHEN 'O' THEN 'oklch(43.2% 0.232 292.759)'
                             ELSE '#4D96FF'
                         END
                 END
@@ -582,6 +586,10 @@ export class DatabaseStorage {
             
     async deleteMaintenanceEvent(id: number): Promise<void> {
         await db.delete(maintenanceEvents).where(eq(maintenanceEvents.id, id));
+    }
+
+    async cancelCurrentMaintenanceForEquipment(id: number): Promise<void> {
+        await db.delete(maintenanceEvents).where(and(eq(maintenanceEvents.equipmentId, id), gte(maintenanceEvents.start, new Date().toISOString().slice(0, 10))));
     }
     /* ======================================================================================================================== */
     

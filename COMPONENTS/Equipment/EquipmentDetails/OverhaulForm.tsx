@@ -39,7 +39,8 @@ const OverhaulForm = ({
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["equipments"] });
             queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
-            toast.success(`Overhaul initialised successfully!`);
+            queryClient.invalidateQueries({ queryKey: ["/api/maintenance-events/info"] })
+            toast.success("Overhaul initialised successfully!");
             onClose();
         },
         onError: (err: unknown) => {

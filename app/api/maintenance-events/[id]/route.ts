@@ -64,6 +64,8 @@ export async function PATCH(
             // const equipment = await storage.updateEquipment(event.equipmentId, {status: "operational"});
             // if (!equipment) return res.json({ error: "Equipment not found!" }, { status: 404 });
 
+            await storage.updateEquipment(event.equipmentId, { status: "operational" });
+
             await activityLogger(user, "update", `Emergency repair for equipment ${event.equipmentId} finished!`, event.equipmentId);
             
             return res.json(true, { status: 201 });
@@ -75,6 +77,8 @@ export async function PATCH(
 
             // const equipment = await storage.updateEquipment(event.equipmentId, { status: "operational" });
             // if (!equipment) return res.json({ error: "Equipment not found!" }, { status: 404 });
+
+            await storage.updateEquipment(event.equipmentId, { hadOverhaul: false, status: "operational" });
 
             await activityLogger(user, "update", `Overhaul repair for equipment ${event.equipmentId} finished!`, event.equipmentId);
 

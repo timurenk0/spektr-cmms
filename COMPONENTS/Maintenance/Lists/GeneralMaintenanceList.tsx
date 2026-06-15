@@ -5,45 +5,15 @@ import Image from 'next/image';
 import React from 'react'
 
 
-const getLevelBadge = (level: string) => {        
-    switch (level) {
-        case "A":
-            return (
-                <div className="w-20 bg-green-500 text-white text-center mx-auto py-2 rounded-[100px]">
-                    {level}
-                </div>
-            );
-        case "B":
-            return (
-                <div className="w-20 bg-orange-500 text-white text-center mx-auto py-2 rounded-[100px]">
-                    {level}
-                </div>
-            );
-        case "C":
-            return (
-                <div className="w-20 bg-blue-500 text-white text-center mx-auto py-2 rounded-[100px]">
-                    {level}
-                </div>
-            );
-        case "D":
-            return (
-                <div className="w-20 bg-purple-500 text-white text-center mx-auto py-2 rounded-[100px]">
-                    {level}
-                </div>
-            );
-        case "E":
-            return (
-                <div className="w-20 police-tape text-center mx-auto py-2 rounded-[100px]">
-                    {level}
-                </div>
-            );
-        case "I":
-            return (
-                <div className="w-20 bg-pink-500 text-white text-center mx-auto py-2 rounded-[100px]">
-                    {level}
-                </div>
-            );
-    }
+const levelMap: Record<string, string> = {
+    "A": "bg-green-500 text-white",
+    "B": "bg-orange-500 text-white",
+    "C": "bg-blue-500 text-white",
+    "D": "bg-purple-500 text-white",
+    "E": "police-tape",
+    "I1": "bg-teal-500 text-white",
+    "I2": "bg-teal-500 text-white",
+    "O": "bg-violet-500 text-white",
 }
 
 const GeneralMaintenanceList = ({
@@ -93,7 +63,11 @@ const GeneralMaintenanceList = ({
                 {complete && (
                     <TableCell>{format(ev.start, "MMM dd, yyyy")}</TableCell>
                 )}
-                <TableCell>{getLevelBadge(ev.level)}</TableCell>
+                <TableCell>
+                    <div className={`w-20 ${levelMap[ev.level]} text-center mx-auto py-2 rounded-[100px]`}>
+                        {ev.level}
+                    </div>
+                </TableCell>
             </TableRow>
             )}): (
             <TableRow>
