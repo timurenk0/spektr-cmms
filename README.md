@@ -1,5 +1,6 @@
 # PRIORITY
 - Edit maintenance logic (leave as it is - ok, but dangerous. adds events, not replaces) (add overhaulCounter or nah)
+- Add try/catch blocks to storage for DB error handling + DBError Error
 - Move all document upload to backend to ensure submission atomicity (no duplicate requests from frontend atleast)
 - Event shift logic to shift and count from the event endDate, not start (think about continuous non-several-day events) 
 - Disable maintenance event submission button after first click (document upload duplication issue)

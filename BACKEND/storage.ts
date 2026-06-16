@@ -23,6 +23,7 @@ import { PgTransaction } from "drizzle-orm/pg-core";
 
 type Schema = typeof schema;
 type Transaction = PgTransaction<NeonQueryResultHKT, Schema, ExtractTablesWithRelations<Schema>>;
+export type DBExecutor = typeof db | Transaction;
 
 
 export class DatabaseStorage {
@@ -212,8 +213,10 @@ export class DatabaseStorage {
         return { equips: data, totalCount: count[0].count }
     }
     
-    async getEquipment(id: number): Promise<Equipment | undefined> {
+    async getEquipment(id: number, tenantId: number): Promise<Equipment | undefined> {
         // return (await db.select().from(equipments).where(eq(equipments.id, id)))[0]
+        const conditions = [eq(equipments.id, id)];
+        if (tenantId !== 1) conditions.push(eq(equipments.tenantId, tenantId));
         const lastEventSubquery = db
                                         .select({ lastEvent: maintenanceEvents.start })
                                         .from(maintenanceEvents)
@@ -249,7 +252,11 @@ export class DatabaseStorage {
                 }
             )
                     .from(equipments)
-                    .where(eq(equipments.id, id))
+                    .where(
+                        and(
+                            ...conditions
+                        )
+                    )
                     .leftJoinLateral(lastEventSubquery, sql`true`)
                     .leftJoinLateral(nextEventSubquery, sql`true`)
         )[0];
@@ -271,8 +278,8 @@ export class DatabaseStorage {
         return (await db.insert(equipments).values(insertEquipment).returning())[0];
     }
     
-    async updateEquipment(id: number, updateData: Partial<InsertEquipment>): Promise<Equipment | undefined> {
-        const [equipment] = await db.update(equipments).set(updateData).where(eq(equipments.id, id)).returning();
+    async updateEquipment(id: number, updateData: Partial<InsertEquipment>, tx: DBExecutor = db): Promise<Equipment | undefined> {
+        const [equipment] = await tx.update(equipments).set(updateData).where(eq(equipments.id, id)).returning();
 
         return equipment;
     }
@@ -320,7 +327,7 @@ export class DatabaseStorage {
         return (await db.select().from(maintenances).where(eq(maintenances.id, id)))[0];
     }
     
-    async getMainteancesByEquipmentId(id: number): Promise<Maintenance | undefined> {
+    async getMaintenancesByEquipmentId(id: number): Promise<Maintenance | undefined> {
         return (await db.select().from(maintenances).where(eq(maintenances.equipmentId, id)))[0];
     }
     
@@ -526,20 +533,19 @@ export class DatabaseStorage {
         return event;
     }
     
-    async getMaintenanceEventsByEquipmentId(id: number, level?: string): Promise<MaintenanceEvent[]> {
+    async getMaintenanceEventsByEquipmentId(id: number, level?: MaintenanceEvent["level"]): Promise<MaintenanceEvent[]> {
         const conditions = [eq(maintenanceEvents.equipmentId, id)];
         if (level) {
-            conditions.push(lte(maintenanceEvents.level, level));
+            conditions.push(eq(maintenanceEvents.level, level));
         }
         return await db.select().from(maintenanceEvents).where(and(...conditions));
     }
 
     async addMaintenanceEvents(
             events: InsertMaintenanceEvent[],
-            transaction?: Transaction
+            tx: DBExecutor = db
         ): Promise<MaintenanceEvent[]> {
-            const query = transaction ? transaction.insert(maintenanceEvents).values(events).returning() : db.insert(maintenanceEvents).values(events).returning();
-            return await query;
+            return await tx.insert(maintenanceEvents).values(events).returning();
         }
             
     async updateMaintenanceEvent(
@@ -617,8 +623,8 @@ export class DatabaseStorage {
         await db.delete(maintenanceEvents).where(eq(maintenanceEvents.id, id));
     }
 
-    async cancelCurrentMaintenanceForEquipment(id: number): Promise<void> {
-        await db.delete(maintenanceEvents).where(and(eq(maintenanceEvents.equipmentId, id), gte(maintenanceEvents.start, new Date().toISOString().slice(0, 10))));
+    async cancelCurrentMaintenanceForEquipment(id: number, tx: DBExecutor = db): Promise<void> {
+        await tx.delete(maintenanceEvents).where(and(eq(maintenanceEvents.equipmentId, id), gte(maintenanceEvents.start, new Date().toISOString().slice(0, 10))));
     }
     /* ======================================================================================================================== */
     
@@ -629,8 +635,8 @@ export class DatabaseStorage {
             await db.select().from(activities).where(eq(activities.tenantId, tenantId)).orderBy(desc(activities.createdAt)).limit(limit);
     }
     
-    async addActivity(insertActivity: InsertActivity): Promise<Activity> {
-        return (await db.insert(activities).values(insertActivity).returning())[0];
+    async addActivity(insertActivity: InsertActivity, tx: DBExecutor = db): Promise<Activity> {
+        return (await tx.insert(activities).values(insertActivity).returning())[0];
     }
     /* ======================================================================================================================== */
     
@@ -876,7 +882,7 @@ export class DatabaseStorage {
         return await db.update(equipments).set({ healthIndex: sql`${equipments.healthIndex} - ${penalty}` }).where(eq(equipments.id, event.equipmentId));
     }
 
-    async subtractMonthlyHealthDrop(tenantId: number) {
+    async subtractMonthlyHealthDrop() {
         
         await db.execute(sql`
             UPDATE equipments
@@ -905,7 +911,7 @@ export class DatabaseStorage {
             WHERE
                 health_index IS NOT NULL
                 AND next_health_index_update <= CURRENT_DATE
-            AND (${tenantId} = 1 OR tenant_id = ${tenantId})`)
+            `)
     }
 
     // async subtractPenaltyScore(

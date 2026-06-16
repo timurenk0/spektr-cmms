@@ -1,6 +1,6 @@
 import { Activity, insertActivitySchema } from "@/BACKEND/Database/schema";
 import { AuthUser } from "@/BACKEND/Middleware/AuthService";
-import { storage } from "@/BACKEND/storage";
+import { DBExecutor, storage } from "@/BACKEND/storage";
 
 type AddActivity = {
     user: AuthUser,
@@ -16,7 +16,7 @@ class ActivitiesService {
         return await storage.getActivities(tenantId, -1, equipmentId);
     }
 
-    async addActivity({ user, action, description, equipmentId }: AddActivity): Promise<Activity> {
+    async addActivity({ user, action, description, equipmentId }: AddActivity, tx?: DBExecutor): Promise<Activity> {
         const validatedData = insertActivitySchema.parse({
             userId: user.id,
             username: user.username,
@@ -26,7 +26,7 @@ class ActivitiesService {
             equipmentId
         });
 
-        return await storage.addActivity(validatedData);
+        return await storage.addActivity(validatedData, tx);
     }
 }
 

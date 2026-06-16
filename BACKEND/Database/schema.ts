@@ -51,9 +51,9 @@ export const components = pgTable("components", {
     stock: integer("recommended_stock").notNull(),
     failImpact: varchar("fail_impact", { length: 255 }).notNull(),
     notes: varchar("notes", { length: 511 })
-}, (table) => ({
-    uniqueNamePerEquipment: unique().on(table.equipmentId, table.name)
-}));
+}, (table) => [
+    unique("unique_component_name_on_equipment_id").on(table.equipmentId, table.name)
+]);
 
 export const insertComponentSchema = createInsertSchema(components).omit({
     id: true
@@ -114,6 +114,9 @@ export const equipments = pgTable(
       "status_check",
       sql`status IN ('operational', 'under repair', 'out of service')`
     ),
+    index(
+        "idx_equipment_next_update",
+    ).on(table.nextHealthIndexUpdate).where(sql`health_index IS NOT NULL`),
     // Allow N/A as value
     // unique("unique_asset_id_per_tenant").on(table.tenantId, table.assetId),
     unique("unique_serial_number_per_tenant").on(table.tenantId, table.serialNumber),

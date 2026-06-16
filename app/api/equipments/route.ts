@@ -1,13 +1,12 @@
-import { storage } from "@/BACKEND/storage";
 import { NextRequest, NextResponse as res } from "next/server";
 import { insertEquipmentSchema } from "@/BACKEND/Database/schema";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
-import { ZodError } from "zod";
-import buildError, { CustomApiError, buildCustomError } from "@/BACKEND/Utils/errorBuilder";
+import buildError, { buildCustomError } from "@/BACKEND/Utils/errorBuilder";
 import { DatabaseError } from "@neondatabase/serverless";
 import { DrizzleQueryError } from "drizzle-orm";
 import { equipmentsService } from "./service";
+import { activitiesService } from "../activities/service";
 
 
 
@@ -66,10 +65,15 @@ export async function POST(req: NextRequest) {
         const equipmentValidatedData = insertEquipmentSchema.parse(body);
 
         // Add validated equipment data to the DB.
-        const newEquipment = await storage.addEquipment(equipmentValidatedData);
+        const newEquipment = await equipmentsService.addEquipment(equipmentValidatedData);
         
         // Log the activity for added equipment using helper logger method.
-        await activityLogger(user, "add", `Equipment ${newEquipment.name} added to the database`, newEquipment.id);
+        await activitiesService.addActivity({
+            user,
+            action: "add",
+            description: `Equipment ${newEquipment.name} added to the database`,
+            equipmentId: newEquipment.id
+        })
 
         return res.json(JSON.parse(JSON.stringify(newEquipment)), { status: 201 });
     } catch (error: unknown) {
