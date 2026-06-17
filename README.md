@@ -1,4 +1,5 @@
 # PRIORITY
+- Reduce health index after incomplete emergency and overhaul???
 - Edit maintenance logic (leave as it is - ok, but dangerous. adds events, not replaces) (add overhaulCounter or nah)
 - Move all document upload to backend to ensure submission atomicity (no duplicate requests from frontend atleast)
 - Event shift logic to shift and count from the event endDate, not start (think about continuous non-several-day events) 

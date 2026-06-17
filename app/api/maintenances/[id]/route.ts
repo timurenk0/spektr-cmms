@@ -75,6 +75,8 @@ export async function PATCH(
             equipmentId: maintenance.equipmentId
         });
         const newMaintenance = await storage.updateMaintenance(maintenanceId, validatedData, equipment);
+
+        await storage.updateEquipment(equipment.id, { healthIndex: newMaintenance?.givenHealthIndex });
         
 
         return res.json(newMaintenance, { status: 201 });
