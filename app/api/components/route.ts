@@ -2,13 +2,22 @@ import { insertComponentSchema } from "@/BACKEND/Database/schema";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
-import buildError from "@/BACKEND/Utils/errorBuilder";
+import buildError, { CustomApiError, ERROR_CODES } from "@/BACKEND/Utils/errorBuilder";
 import { NextRequest, NextResponse as res } from "next/server";
 
 
-export async function GET() {
+export async function GET(
+    req: NextRequest
+) {
     try {
-        const components = await storage.getComponents();
+        const equipmentId = Number(req.nextUrl.searchParams.get("equipmentId"));
+        if (!Number.isInteger(equipmentId)) throw new CustomApiError({
+            code: ERROR_CODES.VALIDATION_ERROR,
+            message: "Invalid equipment ID",
+            status: 400
+        });
+        
+        const components = await storage.getComponents(equipmentId);
 
         return res.json(components, { status: 200 });
     } catch (error) {

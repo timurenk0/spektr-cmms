@@ -3,7 +3,7 @@ import "./globals.css";
 import Body from "@/COMPONENTS/Body";
 import { Toaster } from "react-hot-toast";
 import Providers from "@/COMPONENTS/utils/providers";
-import { SpeedInsights } from "@vercel/speed-insights/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 
 export const metadata: Metadata = {

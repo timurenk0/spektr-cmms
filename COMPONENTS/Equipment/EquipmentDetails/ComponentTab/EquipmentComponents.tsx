@@ -15,7 +15,7 @@ const EquipmentComponents = ({
 }) => {
 
     const { data: components = [], isLoading: isLoadingComponents } = useQuery<TComponent[]>({
-        queryKey: [`/api/components`, equipmentId]
+        queryKey: [`/api/components?equipmentId=${equipmentId}`]
     });
 
     const isLoading = (isLoadingComponents);
