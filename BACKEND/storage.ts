@@ -186,7 +186,7 @@ export class DatabaseStorage {
                     hadOverhaul: equipments.hadOverhaul,
                     lastEvent: lastEventSubquery.lastEvent,
                     nextEvent: nextEventSubquery.nextEvent,
-                    totalWorkingHours: equipments.totalWorkingHours
+                    requirements: equipments.requirements
                 } : {
                     ...getTableColumns(equipments),
                     lastEvent: lastEventSubquery.lastEvent,

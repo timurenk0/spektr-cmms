@@ -14,6 +14,10 @@ import { Button, FormControl, FormControlLabel, FormLabel, InputAdornment, Input
 import { EquipmentCategories } from "../utils/equipmentCategories";
 import { CustomError, TEquipment, TTenant } from "../utils/types";
 import { ImageIcon } from "lucide-react";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { PickerValue } from "@mui/x-date-pickers/internals";
 
 
 const formSchema = insertEquipmentSchema.extend({
@@ -40,7 +44,7 @@ export default function AddEquipmentForm(
     const [equipmentImage, setEquipmentImage] = useState("");
     const [localEquipmentImage, setLocalEquipmentImage] = useState("");
     const [eqLocation, setEqLocation] = useState("");
-    const [DOF, setDOF] = useState(new Date().toISOString().slice(0, 10));
+    const [DOF, setDOF] = useState(new Date());
     const [requirements, setRequirements] = useState("");
 
     const { data: tenants, isLoading: isLoadingTenants } = useQuery<TTenant[]>({
@@ -371,34 +375,40 @@ export default function AddEquipmentForm(
                     </FormControl>
                 )}
             />
-            <TextField
-                type="date"
-                label="Date of Manufacturing"
-                color="info"
-                slotProps={{
-                    htmlInput: { min: new Date(new Date().getTime()-1000*86400*365*20).toISOString().slice(0, 10), max: new Date().toISOString().slice(0, 10) }
-                }}
-                margin="dense"
-                fullWidth
-                required
-                {...form.register("dateOfManufacturing")}
-                onChange={e => {
-                    setDOF(e.target.value)
-                }}
+            <Controller
+                name="dateOfManufacturing"
+                control={form.control}
+                render={({ field }) => (
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <DatePicker
+                            label="Date of Manufacturing"
+                            defaultValue={DOF}
+                            minDate={new Date(DOF.getTime() - (1000 * 86400 * 365 * 30))}
+                            maxDate={new Date()}
+                            format="dd/MM/yyyy"
+                            onChange={(e: PickerValue) => {
+                                setDOF(e!);
+                                field.onChange(e?.toISOString().slice(0, 10));
+                            }}
+                        />
+                    </LocalizationProvider>
+                )}
             />
-            <TextField
-                type="date"
-                label="In Service Date"
-                color="info"
-                slotProps={{
-                    htmlInput: { min: DOF, max: new Date().toISOString().slice(0, 10) }
-                }}
-                disabled={!DOF}
-                margin="dense"
-                fullWidth
-                required
-                {...form.register("inServiceDate")}
-                helperText="*First select date of manufacturing"
+            <Controller
+                name="inServiceDate"
+                control={form.control}
+                render={({ field }) => (
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <DatePicker
+                            label="In Service Date"
+                            defaultValue={new Date()}
+                            minDate={DOF}
+                            maxDate={new Date()}
+                            format="dd/MM/yyyy"
+                            onChange={(e: PickerValue) => field.onChange(e?.toISOString().slice(0, 10))}
+                        />
+                    </LocalizationProvider>
+                )}
             />
             
             <div>
