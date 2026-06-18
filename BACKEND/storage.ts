@@ -442,20 +442,6 @@ export class DatabaseStorage {
                 CASE
                     WHEN ${maintenanceEvents.status} = 'pending' THEN
                         CASE ${maintenanceEvents.level}
-                            WHEN 'A' THEN 'oklch(43.2% 0.095 166.913)'
-                            WHEN 'B' THEN 'oklch(68.1% 0.162 75.834)'
-                            WHEN 'C' THEN 'oklch(42.4% 0.199 265.638)'
-                            WHEN 'D' THEN 'oklch(71.4% 0.203 305.504)'
-                            WHEN 'E' THEN 'oklch(0.559643 0.192567 35.8054)'
-                            WHEN 'I1' THEN 'oklch(.704 .14 182.503)'
-                            WHEN 'I2' THEN 'oklch(.704 .14 182.503)'
-                            WHEN 'O' THEN 'oklch(60.6% 0.25 292.717)'
-                            ELSE '#4D96FF'
-                        END
-                    WHEN CURRENT_DATE - ${maintenanceEvents.start}  > 3 AND ${maintenanceEvents.status} != 'complete' THEN '#22222275'
-                    WHEN ${maintenanceEvents.status} = 'incomplete' THEN '#FF0000'
-                    WHEN ${maintenanceEvents.status} = 'complete' THEN
-                        CASE ${maintenanceEvents.level}
                             WHEN 'A' THEN 'oklch(76.5% 0.177 163.223)'
                             WHEN 'B' THEN 'oklch(85.2% 0.199 91.936)'
                             WHEN 'C' THEN 'oklch(70.7% 0.165 254.624)'
@@ -464,6 +450,20 @@ export class DatabaseStorage {
                             WHEN 'I1' THEN 'oklch(.511 .096 186.391)'
                             WHEN 'I2' THEN 'oklch(.511 .096 186.391)'
                             WHEN 'O' THEN 'oklch(43.2% 0.232 292.759)'
+                            ELSE '#4D96FF'
+                        END
+                        WHEN CURRENT_DATE - ${maintenanceEvents.start}  > 3 AND ${maintenanceEvents.status} != 'complete' THEN '#22222275'
+                        WHEN ${maintenanceEvents.status} = 'incomplete' THEN '#FF0000'
+                        WHEN ${maintenanceEvents.status} = 'complete' THEN
+                        CASE ${maintenanceEvents.level}
+                            WHEN 'A' THEN 'oklch(43.2% 0.095 166.913)'
+                            WHEN 'B' THEN 'oklch(68.1% 0.162 75.834)'
+                            WHEN 'C' THEN 'oklch(42.4% 0.199 265.638)'
+                            WHEN 'D' THEN 'oklch(71.4% 0.203 305.504)'
+                            WHEN 'E' THEN 'oklch(0.559643 0.192567 35.8054)'
+                            WHEN 'I1' THEN 'oklch(.704 .14 182.503)'
+                            WHEN 'I2' THEN 'oklch(.704 .14 182.503)'
+                            WHEN 'O' THEN 'oklch(60.6% 0.25 292.717)'
                             ELSE '#4D96FF'
                         END
                 END
@@ -482,18 +482,16 @@ export class DatabaseStorage {
     }
 
     async getMaintenanceEventsInfo(): Promise<{total: number, upcoming: number, overdue: number, complete: number, incomplete: number}> {
-        const today = new Date().toISOString().slice(0, 10); 
-        
         const upcomingEvents = (await db.select().from(maintenanceEvents).
-                            where(gte(maintenanceEvents.start, today))).length;
+                            where(gte(maintenanceEvents.start, sql`CURRENT_DATE`))).length;
 
         const overdueEvents = (await db.select().from(maintenanceEvents).
                             where(
                                 and(
-                                    lt(maintenanceEvents.start, sql`CURRENT_DATE + interval '1 day'`),
-                                    eq(maintenanceEvents.status, "pending")
+                                    lt(maintenanceEvents.start, sql`CURRENT_DATE`),
+                                    // eq(maintenanceEvents.status, "pending")
                                 )
-                            ));
+                            )).length;
 
                             console.log(overdueEvents)
 
@@ -508,9 +506,9 @@ export class DatabaseStorage {
                             )).length;
 
         return {
-            total: upcomingEvents+overdueEvents.length,
+            total: upcomingEvents+overdueEvents,
             upcoming: upcomingEvents,
-            overdue: overdueEvents.length,
+            overdue: overdueEvents,
             complete: completeEvents,
             incomplete: incompleteEvents,
         };

@@ -95,84 +95,87 @@ const EquipmentList = () => {
   return (
     <>
       {filters.category && (<h1 className="ps-1 pb-1">Equipment Category: <span className="font-semibold underline">{filters.category}</span></h1>)}
-      <div className="flex gap-2 mb-3">
-        {EquipmentCategories.map((c, idx) => (
-          !filters.category ? (
-            <Card key={idx} className="w-full flex items-center justify-center">
-              <CardActionArea onClick={() => updateFilters("category", c.id)}>
-                <CardContent className="text-green-600 flex justify-center items-center text-center">
-                  {c.icon}
-                  <p className="ms-2 text-black">{c.id}</p>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          ) : (
-            c.id === filters.category && c.types.map((t, idx) => (
-              <Card key={idx} className="w-full">
-                <CardActionArea
-                  onClick={() => updateFilters("type", t)}
-                  className="h-full"
-                  sx={{backgroundColor: `${t === filters.type && "rgb(0, 190, 0)"}`}}
-                >
-                  <CardContent className={`text-green-600 ${t === filters.type && "text-white"}`}>
-                    <p className="text-black text-sm text-center">{t}</p>
+
+      <div className="">
+        <div className="flex gap-2 my-2">
+          {EquipmentCategories.map((c, idx) => (
+            !filters.category ? (
+              <Card key={idx} className="w-full flex items-center justify-center">
+                <CardActionArea onClick={() => updateFilters("category", c.id)}>
+                  <CardContent className="text-green-600 flex justify-center items-center text-center">
+                    {c.icon}
+                    <p className="ms-2 text-black">{c.id}</p>
                   </CardContent>
                 </CardActionArea>
               </Card>
-            ))
-          )
-        ))}
-      </div>
-      <Paper sx={{ width: "100%", overflow: "hidden" }}>
-       <div className="flex flex-col md:flex-row gap-2 p-2">
-          <div className="grow">
-            <TextField size="small" fullWidth placeholder="Search Equipment" type="search" color="info" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
+            ) : (
+              c.id === filters.category && c.types.map((t, idx) => (
+                <Card key={idx} className="w-full">
+                  <CardActionArea
+                    onClick={() => updateFilters("type", t)}
+                    className="h-full"
+                    sx={{backgroundColor: `${t === filters.type && "rgb(0, 190, 0)"}`}}
+                  >
+                    <CardContent className={`text-green-600 ${t === filters.type && "text-white"}`}>
+                      <p className="text-black text-sm text-center">{t}</p>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              ))
+            )
+          ))}
           </div>
-          <div className="grow flex gap-2">
-            <div className="border border-black/20 text-black/60 rounded-md p-2 text-md my-auto whitespace-nowrap">
-              Equipment Count: <span className="font-bold">{equipments.totalCount}</span>
+         <div className="flex flex-col md:flex-row gap-2 p-2">
+            <div className="grow">
+              <TextField size="small" fullWidth placeholder="Search Equipment" type="search" color="info" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
             </div>
-            <FormControl size="small" fullWidth>
-              <Select
-                color="info"
-                value={filters.location}
-                onChange={(e) => updateFilters("location", (e.target as HTMLInputElement).value)}
-                startAdornment={
-                  <InputAdornment position="start">
-                    <Filter />
-                  </InputAdornment>
-                }
-              >
-                <MenuItem value="all">All Locations</MenuItem>
-                {equipmentLocations.map((loc, idx) => (
-                  <MenuItem key={idx} value={loc}>{loc}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl size="small" fullWidth>
-              <Select
-                color="info"
-                value={filters.status}
-                onChange={(e) => updateFilters("status", (e.target as HTMLInputElement).value)}
-                startAdornment={
-                  <InputAdornment position="start">
-                    <Filter />
-                  </InputAdornment>
-                }
-              >
-                <MenuItem value="all">All Statuses</MenuItem>
-                {equipmentStatuses.map((status, idx) => (
-                  <MenuItem key={idx} value={status}>{status[0].toUpperCase()+status.slice(1).toLowerCase()}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <div className="grow flex gap-2">
+              <div className="border border-black/20 text-black/60 rounded-md p-2 text-md my-auto whitespace-nowrap">
+                Equipment Count: <span className="font-bold">{equipments.totalCount}</span>
+              </div>
+              <FormControl size="small" fullWidth>
+                <Select
+                  color="info"
+                  value={filters.location}
+                  onChange={(e) => updateFilters("location", (e.target as HTMLInputElement).value)}
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <Filter />
+                    </InputAdornment>
+                  }
+                >
+                  <MenuItem value="all">All Locations</MenuItem>
+                  {equipmentLocations.map((loc, idx) => (
+                    <MenuItem key={idx} value={loc}>{loc}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl size="small" fullWidth>
+                <Select
+                  color="info"
+                  value={filters.status}
+                  onChange={(e) => updateFilters("status", (e.target as HTMLInputElement).value)}
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <Filter />
+                    </InputAdornment>
+                  }
+                >
+                  <MenuItem value="all">All Statuses</MenuItem>
+                  {equipmentStatuses.map((status, idx) => (
+                    <MenuItem key={idx} value={status}>{status[0].toUpperCase()+status.slice(1).toLowerCase()}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
+            <Button className="text-nowrap" size="small" color="error" onClick={removeFilters}>Reset</Button>
           </div>
-          <Button className="text-nowrap" size="small" color="error" onClick={removeFilters}>Reset</Button>
         </div>
+      <Paper sx={{ width: "100%", overflowX: "hidden" }}>
         <TableContainer sx={{ maxHeight: "80vh" }}>
           <Table stickyHeader>
             <TableHead>
-              <TableRow sx={{ "& .MuiTableCell-root": { fontWeight: "bold", backgroundColor: "#ececec", color: "#666", textAlign: "center" } }}>
+              <TableRow sx={{ "& .MuiTableCell-root": { padding: "0.25rem", fontWeight: "bold", backgroundColor: "#ececec", color: "#666", textAlign: "center" } }}>
                 <TableCell>Equipment</TableCell>
                 <TableCell>Asset ID</TableCell>
                 <TableCell>Status</TableCell>

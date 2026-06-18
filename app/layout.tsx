@@ -24,7 +24,8 @@ export default async function RootLayout({
       <body>
         <Providers>
           <SpeedInsights />
-            <main className="flex h-screen overflow-hidden">
+            {/* Removed overflow-hidden from main component */}
+            <main className="flex h-screen overflow-x-hidden">
               <Body>
                 {children}
                 <Toaster />

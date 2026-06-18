@@ -3,7 +3,7 @@ import { Menu } from 'lucide-react'
 
 const Header = ({ title }: { title: string }) => {
   return (
-    <header className='bg-white shadow-sm top-0 z-10'>
+    <header className={`bg-white shadow-sm top-0 z-10 ${title==="Calendar" && "sticky"}`}>
         <div className="flex items-center justify-between p-4">
             <div className="flex items-center">
                 <button className="mr-2 text-gray-600 lg:hidden">

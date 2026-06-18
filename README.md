@@ -1,8 +1,15 @@
 # PRIORITY
 - Reduce health index after incomplete emergency and overhaul???
-- Edit maintenance logic (leave as it is - ok, but dangerous. adds events, not replaces) (add overhaulCounter or nah)
+- Edit maintenance logic (leave as it is - ok, but dangerous. adds events, not replaces) (add overhaulCounter )
+- Equiopment status callout numbers
+- Maint form date (DD-MM-YYYY)
+- Maint from least level + gap of least level (e.g lvl A after 20 days)
+- Equipment Types sticky
+- Maint event switch colors complete/pending
+- Calendar arrows sticky ???
+- Maint form isHours to requirements
+- Maint working hours not enough (every 200h, only 100h passed)
 - Move all document upload to backend to ensure submission atomicity (no duplicate requests from frontend atleast)
-- Event shift logic to shift and count from the event endDate, not start (think about continuous non-several-day events) 
 - Disable maintenance event submission button after first click (document upload duplication issue)
 
 # ISSUES
@@ -17,6 +24,5 @@
 - Trim EVERY form input
 - Search bar for maintenance list
 - Change the TabList in theme to "legacy" version
-- Prettify activities log
 - User position in the company for laughs and giggles (maintenance event by position separation in the future)
 

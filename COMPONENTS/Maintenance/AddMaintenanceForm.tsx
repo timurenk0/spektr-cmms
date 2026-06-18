@@ -227,7 +227,7 @@ const AddMaintenanceForm = ({
               required
               {...form.register("serviceEndDate")}
             />
-         { isHours ? (
+         {isHours ? (
          <>
            <Controller
             name="dailyWorkingHours"

@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         
         const equipmentId = Number(rawEquipmentId);
         console.log(equipmentId);
-        if (Number.isInteger(equipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
+        if (!Number.isInteger(equipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
         
         if (!title) return res.json({ error: "No document title passed" }, { status: 400 });
         

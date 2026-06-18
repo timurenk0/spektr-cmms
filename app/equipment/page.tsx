@@ -5,7 +5,7 @@ import AddEquipmentButton from "../../COMPONENTS/Equipment/AddEquipmentButton"
 const Equipment = () => {
   return (
     <>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
 
         <div>
           <h1 className="text-xl font-semibold text-gray-900">

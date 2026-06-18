@@ -20,7 +20,7 @@ const Transition = React.forwardRef(function Transition(
 const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose: () => void; }) => {
   const [eventStatus, setEventStatus] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [completionDate, setCompletionDate] = useState(new Date().toISOString().slice(0, 10));
+  const [completionDate, setCompletionDate] = useState(event.end?.toISOString().slice(0, 10) ?? new Date().toISOString().slice(0, 10));
   const [reason, setReason] = useState("");
   const queryClient = useQueryClient();
 
