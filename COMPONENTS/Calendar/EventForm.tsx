@@ -141,7 +141,7 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle fontWeight={600} className="flex justify-between">
+        <DialogTitle className="flex justify-between font-bold">
           Update Event
         </DialogTitle>
         <DialogContent className="flex flex-col gap-y-4">

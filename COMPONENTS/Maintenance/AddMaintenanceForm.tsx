@@ -5,11 +5,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import toast from "react-hot-toast";
 import z from "zod"
 import { TEquipment, TMaintenance } from "../utils/types";
+import { PickerValue } from "@mui/x-date-pickers/internals";
 
 
 const formSchema = insertMaintenanceSchema.omit({
@@ -25,7 +29,7 @@ const AddMaintenanceForm = ({
   onClose: () => void
 }) => {
   const queryClient = useQueryClient();
-  const [serviceStart, setServiceStart] = useState("");
+  const [serviceStart, setServiceStart] = useState(new Date());
   
   /* ======================================DATA FETCHING=========================================== */
   
@@ -199,34 +203,41 @@ const AddMaintenanceForm = ({
                onChange={(e) => field.onChange(Number(e.target.value))}
             />
           )}
-         />
-           <TextField
-              type="date"
-              label="Service Start Date"
-              color="info"
-              margin="dense"
-              slotProps={{
-                htmlInput: { min: new Date(new Date().getTime() - 1000*86400*365*2).toISOString().slice(0, 10), max: new Date(new Date().getTime() + 1000*86400*365*5).toISOString().slice(0, 10) }
-              }}
-              fullWidth
-              required
-              {...form.register("serviceStartDate")}
-              onChange={e => {
-                setServiceStart(e.target.value)
-              }}
-            />
-           <TextField
-              type="date"
-              label="Service End Date"
-              color="info"
-              margin="dense"
-              slotProps={{
-                htmlInput: { min: serviceStart, max: new Date(new Date().getTime() + 1000*86400*365*5).toISOString().slice(0, 10) }
-              }}
-              fullWidth
-              required
-              {...form.register("serviceEndDate")}
-            />
+        />
+        <Controller
+          name="serviceStartDate"
+          control={form.control}
+          render={({ field }) => (
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                defaultValue={serviceStart}
+                minDate={new Date(new Date().getTime() - (1000 * 86400 * 365))}
+                maxDate={new Date(new Date().getTime() + (1000 * 86400 * 365))}
+                onChange={(e: PickerValue) => {
+                  setServiceStart(e!);
+                  field.onChange(e);
+                }}
+                label="Service Start Date"
+                format="dd/MM/yyyy"
+              />
+            </LocalizationProvider>
+            )}
+        />
+        <Controller
+          name="serviceEndDate"
+          control={form.control}
+          render={({ field }) => (
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                minDate={serviceStart}
+                maxDate={new Date(new Date().getTime() + (1000 * 86400 * 365 * 5))}
+                onChange={field.onChange}
+                label="Service End Date"
+                format="dd/MM/yyyy"
+              />
+            </LocalizationProvider>
+            )}
+        />
          {isHours ? (
          <>
            <Controller
