@@ -242,7 +242,8 @@ const Settings = () => {
                                 color="info"
                                 margin="dense"
                                 slotProps={{
-                                    htmlInput: { maxLength: 255 }
+                                    htmlInput: { maxLength: 255 },
+                                    inputLabel: { shrink: true }
                                 }}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                     e.preventDefault();
@@ -256,7 +257,8 @@ const Settings = () => {
                                 color="info"
                                 margin="dense"
                                 slotProps={{
-                                    htmlInput: { maxLength: 255 }
+                                    htmlInput: { maxLength: 255 },
+                                    inputLabel: { shrink: true }
                                 }}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                     e.preventDefault();
@@ -270,17 +272,18 @@ const Settings = () => {
                                 color="info"
                                 margin="dense"
                                 slotProps={{
-                                    htmlInput: { maxLength: 255 }
+                                    htmlInput: { maxLength: 255 },
+                                    inputLabel: { shrink: true }
                                 }}
                                 onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
                                     e.preventDefault();
                                     if (!e.target.value && fName && lName) {
-                                        e.target.value = `${fName} ${lName}`
+                                        form.setValue("username", `${fName} ${lName}`)
                                     }
-                                    form.setValue("username", e.target.value.trim())
+                                    // form.setValue("username", e.target.value.trim())
                                 }}
                                 required
-                                // {...form.register("username")}
+                                {...form.register("username")}
                             />
                             <div className="flex flex-col">
                                 <TextField
@@ -290,7 +293,8 @@ const Settings = () => {
                                     color="info"
                                     margin="dense"
                                     slotProps={{
-                                        htmlInput: { maxLength: 255 }
+                                        htmlInput: { maxLength: 255 },
+                                        inputLabel: { shrink: true }
                                     }}
                                     required
                                     {...form.register("password")}
