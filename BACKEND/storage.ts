@@ -404,7 +404,7 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
     
     /* ============================================== Maintenance Events Methods ============================================== */
-    async getMaintenanceEvents(tenantId: number, status: "any" | "pending" | "complete" | "incomplete",  start?: string, end?: string): Promise<MaintenanceEvent[]> {
+    async getMaintenanceEvents(tenantId: number, status: "any" | "overdue" | "pending" | "complete" | "incomplete",  start?: string, end?: string): Promise<MaintenanceEvent[]> {
         const tenantCondition = tenantId === 1 ? undefined : eq(maintenanceEvents.tenantId, tenantId);
         const conditions = [tenantCondition];
 
@@ -413,7 +413,9 @@ export class DatabaseStorage {
         }
 
         if (status !== "any") {
-            conditions.push(eq(maintenanceEvents.status, status));
+            if (status === "overdue") {
+                conditions.push(not(eq(maintenanceEvents.status, "complete")), lt(maintenanceEvents.start, sql`CURRENT_DATE`));
+            } else conditions.push(eq(maintenanceEvents.status, status));
         }
 
         const events = await db.select({
@@ -447,8 +449,8 @@ export class DatabaseStorage {
                             WHEN 'C' THEN 'oklch(70.7% 0.165 254.624)'
                             WHEN 'D' THEN 'oklch(43.8% 0.218 303.724)'
                             WHEN 'E' THEN 'oklch(0.4915 0.1306 49.65)'
-                            WHEN 'I1' THEN 'oklch(.511 .096 186.391)'
-                            WHEN 'I2' THEN 'oklch(.511 .096 186.391)'
+                            WHEN 'I1' THEN 'oklch(.704 .14 182.503)'
+                            WHEN 'I2' THEN 'oklch(.704 .14 182.503)'
                             WHEN 'O' THEN 'oklch(43.2% 0.232 292.759)'
                             ELSE '#4D96FF'
                         END
@@ -461,8 +463,8 @@ export class DatabaseStorage {
                             WHEN 'C' THEN 'oklch(42.4% 0.199 265.638)'
                             WHEN 'D' THEN 'oklch(71.4% 0.203 305.504)'
                             WHEN 'E' THEN 'oklch(0.559643 0.192567 35.8054)'
-                            WHEN 'I1' THEN 'oklch(.704 .14 182.503)'
-                            WHEN 'I2' THEN 'oklch(.704 .14 182.503)'
+                            WHEN 'I1' THEN 'oklch(.511 .096 186.391)'
+                            WHEN 'I2' THEN 'oklch(.511 .096 186.391)'
                             WHEN 'O' THEN 'oklch(60.6% 0.25 292.717)'
                             ELSE '#4D96FF'
                         END

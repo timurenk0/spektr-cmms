@@ -6,7 +6,7 @@ import { Skeleton } from '@mui/material'
 
 const OverdueMaintenanceList = ({equipments}: { equipments: TEquipment[] }) => {
     const { data: events, isLoading: isLoadingEvents } = useQuery<TMaintenanceEvent[]>({
-        queryKey: [`/api/maintenance-events?start=${new Date(new Date().getTime() - 1000*86400*3).toISOString().slice(0, 10)}&end=${new Date().toISOString().slice(0, 10)}`]
+        queryKey: [`/api/maintenance-events?status=overdue`]
     });
 
     if (!events || isLoadingEvents) {

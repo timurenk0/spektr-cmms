@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
         
         const searchParams = req.nextUrl.searchParams;
         let status = searchParams.get("status") as Status || "any";
-        if (!["any", "complete", "incomplete", "pending"].includes(status)) status = "any";
+        if (!["any", "complete", "incomplete", "overdue", "pending"].includes(status)) status = "any";
 
         const start = searchParams.get("start") as string;
         const end = searchParams.get("end") as string;
