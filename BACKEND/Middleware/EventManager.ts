@@ -142,5 +142,5 @@ export function createMaintenanceEvents(
         }
     }
     
-    return events;
+    return events.toSpliced(0, 1);
 }
