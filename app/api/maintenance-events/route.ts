@@ -13,33 +13,23 @@ export async function GET(req: NextRequest) {
         const user = await validateUser();
         
         const searchParams = req.nextUrl.searchParams;
-        const status = searchParams.get("status") as Status;
+        let status = searchParams.get("status") as Status || "any";
+        if (!["any", "complete", "incomplete", "pending"].includes(status)) status = "any";
 
         const start = searchParams.get("start") as string;
         const end = searchParams.get("end") as string;
 
-        console.log(new Date(start));
-        console.log(new Date(end));
+        console.log(status)
+        console.log(start);
+        console.log(end);
 
-        if (status) {
-            if (!["any", "complete", "incomplete", "pending"].includes(status)) return res.json("Invalid status value", { status: 400 });
-
-            if (start && end) {
-                const response = await storage.getMaintenanceEvents(user.tenantId, status, start, end);
-                return res.json(response, { status: 200 });
-            }
-            
-            const response = await storage.getMaintenanceEvents(user.tenantId, status);
-
+        if (start && end) {
+            const response = await storage.getMaintenanceEvents(user.tenantId, status, start, end);
             return res.json(response, { status: 200 });
         }
-
-        if (start !== undefined || end !== undefined) {
-            const events = await storage.getMaintenanceEvents(user.tenantId, "any", start, end);
-            return res.json(events, { status: 200 });
-        }
         
-        const response = await storage.getMaintenanceEvents(user.tenantId, "any");
+        const response = await storage.getMaintenanceEvents(user.tenantId, status);
+
         return res.json(response, { status: 200 });
     } catch (error) {
         const msg = error instanceof Error ? error.message : "Unknown error";

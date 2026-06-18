@@ -303,7 +303,7 @@ export class DatabaseStorage {
             equipmentId: maintenanceEvents.equipmentId,
             totalCount: sql<number>`COUNT(*)`.as("total_count"),
             completeCount: sql<number>`COUNT(*) FILTER (WHERE ${maintenanceEvents.status} = 'complete')`.as("complete_count"),
-            overdueCount: sql<number>`COUNT(*) FILTER (WHERE CURRENT_DATE - ${maintenanceEvents.scheduledAt} > 3)`.as("overdue_count"),
+            overdueCount: sql<number>`COUNT(*) FILTER (WHERE CURRENT_DATE - ${maintenanceEvents.scheduledAt} > 3 AND ${maintenanceEvents.status} != 'complete')`.as("overdue_count"),
             pendingCount: sql<number>`COUNT(*) FILTER (WHERE ${maintenanceEvents.status} = 'pending')`.as("pending_count"),
         }).from(maintenanceEvents).where(maintenanceEventCondition).groupBy(maintenanceEvents.equipmentId).as("event_counts")
         
