@@ -1,12 +1,9 @@
 # PRIORITY
 - Reduce health index after incomplete emergency and overhaul???
 - Edit maintenance logic (leave as it is - ok, but dangerous. adds events, not replaces) (add overhaulCounter )
-- Equiopment status callout numbers
-- Maint from least level + gap of least level (e.g lvl A after 20 days)
-- Calendar arrows sticky ???
 - Maint working hours not enough (every 200h, only 100h passed)
-- Move all document upload to backend to ensure submission atomicity (no duplicate requests from frontend atleast)
 - Disable maintenance event submission button after first click (document upload duplication issue)
+    - Move all document upload to backend to ensure submission atomicity (no duplicate requests from frontend atleast)
 
 # ISSUES
 - Change JWT_SECRET to something more serious

@@ -19,6 +19,7 @@ const Transition = React.forwardRef(function Transition(
 
 const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose: () => void; }) => {
   const [eventStatus, setEventStatus] = useState("");
+  const [documentUploading, setDocumentUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [completionDate, setCompletionDate] = useState(event.end?.toISOString().slice(0, 10) ?? new Date().toISOString().slice(0, 10));
   const [reason, setReason] = useState("");
@@ -28,6 +29,7 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
   
 
   const uploadDocument = async () => {
+    setDocumentUploading(true);
     try {
       if (!file) throw new Error("No file found");
 
@@ -49,6 +51,8 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
       return data;
     } catch (error) {
       throw error;
+    } finally {
+      setDocumentUploading(false);
     } 
   }
   
@@ -130,6 +134,8 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
     mutation.mutate(eventStatus);
   }
 
+  const isPending = (mutation.isPending || documentUploading);
+  
     return (
       <Dialog
         open={!!event}
@@ -225,8 +231,8 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
             </>
           ) }
         <DialogActions>
-          <Button type="submit" variant="text" onClick={onSubmit} disabled={mutation.isPending}>
-            {mutation.isPending ? "Submitting..." : "Submit"}
+          <Button type="submit" variant="text" onClick={onSubmit} disabled={isPending}>
+            {isPending ? "Submitting..." : "Submit"}
           </Button>
           <Button variant="text" color="error" onClick={onClose}>
             Cancel
