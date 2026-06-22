@@ -43,7 +43,7 @@ const RecentActivities = ({ equipmentId } : { equipmentId?: number }) => {
                         <div className="flex flex-col justify-between">
                             <p className="text-sm">{activity.description}</p>
                             <p className="text-xs text-gray-500">
-                                {format(activity.createdAt.toISOString(), "MMM dd, yyyy | HH:mm:ss | ")}
+                                {format(activity.createdAt, "MMM dd, yyyy | HH:mm:ss | ")}
                                 by {activity.username}
                             </p>
                         </div>

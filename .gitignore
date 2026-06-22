@@ -1,6 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 # Google Bucket credentials file
 cmms-474317-bdf12c1b10c7.json
+cmms-sandbox-500219-4a4c89b14d92.json
 
 # dependencies
 /node_modules
