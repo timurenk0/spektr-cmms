@@ -139,7 +139,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
         const res = await fetch(`http://localhost:3000/api/equipments/${equipmentId}`, {
           method: "PATCH",
           body: JSON.stringify({
-            hadOverhaul: !equipment?.hadOverhaul
+            hasOverhaul: !equipment?.hasOverhaul
           }),
           credentials: "include"
         });
@@ -192,7 +192,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
             <div className="flex items-center">
               <div className="mr-6 relative">
                 <Image src={equipment.equipmentImage} width={200} height={200} className="max-w-[200px] max-h-[200px] rounded-md object-cover border" alt="Equipment image" />
-                {user.role === "admin" && equipment.hadOverhaul && <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-red-600/50 p-2 text-xs text-white font-bold">ONGOING OVERHAUL</h1>}
+                {user.role === "admin" && equipment.hasOverhaul && <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-red-600/50 p-2 text-xs text-white font-bold">ONGOING OVERHAUL</h1>}
               </div>
               <div>
                 <div className="flex items-center gap-x-2">
@@ -261,11 +261,11 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                 </Button>
               </Link>
               
-              {!equipment.hadOverhaul && (
+              {!equipment.hasOverhaul && (
                 <SlideDialog
                   title="Overhaul"
                   Btn={( props ) => (
-                    <Button color="error" {...props}>{equipment.hadOverhaul ? "Finish" : "Start"} Overhaul</Button>
+                    <Button color="error" {...props}>{equipment.hasOverhaul ? "Finish" : "Start"} Overhaul</Button>
                   )}
                   DialogForm={(props) => (
                     <OverhaulForm {...props} equipmentId={equipmentId} />

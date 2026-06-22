@@ -83,7 +83,7 @@ export async function PATCH(
         
         const body = await req.json();
         console.log(body)
-        const { isDeleted, status, reason, hadOverhaul, finishDate } = body;
+        const { isDeleted, status, reason, hasOverhaul, finishDate } = body;
         
         
         // Fetch specified equipment by ID and check if it exists.
@@ -100,7 +100,7 @@ export async function PATCH(
             return res.json(true, { status: 201 });
         }
         
-        if (hadOverhaul) { 
+        if (hasOverhaul) { 
             if (!finishDate) {
                 return buildCustomError({
                     code: ERROR_CODES.VALIDATION_ERROR,
@@ -136,14 +136,14 @@ export async function PATCH(
             ]);
 
 
-            await storage.updateEquipment(equipmentId, { hadOverhaul, status: "out of service" });
+            await storage.updateEquipment(equipmentId, { hasOverhaul, status: "out of service" });
             await activityLogger(user, "update", `Overhaul initiated for equipment ${equipmentId}`, equipmentId);
-            return res.json(hadOverhaul, { status: 201 });
+            return res.json(hasOverhaul, { status: 201 });
         }
 
         if (status) {
             if (status === "operational" && !await storage.getEmergencyMaintenanceEventByEquipmentId(equipment.id) && !await storage.getOverhaulMaintenanceEventByEquipmentId(equipment.id)) {
-                await storage.updateEquipment(equipmentId, { status: "operational", hadOverhaul: false });
+                await storage.updateEquipment(equipmentId, { status: "operational", hasOverhaul: false });
                 await activityLogger(user, "update", `Equipment ${equipmentId} status set as Operational`);
 
                 return res.json(true, { status: 201 });
@@ -157,7 +157,7 @@ export async function PATCH(
                     status: 400
                 });
             }
-            if (equipment.hadOverhaul) {
+            if (equipment.hasOverhaul) {
                 return buildCustomError({
                     code: "ONGOING_OVERHAUL",
                     field: "status",

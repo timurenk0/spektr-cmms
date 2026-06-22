@@ -11,7 +11,8 @@ import {
   doublePrecision,
   boolean,
   varchar,
-  char
+  char,
+  smallint
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
@@ -101,7 +102,8 @@ export const equipments = pgTable(
     equipmentImage: text("equipment_image").notNull(),
     healthIndex: doublePrecision("health_index"),
     nextHealthIndexUpdate: date("next_health_index_update"),
-    hadOverhaul: boolean("had_overhaul").notNull().default(false),
+    hasOverhaul: boolean("has_overhaul").notNull().default(false),
+    overhaulCounter: smallint("overhaul_counter").notNull().default(0),
     notes: varchar("notes", { length: 511 }),
     uploadedAt: timestamp("uploaded_at").notNull().defaultNow()
   },

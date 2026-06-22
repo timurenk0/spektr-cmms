@@ -19,18 +19,8 @@ const formSchema = z.object({
 });
 type DocumentFormValues = z.infer<typeof formSchema>;
 
-const documentCategories: Record<string, string> = {
-    "Manuals": "manual",
-    "Maintenance Reports": "maintenance",
-    "Certificates": "certificate",
-    "Pre-mob Reports": "premob",
-    "Fault Reports": "fault",
-    "Emergency Repair Reports": "emergency",
-    "Other": "other"
-}
 
-
-const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number, onClose: () => void }) => {
+const EquipmentDocumentsForm = ({ equipmentId, documentCategories, onClose }: { equipmentId: number, documentCategories: Record<string, string>, onClose: () => void }) => {
     const queryClient = useQueryClient();
 
     const form = useForm<DocumentFormValues>({
@@ -51,7 +41,7 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
             if (values.file && values.file.size > 1024*1024*10) throw new Error("File size should not exceed 10MB!")
             
             formData.append("file", values.file);
-            formData.append("equipmentId", equipmentId.toString());
+            formData.append("rawEquipmentId", equipmentId.toString());
             formData.append("title", values.title);
             formData.append("category", values.category);
             formData.append("notes", values.notes ?? "");
@@ -133,6 +123,7 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
 
                                 if (file.size > 1024*1024*10) {
                                     toast.error("File should not exceed 10MB!");
+                                    e.target.value = ""
                                 }
                                 
                                 field.onChange(file);
@@ -154,8 +145,8 @@ const EquipmentDocumentsForm = ({ equipmentId, onClose }: { equipmentId: number,
                 <FormControl fullWidth>
                     <InputLabel id="select-category" color="info" required sx={{ margin: "8px 0" }}>Select Category</InputLabel>
                     <Select labelId="select-category" label="Select Category" {...field} color="info" required sx={{ margin: "8px 0" }}>
-                        {Object.keys(documentCategories).map(cat => (
-                            <MenuItem key={cat} value={documentCategories[cat]}>{cat}</MenuItem>
+                        {Object.entries(documentCategories).map(([val, lab]) => (
+                            <MenuItem key={val} value={val}>{lab}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>

@@ -13,6 +13,19 @@ import toast from 'react-hot-toast'
 import { TDocument } from '@/COMPONENTS/utils/types'
 
 
+
+const DOCUMENT_CATEGORIES: Record<string, string> = {
+    "all": "All documents",
+    "manual": "Manuals",
+    "maintenance": "Maintenance Reports",
+    "certificate": "Certificates",
+    "premob": "Pre-mob Reports",
+    "fault": "Fault Reports",
+    "inspection": "Inspection Reports",
+    "emergency": "Emergency Repair Reports"
+}
+
+
 const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, userRole: string }) => {
     const queryClient = useQueryClient();
     
@@ -38,41 +51,6 @@ const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, us
         enabled: !!equipmentId
     });
 
-    const deleteDocumentMutation = useMutation({
-        mutationFn: async (documentId: number) => {
-            const response = await fetch(`/api/documents/${documentId}`, {
-                method: "DELETE",
-                credentials: "include"
-            });
-
-            const data = await response.json();
-            
-            if (!response.ok) {
-                const message = data.error || `Request failed: ${response.status} ${response.statusText}`;
-                throw new Error(message);
-            };
-
-            return true;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["documents", equipmentId] });
-            toast.success("Document deleted successfully", {
-                duration: 2000,
-                position: "bottom-right",
-                icon: "✅"
-            });
-        },
-        onError: (error) => {
-           console.error(error.cause, error.stack);
-           toast.error("Failed to delete document", {
-            duration: 2000,
-            position: "bottom-right",
-            icon: "❌"
-           });
-        }
-    });
-
-    
     const isLoading = (!documents || isLoadingDocuments);
 
     if (isLoading) return (
@@ -114,7 +92,7 @@ const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, us
                             </Button>
                         )}
                         DialogForm={(props) => (
-                            <EquipmentDocumentsForm equipmentId={equipmentId} {...props} />
+                            <EquipmentDocumentsForm equipmentId={equipmentId} documentCategories={DOCUMENT_CATEGORIES} {...props} />
                             )
                         }
                     >
@@ -122,35 +100,15 @@ const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, us
                 )}
             </div>
             <TabList scrollButtons={false} onChange={handleTabChange} variant='scrollable'>
-                <Tab label="All documents" value="all" />
-                <Tab label="Manuals" value="manual" />
-                <Tab label="Maintenance Reports" value="maintenance" />
-                <Tab label="Certificates" value="certificate" />
-                <Tab label="Pre-mob Reports" value="premob" />
-                <Tab label="Fault Reports" value="fault" />
-                <Tab label="Emergency Repair Reports" value="emergency" />
+                {Object.entries(DOCUMENT_CATEGORIES).map(([val, lab]) => (
+                    <Tab label={lab} value={val} />
+                ))} 
             </TabList>
-            <TabPanel value="all">
-                <EquipmentDocumentsEl documents={documents} userRole={userRole} />
-            </TabPanel>
-            <TabPanel value="manual">
-                <EquipmentDocumentsEl documents={documents.filter(doc=>doc.category==="manual")} userRole={userRole} />
-            </TabPanel>
-            <TabPanel value="maintenance">
-                <EquipmentDocumentsEl documents={documents.filter(doc=>doc.category==="maintenance")} userRole={userRole} />
-            </TabPanel>
-            <TabPanel value="certificate">
-                <EquipmentDocumentsEl documents={documents.filter(doc=>doc.category==="certificate")} userRole={userRole} />
-            </TabPanel>
-            <TabPanel value="premob">
-                <EquipmentDocumentsEl documents={documents.filter(doc=>doc.category==="premob")} userRole={userRole} />
-            </TabPanel>
-            <TabPanel value="fault">
-                <EquipmentDocumentsEl documents={documents.filter(doc=>doc.category==="fault")} userRole={userRole} />
-            </TabPanel>
-            <TabPanel value="emergency">
-                <EquipmentDocumentsEl documents={documents.filter(doc=>doc.category==="emergency")} userRole={userRole} />
-            </TabPanel>
+            {Object.entries(DOCUMENT_CATEGORIES).map(([val, lab]) => (
+                <TabPanel value={val}>
+                    <EquipmentDocumentsEl documents={val === "all" ? documents : documents.filter(doc => doc.category===val)} userRole={userRole}></EquipmentDocumentsEl>
+                </TabPanel>
+            ))}
         </TabContext>
   )
 }

@@ -21,7 +21,7 @@ const OverhaulForm = ({
                 const res = await fetch(`/api/equipments/${equipmentId}`, {
                     method: "PATCH",
                     body: JSON.stringify({
-                        hadOverhaul: true,
+                        hasOverhaul: true,
                         finishDate
                     }),
                     credentials: "include"

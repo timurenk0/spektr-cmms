@@ -75,10 +75,10 @@ export async function PATCH(
             const eventValidatedData = insertMaintenanceEventSchema.partial().parse(body);
             await storage.updateMaintenanceEvent(eventId, eventValidatedData);
 
-            // const equipment = await storage.updateEquipment(event.equipmentId, { status: "operational" });
-            // if (!equipment) return res.json({ error: "Equipment not found!" }, { status: 404 });
+            const equipment = await storage.updateEquipment(event.equipmentId, { status: "operational" });
+            if (!equipment) return res.json({ error: "Equipment not found!" }, { status: 404 });
 
-            await storage.updateEquipment(event.equipmentId, { hadOverhaul: false, status: "operational" });
+            await storage.updateEquipment(event.equipmentId, { hasOverhaul: false, overhaulCounter: equipment.overhaulCounter+1, status: "operational" });
 
             await activityLogger(user, "update", `Overhaul repair for equipment ${event.equipmentId} finished!`, event.equipmentId);
 

@@ -183,7 +183,7 @@ export class DatabaseStorage {
                     assetId: equipments.assetId,
                     equipmentImage: equipments.equipmentImage,
                     status: equipments.status,
-                    hadOverhaul: equipments.hadOverhaul,
+                    hasOverhaul: equipments.hasOverhaul,
                     lastEvent: lastEventSubquery.lastEvent,
                     nextEvent: nextEventSubquery.nextEvent,
                     requirements: equipments.requirements

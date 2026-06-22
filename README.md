@@ -5,8 +5,11 @@
 - Disable maintenance event submission button after first click (document upload duplication issue)
     - Move all document upload to backend to ensure submission atomicity (no duplicate requests from frontend atleast)
 
+- Event turn incomplete in DB after 7-10 days logic
+
 # ISSUES
 - Change JWT_SECRET to something more serious
+- Probably wanna change equipment overhaul counter update to raw sql query (avoid race condition or whatever)
 - When moving events serviceEndDate not checked (meh who cares anyways it's their problem)
 
 - usefulLifeSpan to remainingLifeSpan + overhaul logic
