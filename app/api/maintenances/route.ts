@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
         // Log activity for added maintenance using helper logger method.
         await activityLogger(user, "add", `Maintenance for equipment ${newMaintenance.equipmentId} added to the database`, newMaintenance.equipmentId);
         
-        return res.json(JSON.parse(JSON.stringify(newMaintenance)), { status: 201 });
+        return res.json(newMaintenance, { status: 201 });
     } catch (error: unknown) {
         return buildError(error);
     }

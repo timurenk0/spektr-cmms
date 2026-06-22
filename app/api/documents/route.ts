@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
         
         await activityLogger(user, "add", `Document uploaded for equipment ${newDocument.equipmentId}`, newDocument.equipmentId);
         
-        return res.json(JSON.parse(JSON.stringify(newDocument)), { status: 201 });
+        return res.json(newDocument, { status: 201 });
     } catch (error: unknown) {
         return buildError(error);
     }

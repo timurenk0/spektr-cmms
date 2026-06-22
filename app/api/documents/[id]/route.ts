@@ -29,7 +29,7 @@ export async function DELETE(
 
         await activityLogger(user, "delete", "Document deleted successfully"); 
 
-        return res.json(true, { status: 200 });
+        return res.json({ sucess: true }, { status: 200 });
     } catch (error: unknown) {
         return buildError(error);
     }

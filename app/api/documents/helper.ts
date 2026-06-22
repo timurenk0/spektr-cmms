@@ -5,7 +5,7 @@ import { storage } from "@/BACKEND/storage";
 export default async function uploadAndAddDocument(
     file: File,
     documentData: { equipmentId: number, title: string,  }
-): Promise<Document | undefined> {
+): Promise<Document> {
     let fileUrl: string | null = null;
 
     try {
@@ -29,5 +29,7 @@ export default async function uploadAndAddDocument(
                     throw err;
                 })
         }
+
+        throw error;
     }
 }

@@ -15,7 +15,7 @@ const theme = createTheme({
                 color: "primary",
             },
             styleOverrides: {
-                containedPrimary: {
+                contained: {
                     color: "#fff",
                     fontWeight: 500,
                 }

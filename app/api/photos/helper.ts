@@ -5,7 +5,7 @@ import { storage } from "@/BACKEND/storage";
 export default async function uploadAndAddPhoto(
     file: File,
     photoData: Omit<InsertPhoto, "imageUrl">
-): Promise<Photo | undefined> {
+): Promise<Photo> {
     let imageUrl: string | null = null;
 
     try {

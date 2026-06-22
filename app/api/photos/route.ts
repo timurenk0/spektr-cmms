@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
         activityLogger(user, "add", `Photo for equipment ${newPhoto?.equipmentId} added`, newPhoto?.equipmentId);
 
-        return res.json(JSON.parse(JSON.stringify(newPhoto)), { status: 201 });
+        return res.json(newPhoto, { status: 201 });
     } catch (error: unknown) {
         // Catch generic errors
         return buildError(error);

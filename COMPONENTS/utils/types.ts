@@ -1,13 +1,13 @@
 import { Activity, Component, Document, Equipment, Maintenance, MaintenanceEvent, Photo, Tenant, User } from "@/BACKEND/Database/schema";
 
 export type CustomError = {
-    code: string,
+    code: string
     message: string,
     suggestion?: string,
     field?: string
 }
 
-export type TActivity = Activity;
+export type TActivity = (Activity);
 
 export type TComponent = Component;
 

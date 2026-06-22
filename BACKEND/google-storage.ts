@@ -3,7 +3,10 @@ import sharp from "sharp";
 
 let storage: Storage;
 if (process.env.NODE_ENV === "production") {
-    const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS!);
+    if (!process.env.GOOGLE_CREDENTIALS) {
+        throw new Error("GOOGLE_CREDENTIALS environment variable is missing");
+    }
+    const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
 
     credentials.private_key = credentials.private_key.replace(/\\n/g, "\n");
 

@@ -32,7 +32,7 @@ export const activities = pgTable("activities", {
     username: varchar("username", { length: 255 }).notNull(),
     action: varchar("action", { length: 255 }).notNull(),
     description: varchar("description", { length: 511 }).notNull(),
-    createdAt: timestamp("created_at").defaultNow()
+    createdAt: timestamp("created_at").notNull().defaultNow()
 }, (table) => [
   check("action_check", sql`action IN ('add', 'delete', 'update')`)
 ]);

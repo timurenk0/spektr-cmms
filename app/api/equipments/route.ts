@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
         // Log the activity for added equipment using helper logger method.
         await activityLogger(user, "add", `Equipment ${newEquipment.name} added to the database`, newEquipment.id);
 
-        return res.json(JSON.parse(JSON.stringify(newEquipment)), { status: 201 });
+        return res.json(newEquipment, { status: 201 });
     } catch (error: unknown) {
         // Database errors
         if (error instanceof DrizzleQueryError) {
