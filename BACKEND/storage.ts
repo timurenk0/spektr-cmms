@@ -741,17 +741,17 @@ export class DatabaseStorage {
 
         const complete = await db.execute(sql`
             SELECT
-                COUNT(*) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '1 week' AND status = 'complete') AS cmt1,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '1 week' AND status = 'complete') AS ceq1,
+                COUNT(*) FILTER (WHERE start_date <= CURRENT_DATE AND start_date > CURRENT_DATE - interval '1 week' AND status = 'complete') AS cmt1,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date <= CURRENT_DATE AND start_date > CURRENT_DATE - interval '1 week' AND status = 'complete') AS ceq1,
 
-                COUNT(*) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '2 week' AND status = 'complete') AS cmt2,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '2 week' AND status = 'complete') AS ceq2,
+                COUNT(*) FILTER (WHERE start_date <= CURRENT_DATE AND start_date > CURRENT_DATE - interval '2 week' AND status = 'complete') AS cmt2,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date <= CURRENT_DATE AND start_date > CURRENT_DATE - interval '2 week' AND status = 'complete') AS ceq2,
 
-                COUNT(*) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '3 week' AND status = 'complete') AS cmt3,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '3 week' AND status = 'complete') AS ceq3,
+                COUNT(*) FILTER (WHERE start_date <= CURRENT_DATE AND start_date > CURRENT_DATE - interval '3 week' AND status = 'complete') AS cmt3,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date <= CURRENT_DATE AND start_date > CURRENT_DATE - interval '3 week' AND status = 'complete') AS ceq3,
 
-                COUNT(*) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '4 week' AND status = 'complete') AS cmt4,
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date >= CURRENT_DATE AND start_date < CURRENT_DATE + interval '4 week' AND status = 'complete') AS ceq4
+                COUNT(*) FILTER (WHERE start_date <= CURRENT_DATE AND start_date > CURRENT_DATE - interval '4 week' AND status = 'complete') AS cmt4,
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date <= CURRENT_DATE AND start_date > CURRENT_DATE - interval '4 week' AND status = 'complete') AS ceq4
             FROM maintenance_events ${whereClause};
         `);
 
