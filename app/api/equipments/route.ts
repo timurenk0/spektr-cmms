@@ -52,7 +52,7 @@ export async function GET(
             filters.search
         )
 
-        await storage.subtractMonthlyHealthDrop(user.tenantId);
+        await storage.subtractMonthlyHealthDrop();
 
         return res.json(equipments, { status: 200 });
     } catch (error) {

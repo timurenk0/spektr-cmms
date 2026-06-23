@@ -199,6 +199,19 @@ export const insertPhotoSchema = createInsertSchema(photos).omit({
     uploadedAt: true
 });
 
+export const systemState = pgTable("system_state", {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    updatedAt: date("updated_at").notNull().defaultNow()
+}, (table) => [
+    unique("unique_name").on(table.name)
+]);
+
+export const insertSystemState = createInsertSchema(systemState).omit({
+    id: true,
+    updatedAt: true
+});
+
 // Tenant table schema
 export const tenants = pgTable("tenants", {
     id: serial("id").primaryKey(),
@@ -246,6 +259,9 @@ export type InsertMaintenanceEvent = z.infer<typeof insertMaintenanceEventSchema
 
 export type Photo = typeof photos.$inferSelect;
 export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
+
+export type SystemState = typeof systemState.$inferSelect;
+export type InsertSystemState = z.infer<typeof insertSystemState>;
 
 export type Tenant = typeof tenants.$inferSelect;
 export type InsertTenant = z.infer<typeof insertTenantSchema>;

@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
         const start = searchParams.get("start") as string;
         const end = searchParams.get("end") as string;
 
+        await storage.overdueToIncompleteEvents();
         console.log(status)
         console.log(start);
         console.log(end);

@@ -7,6 +7,7 @@ import {
     maintenanceEvents, type MaintenanceEvent, type InsertMaintenanceEvent,
     photos, type Photo, type InsertPhoto,
     tenants, type Tenant, type InsertTenant,
+    systemState, type SystemState, type InsertSystemState,
     users, type User, type InsertUser,
 } from "./Database/schema";
 import * as schema from "./Database/schema";
@@ -98,6 +99,21 @@ export class DatabaseStorage {
             throw new Error(`Failed to login user: ${msg}`);
         }
     }
+    /* ======================================================================================================================== */
+
+    /* ================================================= Tenants Methods ====================================================== */
+    async getStates(): Promise<SystemState[]> {
+        return await db.select().from(systemState);
+    }
+    
+    async getState(name: string): Promise<SystemState | undefined> {
+        return (await db.select().from(systemState).where(eq(systemState.name, name)))[0];
+    }
+
+    async updateState(name: string): Promise<void> {
+        await db.insert(systemState).values({ name, updatedAt: sql`CURRENT_DATE` }).onConflictDoUpdate({ target: systemState.name, set: { updatedAt: sql`CURRENT_DATE` } });
+    }
+    
     /* ======================================================================================================================== */
 
     /* ================================================= Tenants Methods ====================================================== */
@@ -871,8 +887,7 @@ export class DatabaseStorage {
         return await db.update(equipments).set({ healthIndex: sql`${equipments.healthIndex} - ${penalty}` }).where(eq(equipments.id, event.equipmentId));
     }
 
-    async subtractMonthlyHealthDrop(tenantId: number) {
-        
+    async subtractMonthlyHealthDrop(): Promise<void> {
         await db.execute(sql`
             UPDATE equipments
             SET
@@ -900,55 +915,56 @@ export class DatabaseStorage {
             WHERE
                 health_index IS NOT NULL
                 AND next_health_index_update <= CURRENT_DATE
-            AND (${tenantId} = 1 OR tenant_id = ${tenantId})`)
+        `)
     }
 
-    // async subtractPenaltyScore(
-    //     event: MaintenanceEvent
-    // ) {
-    //     const levelCoeffs: Record<string, number> = {
-    //         "A": 1,
-    //         "B": 2,
-    //         "C": 3,
-    //         "D": 4,
-    //     };
-    //     const statusCoeffs: Record<string, number> = {
-    //         "complete": 0,
-    //         "overdue": 0.5,
-    //         "incomplete": 1
-    //     };
+    async overdueToIncompleteEvents(): Promise<void> {
+        const STATE_NAME = "last_overdue_conversion";
+        const [ lastState ] = await db.select({ updatedAt: systemState.updatedAt }).from(systemState).where(eq(systemState.name, STATE_NAME));
 
-    //     const score = event.status ? levelCoeffs[event.level]*statusCoeffs[event.status] : "no status yet";
+        const lastUpdated = lastState.updatedAt ?? null;
+        const today = new Date();
 
+        if (lastUpdated && lastUpdated === today.toISOString().slice(0, 10)) {
+            return;
+        }
         
-    //     return await db.update(equipments).set({ healthIndex: sql`${equipments.healthIndex} - ${score}` }).where(eq(equipments.id, event.equipmentId));
-    // }
+        try {
+        const result = await db.update(maintenanceEvents)
+            .set({
+                status: "incomplete"
+            })
+            .where(
+                and(
+                    gt(sql`CURRENT_DATE - ${maintenanceEvents.start}`, 3),
+                    eq(maintenanceEvents.status, "pending"),
+                )
+            );
+        
+        await db.update(systemState).set({ updatedAt: sql`CURRENT_DATE` }).where(eq(systemState.name, STATE_NAME));
+        
+
+        const updatedCount = Number(result.rowCount ??  0);
+        
+        
+        if (updatedCount > 0) {
+            console.log(`[STORAGE] Marked ${updatedCount} events as incomplete`);
+        } else {
+            console.log(`[STORAGE] Failed to update events status`)
+        }
     
-    
-    // async calculateHealthIndex(
-    //     equipmentId: number,
-    //     maintenance: Maintenance
-    // ): Promise<number | undefined> {
-    //     try {
-    //         const equipment = await db.execute(sql`
-    //             SELECT useful_life_span,
-    //             EXTRACT(YEAR FROM AGE(CURRENT_DATE, date_of_manufacturing)) * 12 +
-    //             EXTRACT(MONTH FROM AGE(CURRENT_DATE, date_of_manufacturing)) AS age_in_months
-    //             FROM equipments
-    //             WHERE id = ${equipmentId}
-    //         `);
-
-    //         if (!equipment.rows[0]) return undefined;
-
-    //         const { useful_life_span, age_in_months } = equipment.rows[0];
-    //         if (!useful_life_span || age_in_months == null) return undefined;
-
-    //         return 0;            
-    //     } catch (error) {
-    //         const msg = error instanceof Error ? error.message : "Unknown error";
-    //         throw new Error(`Failed to calculate health index for specified equipment: ${msg}`);
-    //     }
-    // }
+        await this.updateState(STATE_NAME);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                console.error(`[STORAGE] ${err.message}`);
+                console.error(`[STORAGE] ${err.cause}`);
+                console.error(`[STORAGE] ${err.stack}`);
+                console.error(`[STORAGE] ${err.name}`);
+            } else {
+                console.error(`Sosal`)
+            }
+        }
+    }
 
 }
 
