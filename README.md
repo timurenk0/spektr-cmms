@@ -1,11 +1,11 @@
 # PRIORITY
 - Reduce health index after incomplete emergency and overhaul???
+    - What to do on incomplete emergency/overhaul event????
 - Edit maintenance logic (leave as it is - ok, but dangerous. adds events, not replaces) (add overhaulCounter )
 - Maint working hours not enough (every 200h, only 100h passed)
 - Disable maintenance event submission button after first click (document upload duplication issue)
     - Move all document upload to backend to ensure submission atomicity (no duplicate requests from frontend atleast)
 
-- Event turn incomplete in DB after 7-10 days logic
 
 # ISSUES
 - Change JWT_SECRET to something more serious
