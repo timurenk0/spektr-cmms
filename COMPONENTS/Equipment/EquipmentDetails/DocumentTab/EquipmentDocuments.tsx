@@ -101,11 +101,11 @@ const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, us
             </div>
             <TabList scrollButtons={false} onChange={handleTabChange} variant='scrollable'>
                 {Object.entries(DOCUMENT_CATEGORIES).map(([val, lab]) => (
-                    <Tab label={lab} value={val} />
+                    <Tab label={lab} value={val} key={lab} />
                 ))} 
             </TabList>
             {Object.entries(DOCUMENT_CATEGORIES).map(([val, lab]) => (
-                <TabPanel value={val}>
+                <TabPanel value={val} key={lab}>
                     <EquipmentDocumentsEl documents={val === "all" ? documents : documents.filter(doc => doc.category===val)} userRole={userRole}></EquipmentDocumentsEl>
                 </TabPanel>
             ))}

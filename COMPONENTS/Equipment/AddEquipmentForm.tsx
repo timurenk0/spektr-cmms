@@ -293,17 +293,6 @@ export default function AddEquipmentForm(
                 {...form.register("model")}
             />
             <TextField
-                label="Serial Number"
-                color="info"
-                slotProps={{
-                    htmlInput: { maxLength: 255 }
-                }}
-                margin="dense"
-                fullWidth
-                required
-                {...form.register("serialNumber")}
-            />
-            <TextField
                 label="Asset ID"
                 color="info"
                 slotProps={{
@@ -314,6 +303,17 @@ export default function AddEquipmentForm(
                 required
                 {...form.register("assetId")}
             />
+                <TextField
+                    label="Serial Number"
+                    color="info"
+                    slotProps={{
+                        htmlInput: { maxLength: 255 }
+                    }}
+                    margin="dense"
+                    fullWidth
+                    // required
+                    {...form.register("serialNumber")}
+                />
             <TextField
                 label="Owning Department"
                 color="info"
@@ -383,7 +383,7 @@ export default function AddEquipmentForm(
                         <DatePicker
                             label="Date of Manufacturing"
                             defaultValue={DOF}
-                            minDate={new Date(DOF.getTime() - (1000 * 86400 * 365 * 30))}
+                            minDate={new Date(new Date(DOF).getTime() - (1000 * 86400 * 365 * 30))}
                             maxDate={new Date()}
                             format="dd/MM/yyyy"
                             onChange={(e: PickerValue) => {
@@ -400,7 +400,7 @@ export default function AddEquipmentForm(
                 render={({ field }) => (
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DatePicker
-                            label="In Service Date"
+                            label="Put In Service Date"
                             defaultValue={new Date()}
                             minDate={DOF}
                             maxDate={new Date()}

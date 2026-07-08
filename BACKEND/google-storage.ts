@@ -66,7 +66,6 @@ class GStorage {
     async deleteObject(url: string): Promise<void> {
         try {
             const filePath = url.split(BUCKET_NAME+"/")[1];
-            console.log(filePath);
             await bucket.file(filePath).delete();
         } catch (error) {
             throw error;
