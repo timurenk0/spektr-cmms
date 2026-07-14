@@ -65,13 +65,15 @@ export class DatabaseStorage {
         return user;
     }
 
-    async loginUser(username: string, pw: string): Promise<{token: string, user: Partial<User>}> {
+    async loginUser(username: string, pw: string): Promise<{token: string, user: Partial<User & { tenantName: string }>}> {
         const jwtSecret = process.env.JWT_SECRET;
         if (!jwtSecret) throw new Error("JWT_SECRET variables must be set");
 
         try {
             const user = await this.fetchUserByUsername(username);
             if (!user) throw new Error("User not found.");
+
+            console.log(user);
 
             const isMatch = await bcrypt.compare(pw, user.password);
             if (!isMatch) throw new Error("User credentials are incorrect.");
@@ -96,8 +98,8 @@ export class DatabaseStorage {
                 }
             );
 
-            const { password: _, ...userData } = user;
-            return { token, user: userData };
+            const { password: _, ...userData  } = user;
+            return { token, user: {...userData, tenantName: tenantName.name } };
         } catch (error) {
             const msg = error instanceof Error ? error.message : "Unknown error";
             throw new Error(`Failed to login user: ${msg}`);

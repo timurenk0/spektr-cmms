@@ -1,10 +1,12 @@
+import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import { NextResponse as res } from "next/server";
 
 
 export async function GET() {
     try {
-        const info = await storage.getMaintenanceEventsInfo();
+        const user = await validateUser();
+        const info = await storage.getMaintenanceEventsInfo(user.tenantId);
 
         if (!info) return res.json("No info found", { status: 404 });
 

@@ -19,35 +19,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; initialUser?: T
     const [user, setUser] = useState<TUser | null>(initialUser ?? null);
     const [isLoading, setIsLoading] = useState(!initialUser);
 
+    const refreshUser = async () => {
+        try {
+            const res = await fetch("/api/auth/me", {
+                credentials: "include"
+            });
+            if (res.ok) {
+                setUser(await res.json());
+            } else {
+                setUser(null);
+            }
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     useEffect(() => {
         if (initialUser) {
             setIsLoading(false);
             return;
         }
         
-        const fetchUser = async () => {
-            try {
-                const response = await fetch("/api/auth/me", {
-                    credentials: "include"
-                });
-                if (response.ok) {
-                    const userData = await response.json();
-                    setUser(userData);
-                } else if (response.status === 401) {
-                    setUser(null);
-                }
-
-            } catch (error) {
-                setUser(null);
-                throw new Error(`Failed to fetch user: ${error}`);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchUser();
+        
+        refreshUser();
     }, [initialUser]);
 
-    const value = useMemo(() => ({user, setUser, isLoading}), [user, isLoading])
+    const value = useMemo(() => ({user, setUser, isLoading, refreshUser}), [user, isLoading])
     
     return (
         <AuthContext.Provider value={value}>

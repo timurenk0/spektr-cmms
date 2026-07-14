@@ -240,6 +240,8 @@ export default function AddEquipmentForm(
         </>
     )
 
+    console.log(user)
+    
   return (
     <form
         onSubmit={form.handleSubmit(onSubmit, (error) => console.error(error))}
@@ -262,19 +264,18 @@ export default function AddEquipmentForm(
                 control={form.control}
                 defaultValue={user.tenantId}
                 render={({ field }) => (
-                    <FormControl fullWidth>
-                        <InputLabel id="select-tenant" color="info" required sx={{ margin: "8px 0" }}>Select Owner</InputLabel>
-                        {user.tenantId === 1 ? tenants.map(t => (
-                            <Select labelId="select-tenant" label="Select Owner" {...field} color="info" required sx={{ margin: "8px 0" }}>
-                                <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
+                        <FormControl fullWidth>
+                            <InputLabel id="select-tenant" color="info" required sx={{ margin: "8px 0" }}>Select Owner</InputLabel>
+                            <Select labelId="select-tenant" label="Select Owner" {...field} color="info" disabled={user.tenantId !== 1} required sx={{ margin: "8px 0" }}>
+                                {user.tenantId === 1 ? tenants.map(t => (
+                                    <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
+                                )) : (
+                                    <MenuItem value={user.tenantId}>{user.tenantName}</MenuItem>
+                                )}
                             </Select>
-                        )) : (
-                            <Select labelId="select-tenant" {...field} disabled label="Select Owner" required sx={{ margin: "8px 0" }}>
-                                <MenuItem value={user.tenantId}>{user.tenantName}</MenuItem>
-                            </Select>
-                        )}
-                    </FormControl>
-                )}
+                        </FormControl>
+                    )
+                }
             />
             <TextField
                 label="Manufacturer"

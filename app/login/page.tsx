@@ -57,6 +57,7 @@ const Login = () => {
         },
         onSuccess: (data) => {
             setUser(data.user);
+            console.log(data);
 
             toast.success("Login successful", {
                 duration: 1000,

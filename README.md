@@ -1,4 +1,5 @@
 # PRIORITY
+- REMOVE .toSpliced() in EventManager and think of normal logic
 - Serial Number input non-mandatory
 - Working Hours edit 2+ hours moves the maintenance schedule
 - Reduce health index after incomplete emergency and overhaul???
