@@ -50,7 +50,6 @@ export const components = pgTable("components", {
     manufacturer: varchar("manufacturer", { length: 255 }).notNull(),
     partNumber: varchar("part_number", { length: 255 }).notNull(),
     stock: integer("recommended_stock").notNull(),
-    failImpact: varchar("fail_impact", { length: 255 }).notNull(),
     notes: varchar("notes", { length: 511 })
 }, (table) => ({
     uniqueNamePerEquipment: unique().on(table.equipmentId, table.name)

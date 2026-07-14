@@ -15,7 +15,16 @@ const EquipmentComponents = ({
 }) => {
 
     const { data: components = [], isLoading: isLoadingComponents } = useQuery<TComponent[]>({
-        queryKey: [`/api/components?equipmentId=${equipmentId}`]
+        queryKey: [`equipment-components`],
+        queryFn: async () => {
+            const res = await fetch(`/api/components?equipmentId=${equipmentId}`, {
+                credentials: "include"
+            });
+            const data = await res.json()
+            if (!res.ok) throw new Error(`Failed to fetch equipment components: ${data.error.message}`);
+
+            return data;
+        }
     });
 
     const isLoading = (isLoadingComponents);
@@ -26,10 +35,10 @@ const EquipmentComponents = ({
             <h1>Equipment&apos;s recommended spare parts and consumables</h1>
             {userRole === "admin" && (
                 <SlideDialog
-                    title="Add critical components and consumables"
+                    title="Add spare components and consumables"
                     Btn={(props) => (
                         <Button {...props} size="small" color="info">
-                            <Plus size={16} className="mr-2" /> Add critical components
+                            <Plus size={16} className="mr-2" /> Add spare components
                         </Button>
                     )}
                     DialogForm={(props) => (
@@ -47,7 +56,6 @@ const EquipmentComponents = ({
                                 <TableCell>Manufacture</TableCell>
                                 <TableCell>Part Number</TableCell>
                                 <TableCell>Recommended Stock</TableCell>
-                                <TableCell>Fail Impact</TableCell>
                                 <TableCell>Notes</TableCell>
                             </TableRow>
                         </TableHead>
@@ -76,7 +84,6 @@ const EquipmentComponents = ({
                                     <TableCell title={comp.manufacturer} className="max-w-32 truncate">{comp.manufacturer}</TableCell>
                                     <TableCell title={comp.partNumber} className="max-w-32 truncate">{comp.partNumber}</TableCell>
                                     <TableCell>{comp.stock}</TableCell>
-                                    <TableCell title={comp.failImpact} className="max-w-32 truncate">{comp.failImpact}</TableCell>
                                     <TableCell className="max-w-20 truncate" title={comp.notes || "No notes"}>{comp.notes?.length ? comp.notes : ""}</TableCell>
                                 </TableRow>
                             )) : (

@@ -8,15 +8,7 @@ import toast from "react-hot-toast";
 import z from "zod";
 
 
-const componentSchema = insertComponentSchema.extend({
-    name: z.string().min(1, { message: "Component name is required" }),
-    manufacturer: z.string().min(1, { message: "Component manufacturer is required" }),
-    partNumber: z.string().min(1, { message: "Component part number is required" }),
-    stock: z.number().min(1),
-    failImpact: z.string().min(1, { message: "Component fail impact is required" }),
-    notes: z.string().optional()
-});
-
+const componentSchema = insertComponentSchema;
 const formSchema = z.object({
     components: z.array(componentSchema).min(1)
 });
@@ -40,7 +32,6 @@ const AddEquipmentComponentForm = ({
                     name: "",
                     manufacturer: "",
                     partNumber: "",
-                    failImpact: "",
                     notes: "",
                     stock: 1
                 }
@@ -71,7 +62,7 @@ const AddEquipmentComponentForm = ({
             }
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/components"] });
+            queryClient.invalidateQueries({ queryKey: ["equipment-components"] });
             toast.success("Components added", {
                 duration: 2000,
                 position: "bottom-right",
@@ -99,7 +90,7 @@ const AddEquipmentComponentForm = ({
             className="space-y-4 max-h overflow-y-auto px-1"
         >
             {fields.map((field, index) => (
-                <div key={field.id} className="grid grid-cols-6 gap-2 py-2">
+                <div key={field.id} className="grid grid-cols-5 gap-2 py-2">
                     <Controller
                         name={`components.${index}.name`}
                         control={form.control}
@@ -145,23 +136,6 @@ const AddEquipmentComponentForm = ({
                                 slotProps={{
                                     htmlInput: { maxLength: 255 }
                                 }}
-                                fullWidth
-                                required
-                                {...field}
-                            />
-                        )}
-                    />
-                    <Controller
-                        name={`components.${index}.failImpact`}
-                        control={form.control}
-                        render={({ field }) => (
-                            <TextField
-                                label="Fail Impact"
-                                color="info"
-                                slotProps={{
-                                    htmlInput: { maxLength: 255 }
-                                }}
-                                margin="dense"
                                 fullWidth
                                 required
                                 {...field}
@@ -216,7 +190,6 @@ const AddEquipmentComponentForm = ({
                     name: "",
                     manufacturer: "",
                     partNumber: "",
-                    failImpact: "",
                     stock: 1,
                     notes: ""
                 })}

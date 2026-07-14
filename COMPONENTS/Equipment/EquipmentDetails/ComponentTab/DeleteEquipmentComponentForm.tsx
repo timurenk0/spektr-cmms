@@ -34,7 +34,7 @@ const DeleteEquipmentComponentForm = ({
             }
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["/api/components"] });
+            queryClient.invalidateQueries({ queryKey: ["equipment-components"] });
             toast.success("Critical component deleted successfully", {
                 duration: 2000,
                 position: "bottom-right",
@@ -60,7 +60,7 @@ const DeleteEquipmentComponentForm = ({
         <div>
             <p>Are you sure you want to delete &quot;{componentName}&quot;?</p>
             <div className="flex justify-end gap-2">
-                <Button type="submit" onClick={onSubmit} variant="outlined" color="error" disabled={deleteMutation.isPending}>Delete</Button>
+                <Button type="submit" onClick={onSubmit} variant="outlined" color="error" disabled={deleteMutation.isPending}>{deleteMutation.isPending ? "Deletnig..." : "Delete"}</Button>
                 <Button onClick={onClose} variant="text" color="inherit">Cancel</Button>
             </div>
         </div>
