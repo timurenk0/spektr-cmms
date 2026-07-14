@@ -76,6 +76,9 @@ export class DatabaseStorage {
             const isMatch = await bcrypt.compare(pw, user.password);
             if (!isMatch) throw new Error("User credentials are incorrect.");
 
+            const tenantName = await this.getTenant(user.tenantId);
+            if (!tenantName) throw new Error("Inexistent tenant for specified user");
+
             const token = jwt.sign(
                 {
                     id: user.id,
@@ -84,6 +87,7 @@ export class DatabaseStorage {
                     firstName: user.firstName,
                     lastName: user.lastName,
                     tenantId: user.tenantId,
+                    tenantName: tenantName.name,
                     iat: Math.floor(Date.now() / 1000)
                 },
                 jwtSecret,
@@ -499,13 +503,21 @@ export class DatabaseStorage {
         return (await db.select().from(maintenanceEvents).where(and(eq(maintenanceEvents.equipmentId, id), eq(maintenanceEvents.level, "O"), eq(maintenanceEvents.status, "pending"))))[0];
     }
 
-    async getMaintenanceEventsInfo(): Promise<{total: number, upcoming: number, overdue: number, complete: number, incomplete: number}> {
+    async getMaintenanceEventsInfo(tenantId: number): Promise<{total: number, upcoming: number, overdue: number, complete: number, incomplete: number}> {
+        const tenantWhere = tenantId === 1 ? undefined : eq(maintenanceEvents.tenantId, tenantId);
+        
         const upcomingEvents = (await db.select().from(maintenanceEvents).
-                            where(gte(maintenanceEvents.start, sql`CURRENT_DATE`))).length;
+                            where(
+                                and(
+                                    tenantWhere,
+                                    gte(maintenanceEvents.start, sql`CURRENT_DATE`)
+                                )
+                            )).length;
 
         const overdueEvents = (await db.select().from(maintenanceEvents).
                             where(
                                 and(
+                                    tenantWhere,
                                     lt(maintenanceEvents.start, sql`CURRENT_DATE`),
                                     // eq(maintenanceEvents.status, "pending")
                                 )
@@ -515,12 +527,18 @@ export class DatabaseStorage {
 
         const completeEvents = (await db.select().from(maintenanceEvents).
                             where(
-                                eq(maintenanceEvents.status, "complete")
+                                and(
+                                    tenantWhere,
+                                    eq(maintenanceEvents.status, "complete")
+                                )
                             )).length;
 
         const incompleteEvents = (await db.select().from(maintenanceEvents).
                             where(
-                                eq(maintenanceEvents.status, "incomplete"),
+                                and(
+                                    tenantWhere,
+                                    eq(maintenanceEvents.status, "incomplete"),
+                                )
                             )).length;
 
         return {

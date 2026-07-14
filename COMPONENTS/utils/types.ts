@@ -23,4 +23,4 @@ export type TPhoto = Photo;
 
 export type TTenant = Tenant;
 
-export type TUser = Omit<User, "password">;
+export type TUser = (Omit<User, "password"> & {tenantName: string});

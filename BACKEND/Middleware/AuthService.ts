@@ -10,6 +10,7 @@ export interface AuthUser {
     lastName: string,
     role: string,
     tenantId: number,
+    tenantName: string,
 };
 
 export async function authService(): Promise<AuthUser | null> {

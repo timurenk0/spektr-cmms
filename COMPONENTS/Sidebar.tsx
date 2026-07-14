@@ -145,10 +145,14 @@ const Sidebar = () => {
                         {/* <User color='gray'></User> */}
                     </div>
                     <div>
-                        <p className="text-sm font-medium">
-                            {isLoading ? "Fetching user..." : !user ? "No User" : user.username}
-                        </p>
-                        <p className="text-xs text-gray-500">{isLoading ? "" : !user ? "" : user.role}</p>
+                        {isLoading ? "Fetching user..." : (
+                            <>
+                                <p className="text-sm font-medium">
+                                    {isLoading ? "Fetching user..." : !user ? "No User" : user.username}
+                                </p>
+                                <p className="text-xs text-gray-500">{isLoading ? "" : !user ? "" : user.tenantName}</p>
+                            </>
+                        )}
                     </div>
                     
                 </Link>
