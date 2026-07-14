@@ -29,11 +29,7 @@ const Sidebar = () => {
         },
         onSuccess: () => {
             setUser(null);
-            toast.success("Logged out successfully", {
-                duration: 2000,
-                position: "bottom-right",
-                icon: "✅"
-            });
+            window.location.reload();
         },
         onError: (error) => {
             toast.error(`Failed to logout: ${error.message}`, {

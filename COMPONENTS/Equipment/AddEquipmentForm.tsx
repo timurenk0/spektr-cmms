@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Button, FormControl, FormControlLabel, FormLabel, InputAdornment, InputLabel, MenuItem, Radio, RadioGroup, Select, Skeleton, TextField } from "@mui/material";
 import { EquipmentCategories } from "../utils/equipmentCategories";
-import { CustomError, TEquipment, TTenant } from "../utils/types";
+import { CustomError, TEquipment, TTenant, TUser } from "../utils/types";
 import { ImageIcon } from "lucide-react";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -32,10 +32,12 @@ const equipmentRequirements = ["Calibration and/or Testing", "Maintenance", "Bot
 
 export default function AddEquipmentForm(
     {
+        user,
         equipmentId,
         onClose,
     }:
     {
+        user: TUser,
         equipmentId?: number,
         onClose: () => void,
     }
@@ -102,7 +104,7 @@ export default function AddEquipmentForm(
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: "",
-            tenantId: 1,
+            tenantId: user.tenantId,
             manufacturer: "",
             assetId: "",
             serialNumber: "",
@@ -258,15 +260,19 @@ export default function AddEquipmentForm(
             <Controller
                 name="tenantId"
                 control={form.control}
-                defaultValue={1}
+                defaultValue={user.tenantId}
                 render={({ field }) => (
                     <FormControl fullWidth>
                         <InputLabel id="select-tenant" color="info" required sx={{ margin: "8px 0" }}>Select Owner</InputLabel>
-                        <Select labelId="select-tenant" label="Select Owner" {...field} color="info" required sx={{ margin: "8px 0" }}>
-                            {tenants.map(t => (
+                        {user.tenantId === 1 ? tenants.map(t => (
+                            <Select labelId="select-tenant" label="Select Owner" {...field} color="info" required sx={{ margin: "8px 0" }}>
                                 <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
-                            ))}
-                        </Select>
+                            </Select>
+                        )) : (
+                            <Select labelId="select-tenant" {...field} disabled label="Select Owner" required sx={{ margin: "8px 0" }}>
+                                <MenuItem value={user.tenantId}>{user.tenantName}</MenuItem>
+                            </Select>
+                        )}
                     </FormControl>
                 )}
             />

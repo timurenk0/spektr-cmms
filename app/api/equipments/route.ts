@@ -41,6 +41,7 @@ export async function GET(
         
         console.log(filters);
 
+        console.log(user);
         const equipments = await storage.getEquipments(
             user.tenantId,
             concise ? "true" : undefined,
@@ -69,6 +70,7 @@ export async function POST(req: NextRequest) {
         // Parse request body to JSON format.
         // Parse equipment data from request body with DB schema for validation.
         const body = await req.json();
+        console.log(body);
         const equipmentValidatedData = insertEquipmentSchema.parse(body);
 
         // Add validated equipment data to the DB.

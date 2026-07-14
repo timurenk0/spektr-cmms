@@ -1,7 +1,6 @@
 # PRIORITY
 - Serial Number input non-mandatory
 - Working Hours edit 2+ hours moves the maintenance schedule
-- Remove fail impact from consumables form
 - Reduce health index after incomplete emergency and overhaul???
     - What to do on incomplete emergency/overhaul event????
 - Edit maintenance logic (leave as it is - ok, but dangerous. adds events, not replaces) (add overhaulCounter )

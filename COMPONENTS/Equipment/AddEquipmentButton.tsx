@@ -28,7 +28,7 @@ export default function AddEquipmentButton() {
                     </Button>
                 )}
                 DialogForm={(props) => (
-                    <AddEquipmentForm {...props} />
+                    <AddEquipmentForm {...props} user={user} />
                 )} 
             />
         )}
