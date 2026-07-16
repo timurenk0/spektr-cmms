@@ -46,7 +46,6 @@ export default function AddEquipmentForm(
     const [equipmentImage, setEquipmentImage] = useState("");
     const [localEquipmentImage, setLocalEquipmentImage] = useState("");
     const [eqLocation, setEqLocation] = useState("");
-    const [DOF, setDOF] = useState(new Date());
     const [requirements, setRequirements] = useState("");
 
     const { data: tenants, isLoading: isLoadingTenants } = useQuery<TTenant[]>({
@@ -55,7 +54,7 @@ export default function AddEquipmentForm(
 
     // Fetch equipment for Equipment Update Form
     const { data: equipment, isLoading: isLoadingEquipment } = useQuery<TEquipment>({
-        queryKey: [`equipment-update`],
+        queryKey: ["equipment-update", equipmentId],
         queryFn: async () => {
             const res = await fetch(`/api/equipments/${equipmentId}`);
             if (!res.ok) {
@@ -64,7 +63,6 @@ export default function AddEquipmentForm(
 
             const data = await res.json();
 
-            setDOF(data.dateOfManufacturing);
 
             return data;
         },
@@ -191,7 +189,7 @@ export default function AddEquipmentForm(
             return data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["equipment-update"] })
+            queryClient.invalidateQueries({ queryKey: ["equipment-update", equipmentId] })
             queryClient.invalidateQueries({ queryKey: ["equipment-list"] });
             queryClient.invalidateQueries({ queryKey: ["/api/equipments?concise=true"] });
             toast.success(`Equipment ${equipmentId ? "updated" : "added"} successfully`, {
@@ -389,12 +387,11 @@ export default function AddEquipmentForm(
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DatePicker
                             label="Date of Manufacturing"
-                            defaultValue={DOF}
-                            minDate={new Date(new Date(DOF).getTime() - (1000 * 86400 * 365 * 30))}
+                            value={field.value ? new Date(field.value) : new Date()}
+                            minDate={new Date(new Date().getTime() - (1000 * 86400 * 365 * 30))}
                             maxDate={new Date()}
                             format="dd/MM/yyyy"
                             onChange={(e: PickerValue) => {
-                                setDOF(e!);
                                 field.onChange(e?.toISOString().slice(0, 10));
                             }}
                         />
@@ -408,8 +405,8 @@ export default function AddEquipmentForm(
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DatePicker
                             label="Put In Service Date"
-                            defaultValue={new Date()}
-                            minDate={DOF}
+                            value={field.value ? new Date(field.value) : new Date()}
+                            minDate={new Date(form.getValues("dateOfManufacturing"))}
                             maxDate={new Date()}
                             format="dd/MM/yyyy"
                             onChange={(e: PickerValue) => field.onChange(e?.toISOString().slice(0, 10))}

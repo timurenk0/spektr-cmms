@@ -660,9 +660,11 @@ export class DatabaseStorage {
     
     /* =================================================== Activity Methods =================================================== */
     async getActivities(tenantId: number, limit: number = 12, equipmentId?: number): Promise<Activity[]> {
+        const tenantWhere = tenantId === 1 ? undefined : eq(activities.tenantId, tenantId);
+        
         return equipmentId ?
-            await db.select().from(activities).where(and(eq(activities.tenantId, tenantId), eq(activities.equipmentId, equipmentId))).orderBy(desc(activities.createdAt)).limit(limit) : 
-            await db.select().from(activities).where(eq(activities.tenantId, tenantId)).orderBy(desc(activities.createdAt)).limit(limit);
+            await db.select().from(activities).where(and(tenantWhere, eq(activities.equipmentId, equipmentId))).orderBy(desc(activities.createdAt)).limit(limit) : 
+            await db.select().from(activities).where(tenantWhere).orderBy(desc(activities.createdAt)).limit(limit);
     }
     
     async addActivity(insertActivity: InsertActivity): Promise<Activity> {

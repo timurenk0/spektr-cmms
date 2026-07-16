@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
             code: ERROR_CODES.VALIDATION_ERROR,
             field: "role",
             message: "Impossible to create admin user.",
-            suggestion: "Contact IT administrator if you wish to have admin priviledges.",
+            suggestion: "Contact IT administrator if you wish to elevate your account permissions.",
             status: 400
         });
         // if (await storage.getUserByUsername(validatedUser.username)) return res.json({ error: "This username is taken! Pick another one" }, { status: 409 });

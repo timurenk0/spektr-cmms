@@ -188,18 +188,18 @@ const Settings = () => {
     }
     
     const addTenant = (name: string) => {
-        const normalizedTenant = name.trim().toLowerCase();
-        if (!normalizedTenant) return;
+        const trimmedTenant = name.trim();
+        if (!trimmedTenant) return;
         
-        if (availableTenants.includes(normalizedTenant)) {
+        if (availableTenants.includes(trimmedTenant)) {
             toast.error("This owner company already exists!", {
                 duration: 2000,
                 position: "bottom-right",
                 icon: "❕"
             });
         } else {
-            setAvailableTenants((prev) => [...prev, normalizedTenant]);
-            form.setValue("tenant", normalizedTenant);
+            setAvailableTenants((prev) => [...prev, trimmedTenant]);
+            form.setValue("tenant", trimmedTenant);
             toast.success("Owner company name added successfully", {
                 duration: 2000,
                 position: "bottom-right",
@@ -229,7 +229,7 @@ const Settings = () => {
                         <div>
                             <p>First name: {user.firstName}</p>
                             <p>Last name: {user.lastName}</p>
-                            <p>Position: Web Developer</p>
+                            <p>Company: {user.tenantName}</p>
                         </div>
                     </div>
                 </TabPanel>

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import AddEquipmentForm from "./AddEquipmentForm";
 import SlideDialog from "../ui/SlideDialog";
 import DeleteEquipmentForm from "./DeleteEquipmentForm";
-import { TEquipment } from "../utils/types";
+import { TEquipment, TUser } from "../utils/types";
 import { HealthBadge } from "../ui/badges/HealthBadge";
 import { StatusBadge } from "../ui/badges/StatusBadge";
 import { format } from "date-fns";
@@ -59,7 +59,7 @@ const getHealthBadge = (healthIndex: number | null) => {
     }
 }
 
-const EquipmentListEl = ({ equipment, userRole }: { equipment: TEquipment, userRole: string }) => {
+const EquipmentListEl = ({ equipment, user }: { equipment: TEquipment, user: TUser }) => {
     const router = useRouter();
 
   return (
@@ -94,7 +94,7 @@ const EquipmentListEl = ({ equipment, userRole }: { equipment: TEquipment, userR
             <TableCell style={{ fontSize: "12px" }}>{equipment.lastEvent ? format(equipment.lastEvent, "MMM d, yyyy") : "N/A"}</TableCell>
             <TableCell style={{ fontSize: "12px" }}>{equipment.nextEvent ? format(equipment.nextEvent, "MMM d, yyyy") : "N/A"}</TableCell>
             <TableCell style={{ fontSize: "12px" }}>{equipment.healthIndex ? getHealthBadge(equipment.healthIndex) : <div className="bg-gray-200 text-gray-600 rounded-full px-2 py-1 text-bold">-</div>}</TableCell>
-            {userRole === "admin" && (
+            {user.role === "admin" && (
                 <TableCell onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-2">
                     {/* Dialog window for equipment record editing */}
@@ -104,7 +104,7 @@ const EquipmentListEl = ({ equipment, userRole }: { equipment: TEquipment, userR
                             <button {...props}><Edit size={20} className="text-blue-400 hover:text-blue-800 cursor-pointer" /></button>
                         )}
                         DialogForm={(props) => (
-                            <AddEquipmentForm {...props} equipmentId={equipment.id} />
+                            <AddEquipmentForm {...props} key={equipment.id} equipmentId={equipment.id} user={user} />
                         )}
                     />
                     {/* Dialog window for equipment record deletion */}

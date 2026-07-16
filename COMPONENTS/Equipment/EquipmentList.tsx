@@ -190,7 +190,7 @@ const EquipmentList = () => {
             </TableHead>
             <TableBody>
               {rows.length > 0 ? rows.map((equipment, idx) => (
-                <EquipmentListEl key={idx} equipment={equipment} userRole={user.role} />
+                <EquipmentListEl key={idx} equipment={equipment} user={user} />
               )): (
                 <TableRow>
                   <TableCell colSpan={7}>
