@@ -58,7 +58,7 @@ const EquipmentPhotos = ({ equipmentId, userRole }: { equipmentId: number, userR
                 )}
             />
         )}
-        <div className="grid grid-cols-2 md:grid-cols-10 mt-4">
+        <div className="grid grid-cols-2 md:grid-cols-10 mt-4 gap-2">
             {photos.length > 0 ? photos.map(photo => (
                 <div key={photo.id} className="relative group max-w-[120px]">
                     <Image src={photo.imageUrl} width={120} height={120} alt="Equipment photo" />

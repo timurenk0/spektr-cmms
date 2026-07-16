@@ -29,7 +29,7 @@ const DOCUMENT_CATEGORIES: Record<string, string> = {
 const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, userRole: string }) => {
     const queryClient = useQueryClient();
     
-    const [activeTab, setActiveTab] = useState("all");
+    const [activeTab, setActiveTab] = useState("other");
 
     const handleTabChange = (event: React.SyntheticEvent, val: string) => {
         setActiveTab(val);

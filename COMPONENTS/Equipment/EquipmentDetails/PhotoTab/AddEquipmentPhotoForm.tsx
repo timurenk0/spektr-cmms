@@ -98,7 +98,7 @@ const AddEquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, 
                                 if (!file) throw new Error("No file selected");
 
                                 if (file.size > 1024*1024*5) {
-                                    toast.error("Image size should not exceed 10MB!");
+                                    toast.error("Image size should not exceed 5MB!");
                                     return;
                                 }
                                 

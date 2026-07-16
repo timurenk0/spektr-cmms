@@ -9,7 +9,6 @@ export default async function uploadAndAddDocument(
     let fileUrl: string | null = null;
 
     try {
-        if (!file) throw new Error("No file");
         if (file.size > 1024 * 1024 * 10) throw new Error("File too big");
         
        fileUrl = await Gstorage.uploadDocument(file); 

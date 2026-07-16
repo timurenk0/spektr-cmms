@@ -9,6 +9,8 @@ export default async function uploadAndAddPhoto(
     let imageUrl: string | null = null;
 
     try {
+        if (file.size > 1024 * 1024 * 5) throw new Error("File too big");
+        
         imageUrl = await Gstorage.uploadPhoto(file);
 
         const photo = insertPhotoSchema.parse({...photoData, imageUrl});

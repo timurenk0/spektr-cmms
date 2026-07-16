@@ -488,10 +488,14 @@ export default function AddEquipmentForm(
                     />
                 )}
             />
-            {localEquipmentImage && (
+            {(equipment || localEquipmentImage) && (
                 <div className="mt-2">
                     <p className="text-sm">Image preview:</p>
-                    <Image src={localEquipmentImage} width={32} height={32} alt="equipment_image_preview" className="w-auto h-auto max-w-64 max-h-64 rounded-md mt-1" />
+                    {localEquipmentImage ? (
+                        <Image src={localEquipmentImage} width={32} height={32} alt="equipment_image_preview" className="w-auto h-auto max-w-64 max-h-64 rounded-md mt-1" />
+                    ) : equipment ? (
+                        <Image src={equipment.equipmentImage} width={256} height={256} alt="equipment_image_preview" className="max-w-64 max-h-64 rounded-md mt-1" />
+                    ) : ""}
                 </div>
             )}
             <TextField
