@@ -14,7 +14,7 @@ import z from 'zod'
 
 
 const formSchema = z.object({
-    file: z.file().max(10_000_000).mime(["image/png", "image/jpeg"]),
+    file: z.file().max(5_000_000).mime(["image/png", "image/jpeg"]),
 });
 type PhotoFormValues = z.infer<typeof formSchema>;
 
@@ -97,7 +97,7 @@ const AddEquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, 
                                 const file = e.target.files?.[0];
                                 if (!file) throw new Error("No file selected");
 
-                                if (file.size > 1024*1024*10) {
+                                if (file.size > 1024*1024*5) {
                                     toast.error("Image size should not exceed 10MB!");
                                     return;
                                 }

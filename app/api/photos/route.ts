@@ -28,6 +28,8 @@ export async function POST(req: NextRequest) {
         const type = req.nextUrl.searchParams.get("type");
         const body = await req.formData();
 
+        console.log(body);
+
         const { equipmentId, file } = Object.fromEntries(body.entries()) as {
             equipmentId?: string,
             file: File,
