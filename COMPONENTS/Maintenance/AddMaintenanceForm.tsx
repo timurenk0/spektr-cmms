@@ -187,7 +187,12 @@ const AddMaintenanceForm = ({
                 >
                   {/* <MenuItem disabled>Select Equipment</MenuItem> */}
                 {availableEquipment.map((eq) => (
-                  <MenuItem key={eq.id} value={eq.id}>{eq.name}</MenuItem>
+                  <MenuItem key={eq.id} value={eq.id}>
+                    <div>
+                      <p className="text-md">{eq.name}</p>
+                      <p className="text-xs text-gray-600">{eq.assetId}</p>
+                    </div>
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
