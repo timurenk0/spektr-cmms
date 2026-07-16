@@ -22,6 +22,7 @@ export const EquipmentCategories = [
             "Transformers",
             "Generators",
             "Switchgear",
+            "Compressors",
             "Circuit Breakers",
             "UPS Systems",
             "Power Panels / Distribution Boards",
