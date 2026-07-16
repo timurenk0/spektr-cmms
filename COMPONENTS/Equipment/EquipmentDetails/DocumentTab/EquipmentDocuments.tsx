@@ -15,7 +15,7 @@ import { TDocument } from '@/COMPONENTS/utils/types'
 
 
 const DOCUMENT_CATEGORIES: Record<string, string> = {
-    "all": "All documents",
+    "other": "All documents",
     "manual": "Manuals",
     "maintenance": "Maintenance Reports",
     "certificate": "Certificates",
@@ -55,7 +55,7 @@ const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, us
 
     if (isLoading) return (
         <Skeleton>
-            <TabPanel value="all">
+            <TabPanel value="other">
                 <EquipmentDocumentsEl documents={[]} userRole={userRole} />
             </TabPanel>
             <TabPanel value="manual">
@@ -106,7 +106,7 @@ const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, us
             </TabList>
             {Object.entries(DOCUMENT_CATEGORIES).map(([val, lab]) => (
                 <TabPanel value={val} key={lab}>
-                    <EquipmentDocumentsEl documents={val === "all" ? documents : documents.filter(doc => doc.category===val)} userRole={userRole}></EquipmentDocumentsEl>
+                    <EquipmentDocumentsEl documents={val === "other" ? documents : documents.filter(doc => doc.category===val)} userRole={userRole}></EquipmentDocumentsEl>
                 </TabPanel>
             ))}
         </TabContext>
