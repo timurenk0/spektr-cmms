@@ -34,51 +34,131 @@ const EquipmentDocumentsForm = ({ equipmentId, documentCategories, onClose }: { 
     });
 
     
+    // const uploadMutation = useMutation({
+    //     mutationFn: async (values: DocumentFormValues) => {
+    //         const formData = new FormData();
+
+    //         if (values.file && values.file.size > 1024*1024*10) throw new Error("File size should not exceed 10MB!")
+            
+    //         formData.append("file", values.file);
+    //         formData.append("rawEquipmentId", equipmentId.toString());
+    //         formData.append("title", values.title);
+    //         formData.append("category", values.category);
+    //         formData.append("notes", values.notes ?? "");
+            
+    //         const response = await fetch("/api/documents", {
+    //             method: "POST",
+    //             body: formData,
+    //         });
+
+    //         const data = await response.json();
+
+    //         if (!response.ok) {
+    //             const message = data.error || `Request failed: ${response.status} ${response.statusText}`;
+    //             throw new Error(message);
+    //         }
+
+    //         return data;
+    //     },
+    //     onSuccess: () => {
+    //         queryClient.invalidateQueries({ queryKey: ["documents", equipmentId] })
+    //         toast.success("Document uploaded successfully", {
+    //             duration: 2000,
+    //             position: "bottom-right",
+    //             icon: "✅"
+    //         });
+    //         form.reset();
+    //         onClose();
+    //     },
+    //     onError: (error: unknown) => {
+    //         const msg = error instanceof Error ? error.message : "Unknown error";
+    //         toast.error(`Failed to upload document: ${msg}`, {
+    //             duration: 2000,
+    //             position: "bottom-right",
+    //             icon: "❌"
+    //         });
+    //     }
+    // });
+
     const uploadMutation = useMutation({
         mutationFn: async (values: DocumentFormValues) => {
-            const formData = new FormData();
+            const file = values.file;
 
-            if (values.file && values.file.size > 1024*1024*10) throw new Error("File size should not exceed 10MB!")
-            
-            formData.append("file", values.file);
-            formData.append("rawEquipmentId", equipmentId.toString());
-            formData.append("title", values.title);
-            formData.append("category", values.category);
-            formData.append("notes", values.notes ?? "");
-            
-            const response = await fetch("/api/documents", {
+            if (!file) throw new Error("No file selected");
+
+            if (file.size > 10_000_000) throw new Error("File size should nbot exceed 10MB!");
+
+            const urlRes = await fetch("/api/documents/upload-url", {
                 method: "POST",
-                body: formData,
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    filename: file.name,
+                    contentType: file.type
+                })
             });
 
-            const data = await response.json();
+            const urlData = await urlRes.json();
+            if (!urlRes.ok) throw new Error(urlData.error || "Failed to generate upload URL");
 
-            if (!response.ok) {
-                const message = data.error || `Request failed: ${response.status} ${response.statusText}`;
-                throw new Error(message);
+            console.log({
+                browserType: file.type,
+                signedUrl: urlData.uploadUrl 
+            });
+            
+            const gcsRes = await fetch(urlData.uploadUrl, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": file.type
+                },
+                body: file,
+            })
+            if (!gcsRes.ok) {
+                console.error("GCS Upload error", await gcsRes.text());
+                throw new Error("Failed to upload file to GCS");
             }
 
-            return data;
+            
+            const uploadRes = await fetch("/api/documents", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    equipmentId,
+                    title: values.title,
+                    category: values.category,
+                    notes: values.notes ?? "",
+                    fileUrl: urlData.fileUrl
+                })
+            });
+            const uploadData = await uploadRes.json();
+            if (!uploadRes.ok) throw new Error(uploadData.error || "Failed to upload document");
+        
+            return uploadData;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["documents", equipmentId] })
-            toast.success("Document uploaded successfully", {
+            queryClient.invalidateQueries({ queryKey: ["documents", equipmentId] });
+            toast.success("Document uplaoded successfully", {
                 duration: 2000,
                 position: "bottom-right",
                 icon: "✅"
             });
+
             form.reset();
             onClose();
         },
-        onError: (error: unknown) => {
-            const msg = error instanceof Error ? error.message : "Unknown error";
+        onError: (err: unknown) => {
+            const msg = err instanceof Error ? err.message : "Unknown error";
+
             toast.error(`Failed to upload document: ${msg}`, {
                 duration: 2000,
                 position: "bottom-right",
                 icon: "❌"
-            });
+            })
         }
-    });
+    })
 
     const onSubmit = (values: DocumentFormValues) => {
         uploadMutation.mutate(values);
@@ -124,6 +204,7 @@ const EquipmentDocumentsForm = ({ equipmentId, documentCategories, onClose }: { 
                                 if (file.size > 1024*1024*10) {
                                     toast.error("File should not exceed 10MB!");
                                     e.target.value = ""
+                                    return;
                                 }
                                 
                                 field.onChange(file);

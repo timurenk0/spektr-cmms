@@ -59,6 +59,37 @@ class GStorage {
         return returnURL;
     }
 
+    async generateDocumentUploadUrl(
+        filename: string,
+        contentType: string
+    ): Promise<{ uploadUrl: string; fileUrl: string }> {
+
+        const now = new Date();
+
+        const date = `${now.getFullYear()}-${String(
+            now.getMonth() + 1
+        ).padStart(2, "0")}`;
+
+        // Avoid collisions if two files have the same name
+        const filePath = `docs/${date}/${crypto.randomUUID()}-${filename}`;
+
+        const gcsFile = bucket.file(filePath);
+
+
+        const [uploadUrl] = await gcsFile.getSignedUrl({
+            version: "v4",
+            action: "write",
+            expires: Date.now() + 15 * 60 * 1000,
+            contentType
+        });
+
+
+        return {
+            uploadUrl,
+            fileUrl: `${publicURL}/${filePath}`
+        };
+    }
+
     /**
      * Delets the specified document/photo by public URL stored in the database
      * @param url Public URL of a document/photo stored in the database

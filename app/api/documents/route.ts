@@ -25,21 +25,19 @@ export async function POST(req: NextRequest) {
     try {
         const user = await validateUser("admin");
 
-        const body = await req.formData();
+        const body = await req.json();
 
-        const { file, rawEquipmentId, title, category, notes } = Object.fromEntries(body.entries()) as {
-            file: File,
-            rawEquipmentId: string,
-            title: string,
-            category: string,
-            notes?: string
-        }
+        const {
+            equipmentId,
+            title,
+            category,
+            notes,
+            fileUrl
+        } = body;
 
-        console.log(rawEquipmentId);
-        
-        const equipmentId = Number(rawEquipmentId);
+
         console.log(equipmentId);
-        if (!Number.isInteger(equipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
+        
         
         if (!title) return res.json({ error: "No document title passed" }, { status: 400 });
         
@@ -54,7 +52,7 @@ export async function POST(req: NextRequest) {
             notes,
         };
         
-        const newDocument = await uploadAndAddDocument(file, documentData);
+        const newDocument = await uploadAndAddDocument(fileUrl, documentData);
 
         await activityLogger(user, "add", `Document uploaded for equipment ${newDocument.equipmentId}`, newDocument.equipmentId);
         
@@ -63,3 +61,46 @@ export async function POST(req: NextRequest) {
         return buildError(error);
     }
 }
+
+//  async function POST(req: NextRequest) {
+//     try {
+//         const user = await validateUser("admin");
+
+//         const body = await req.formData();
+
+//         const { file, rawEquipmentId, title, category, notes } = Object.fromEntries(body.entries()) as {
+//             file: File,
+//             rawEquipmentId: string,
+//             title: string,
+//             category: string,
+//             notes?: string
+//         }
+
+//         console.log(rawEquipmentId);
+        
+//         const equipmentId = Number(rawEquipmentId);
+//         console.log(equipmentId);
+//         if (!Number.isInteger(equipmentId)) return res.json({ error: "Equipment ID is not a number" }, { status: 400 });
+        
+//         if (!title) return res.json({ error: "No document title passed" }, { status: 400 });
+        
+        
+//         if (!category) return res.json({ error: "No document category passed" }, { status: 400 });
+        
+        
+//         const documentData = {
+//             equipmentId,
+//             title,
+//             category,
+//             notes,
+//         };
+        
+//         const newDocument = await uploadAndAddDocument(file, documentData);
+
+//         await activityLogger(user, "add", `Document uploaded for equipment ${newDocument.equipmentId}`, newDocument.equipmentId);
+        
+//         return res.json(newDocument, { status: 201 });
+//     } catch (error: unknown) {
+//         return buildError(error);
+//     }
+// }
