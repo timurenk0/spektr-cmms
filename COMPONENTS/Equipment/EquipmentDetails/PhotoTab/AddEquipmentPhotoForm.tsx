@@ -32,24 +32,54 @@ const AddEquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, 
   
     const mutation = useMutation({
         mutationFn: async (values: PhotoFormValues) => {
-            const formData = new FormData();
+            const file = values.file;
 
-            formData.append("equipmentId", String(equipmentId));
-            formData.append("file", values.file);
+            if (!file) throw new Error("No file selected");
 
-            const response = await fetch("/api/photos", {
+            if (file.size > 5_000_000) throw new Error("File should not exceed 5MB!");
+
+            const urlRes = await fetch("/api/photos/upload-url", {
                 method: "POST",
-                body: formData
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    filename: file.name,
+                    contentType: file.type
+                })
             });
 
-            const data = await response.json();
-            
-            if (!response.ok) {
-                const message = data.error || `Request failed: ${response.status} ${response.statusText}`;
-                throw new Error(message);
+            const urlData = await urlRes.json();
+            if (!urlRes.ok) throw new Error(urlData.error || "Failed to generate upload URL");
+
+
+            const gcsRes = await fetch(urlData.uploadUrl, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": file.type
+                },
+                body: file
+            });
+            if (!gcsRes.ok) {
+                console.error("GCS upload error:", await gcsRes.text());
+                throw new Error("Failed to upload file to GCS");
             }
 
-            return data;
+            const uploadRes = await fetch("/api/photos", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    equipmentId,
+                    fileUrl: urlData.fileUrl
+                })
+            });
+
+            const uploadData = await uploadRes.json();
+            if (!uploadRes.ok) throw new Error(uploadData.error || "Failed to upload document");
+
+            return uploadData;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["photos", equipmentId] });

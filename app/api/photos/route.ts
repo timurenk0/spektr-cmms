@@ -21,28 +21,13 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-    let imageUrl: string | null = null;
     try {
         const user = await validateUser("admin");
 
-        const type = req.nextUrl.searchParams.get("type");
-        const body = await req.formData();
 
-        console.log(body);
-
-        const { equipmentId, file } = Object.fromEntries(body.entries()) as {
-            equipmentId?: string,
-            file: File,
-        }
-
-        if (!file) return res.json({ error: "No file found" }, { status: 400 });
-        if (file.size > 1024*1024*5) return res.json({ error: "File too big" }, { status: 400 });
-
-        if (type === "thumb") {
-            imageUrl = await Gstorage.uploadThumbPhoto(file);
-            return res.json({ equipmentImage: imageUrl }, { status: 201 });
-        }
-
+        const body = await req.json();
+        
+        const { equipmentId, fileUrl } = body;
 
         if (!equipmentId) return res.json({ error: "No equipment ID found" }, { status: 400 });
         const parsedEquipmentId = Number(equipmentId);
@@ -56,10 +41,7 @@ export async function POST(req: NextRequest) {
             status: 404
         });
         
-        const documentData = {
-            equipmentId: parsedEquipmentId,
-        }
-        const newPhoto = await uploadAndAddPhoto(file, documentData)
+        const newPhoto = await uploadAndAddPhoto(equipmentId, fileUrl)
 
         activityLogger(user, "add", `Photo for equipment ${newPhoto?.equipmentId} added`, newPhoto?.equipmentId);
 

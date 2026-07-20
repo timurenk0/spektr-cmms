@@ -22,7 +22,7 @@ import { PickerValue } from "@mui/x-date-pickers/internals";
 
 const formSchema = insertEquipmentSchema.extend({
     projectId: z.string().optional(),
-    image: z.file().max(10_000_000).mime(["image/jpeg", "image/png"]).optional(),
+    image: z.file().max(5_000_000).mime(["image/jpeg", "image/png"]).optional(),
 });
 type EquipmentFormValues = z.infer<typeof formSchema>;
 
@@ -70,33 +70,89 @@ export default function AddEquipmentForm(
     });
 
     
+    // const uploadImage = async (file: File | undefined) => {
+    //     try {
+    //         if (!file) throw new Error("No file selected");
+
+    //         const formData = new FormData();
+    //         formData.append("file", file);
+            
+    //         const response = await fetch("/api/photos/thumb", {
+    //             method: "POST",
+    //             body: formData 
+    //         });
+
+    //         const data = await response.json();
+    //         if (!response.ok) {
+    //             const message = data.error || `Request failed: ${response.status} ${response.statusText}`;
+    //             throw new Error(message);
+    //         };
+
+    //         setEquipmentImage(data.equipmentImage);
+    //         return data.equipmentImage;            
+    //     } catch (error) {
+    //         const msg = error instanceof Error ? error.message : "Unknown error";
+    //         toast.error(`Failed to upload image: ${msg}`);
+    //         return;
+    //     }
+    // };
+
     const uploadImage = async (file: File | undefined) => {
         try {
-            if (!file) throw new Error("No file selected");
+            if (!file) throw new Error("No file selected");     
 
-            const formData = new FormData();
-            formData.append("file", file);
-            
-            const response = await fetch("/api/photos?type=thumb", {
+            const signedRes = await fetch("/api/photos/upload-url", {
                 method: "POST",
-                body: formData 
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    filename: file.name,
+                    contentType: file.type
+                })
             });
 
-            const data = await response.json();
-            if (!response.ok) {
-                const message = data.error || `Request failed: ${response.status} ${response.statusText}`;
-                throw new Error(message);
-            };
+            const signedData = await signedRes.json();
+            if (!signedRes.ok) throw new Error(signedData.error || "Failed generating upload URL");
 
-            setEquipmentImage(data.equipmentImage);
-            return data.equipmentImage;            
+            console.log(signedData);
+
+            const gcsRes = await fetch(signedData.uploadUrl, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": file.type
+                },
+                body: file
+            });
+
+            if (!gcsRes.ok) throw new Error("Failed uploading image");
+
+
+            const thumbRes = await fetch("/api/photos/thumb", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    imageUrl: signedData.fileUrl
+                })
+            });
+
+            console.log(thumbRes.ok);
+
+            
+            const thumbData = await thumbRes.json();
+            if (!thumbRes.ok) throw new Error(thumbData.error || "Failed generating thumbnail");
+
+            console.log(thumbData);
+
+            setEquipmentImage(thumbData);
+
+            return thumbData;
         } catch (error) {
-            const msg = error instanceof Error ? error.message : "Unknown error";
-            toast.error(`Failed to upload image: ${msg}`);
-            return;
+            throw error;
         }
-    };
-
+    }
 
     const form = useForm<EquipmentFormValues>({
         resolver: zodResolver(formSchema),
@@ -157,11 +213,14 @@ export default function AddEquipmentForm(
     const mutation = useMutation({
         mutationFn: async (values: EquipmentFormValues) => {
             
+            console.log(values);
+            
             if (values.image && values.image.size > 1024*1024*5) {
                 throw new Error("Image size should exceeds 5MB! Choose another image");
             }
             
-            const imageUrl = localEquipmentImage ? await uploadImage(values.image) : equipment?.equipmentImage;
+            // const imageUrl = localEquipmentImage ? await uploadImage(values.image) : equipment?.equipmentImage;
+            const imageUrl = values.image ? await uploadImage(values.image) : equipment?.equipmentImage;
             if (!imageUrl) throw new Error("Failed to upload image");
             
             const url = `/api/equipments${equipmentId ? `/${equipmentId}` : ""}`;
@@ -198,6 +257,8 @@ export default function AddEquipmentForm(
                 icon: "✅"
             });
             form.reset();
+            setLocalEquipmentImage("");
+            setEquipmentImage("");
             onClose();
         },
         onError: (error) => {

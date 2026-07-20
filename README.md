@@ -1,7 +1,6 @@
 # PRIORITY
-- DATE OF MANUFACTURING EDIT EQUIPMENT ASAP!!!!!
+- EQUIPIMENT THUMBNAIL UPLOAD HANDLING WITH NEW GCP STORAGE LOGIC + UPLOAD FILE, NOT FILENAME AND CONTENTTYPE USE GPT
 - REMOVE .toSpliced() in EventManager and think of normal logic
-- Serial Number input non-mandatory
 - Working Hours edit 2+ hours moves the maintenance schedule
 - Reduce health index after incomplete emergency and overhaul???
     - What to do on incomplete emergency/overhaul event????

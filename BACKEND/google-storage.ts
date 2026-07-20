@@ -90,6 +90,37 @@ class GStorage {
         };
     }
 
+    async generatePhotoUploadUrl(
+        filename: string,
+        contentType: string
+    ): Promise<{ uploadUrl: string; fileUrl: string }> {
+
+        const now = new Date();
+
+        const date = `${now.getFullYear()}-${String(
+            now.getMonth() + 1
+        ).padStart(2, "0")}`;
+
+        // Avoid collisions if two files have the same name
+        const filePath = `imgs/${date}/${crypto.randomUUID()}-${filename}`;
+
+        const gcsFile = bucket.file(filePath);
+
+
+        const [uploadUrl] = await gcsFile.getSignedUrl({
+            version: "v4",
+            action: "write",
+            expires: Date.now() + 15 * 60 * 1000,
+            contentType
+        });
+
+
+        return {
+            uploadUrl,
+            fileUrl: `${publicURL}/${filePath}`
+        };
+    }
+
     /**
      * Delets the specified document/photo by public URL stored in the database
      * @param url Public URL of a document/photo stored in the database
@@ -112,32 +143,80 @@ class GStorage {
      * @param img image file to upload to the Google Storage
      * @returns public URL to the stored resized image
      */
-    async uploadThumbPhoto(img: File): Promise<string> {
-        const buffer = Buffer.from(await img.arrayBuffer());
+    // async uploadThumbPhoto(imageUrl: string): Promise<string> {
+    //     const filePath = imageUrl.replace(`${publicURL}/`, "");
+    //     const splittedFilePath = filePath.split("/");
+    //     const originalFilename = splittedFilePath[splittedFilePath.length-1];
+    //     console.log(splittedFilePath);
+    //     console.log(originalFilename);
 
-        // Generate image folder name using current date
+    //     const [buffer] = await bucket.file(filePath).download();
+
+    //     const thumbBuffer = await sharp(buffer)
+    //             .rotate()
+    //             .resize({
+    //                 width: 200,
+    //                 withoutEnlargement: true
+    //             })
+    //             .webp({
+    //                 quality: 70
+    //             })
+    //             .toBuffer()
+    
+    //     const now = new Date();
+
+    //     const date = `${now.getFullYear()}-${now.getMonth().toString().padStart(2, "0")}`;
+
+    //     const filename = `thumbs/${date}/${crypto.randomUUID()}-${originalFilename}`;
+
+    //     await bucket.file(filename).save(thumbBuffer, {
+    //         contentType: "image/webp",
+    //         resumable: false
+    //     });
+
+    //     return `${publicURL}/${filename}`
+    // }
+    
+    async generateThumbnail(imageUrl: string): Promise<string> {
+        try {
+
+    
+        const originalPath = imageUrl.replace(`${publicURL}/`, "");
+
+        const [buffer] = await bucket.file(originalPath).download();
+
+        const thumbBuffer = await sharp(buffer)
+                .rotate()
+                .resize({
+                    width: 200
+                })
+                .webp({
+                    quality: 70
+                })
+                .toBuffer()
+
+
+        const filename = originalPath.split("/").pop();
+        console.log(filename);
         const now = new Date();
-        const date = `${now.getFullYear()}-${now.getMonth().toString().padStart(2, "0")}`;
-        const filePath = `thumbs/${date}/${img.name}`;
 
-        const gcsFile = bucket.file(filePath);
+        const date = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, "0")}`;
 
-        const optimized = await sharp(buffer)
-            .rotate()
-            .resize({
-                width: 200,
-                withoutEnlargement: true
-            })
-            .webp({ quality: 70 })
-            .toBuffer();
+        const thumbPath = `thumbs/${date}/${crypto.randomUUID()}-${filename}.webp`;
 
-        await gcsFile.save(optimized, {
-            contentType: img.type,
-            resumable: false
-        });
-        
-        const returnURL = publicURL+`/${filePath}`;
-        return returnURL;
+        await bucket.file(thumbPath).save(
+            thumbBuffer,
+            {
+                resumable: false,
+                contentType: "image/webp"
+            }
+        );
+
+        return `${publicURL}/${thumbPath}`;
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
     }
     
     /**
