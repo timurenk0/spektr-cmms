@@ -24,7 +24,6 @@ export const EquipmentCategories = [
             "Switchgear",
             "Compressors",
             "Circuit Breakers",
-            "Hot Wash Units",
             "UPS Systems",
             "Power Panels / Distribution Boards",
             "Electrical Motors",
@@ -99,6 +98,7 @@ export const EquipmentCategories = [
         icon: <Trash2 className="min-h-4 min-w-4" />,
         types: [
             "Industrial Vacuums",
+            "Hot Wash Units",
             "Scrubbers / Sweepers",
             "Waste Compactors",
             "Incinerators",
