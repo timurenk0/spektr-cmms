@@ -24,6 +24,7 @@ export const EquipmentCategories = [
             "Switchgear",
             "Compressors",
             "Circuit Breakers",
+            "Hot Wash Units",
             "UPS Systems",
             "Power Panels / Distribution Boards",
             "Electrical Motors",
