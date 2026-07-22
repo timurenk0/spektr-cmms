@@ -1,4 +1,5 @@
 # PRIORITY
+- Category & Type are now indexes not names. Either join tables or store extra in the db for equipment
 - EQUIPIMENT THUMBNAIL UPLOAD HANDLING WITH NEW GCP STORAGE LOGIC + UPLOAD FILE, NOT FILENAME AND CONTENTTYPE USE GPT
 - REMOVE .toSpliced() in EventManager and think of normal logic
 - Working Hours edit 2+ hours moves the maintenance schedule
@@ -11,6 +12,8 @@
 
 
 # ISSUES
+- Equipment Category and Type on delete cascade maybe want to assign N/A or smth
+
 - Change JWT_SECRET to something more serious
 - Probably wanna change equipment overhaul counter update to raw sql query (avoid race condition or whatever)
 - When moving events serviceEndDate not checked (meh who cares anyways it's their problem)

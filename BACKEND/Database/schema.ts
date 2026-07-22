@@ -88,8 +88,10 @@ export const equipments = pgTable(
     model: varchar("model", { length: 255 }).notNull(),
     assetId: varchar("asset_id", { length: 255 }).notNull(),
     serialNumber: varchar("serial_number", { length: 255 }).notNull(),
-    type: varchar("type", { length: 255 }).notNull(),
-    category: varchar("category", { length: 255 }).notNull(),
+    // category: varchar("category", { length: 255 }).notNull(),
+    // type: varchar("type", { length: 255 }).notNull(),
+    categoryId: integer("category_id").notNull().references(() => equipmentCategories.id, { onDelete: "cascade" }).default(1),
+    typeId: integer("type_id").notNull().references(() => equipmentTypes.id, { onDelete: "cascade" }).default(1),
     status: varchar("status", { length: 255 }).notNull().default("operational"),
     dateOfManufacturing: date("date_of_manufacturing").notNull(),
     inServiceDate: date("in_service_date").notNull(),
@@ -124,6 +126,27 @@ export const equipments = pgTable(
 export const insertEquipmentSchema = createInsertSchema(equipments).omit({
     id: true,
     uploadedAt: true
+});
+
+// Equipment categories table schema
+export const equipmentCategories = pgTable("equipment_categories", {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 63 }).notNull(),
+});
+
+export const insertEquipmentCategoriesSchema = createInsertSchema(equipmentCategories).omit({
+    id: true
+});
+
+// Equipment types (equipment categories derivative) table schema
+export const equipmentTypes = pgTable("equipment_types", {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 63 }).notNull(),
+    categoryId: integer("category_id").notNull().references(() => equipmentCategories.id, { onDelete: "cascade" })
+});
+
+export const insertEquipmentTypesSchema = createInsertSchema(equipmentTypes).omit({
+    id: true
 });
 
 // Maintenance table schema
@@ -249,6 +272,12 @@ export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 
 export type Equipment = typeof equipments.$inferSelect;
 export type InsertEquipment = z.infer<typeof insertEquipmentSchema>;
+
+export type EquipmentCategory = typeof equipmentCategories.$inferSelect;
+export type InsertEquipmentCategory = z.infer<typeof insertEquipmentCategoriesSchema>;
+
+export type EquipmentType = typeof equipmentTypes.$inferSelect;
+export type InsertEquipmentType = z.infer<typeof insertEquipmentTypesSchema>;
 
 export type Maintenance = typeof maintenances.$inferSelect;
 export type InsertMaintenance = z.infer<typeof insertMaintenanceSchema>;

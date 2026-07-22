@@ -1,4 +1,4 @@
-import { Activity, Component, Document, Equipment, Maintenance, MaintenanceEvent, Photo, Tenant, User } from "@/BACKEND/Database/schema";
+import { Activity, Component, Document, Equipment, EquipmentCategory, EquipmentType, Maintenance, MaintenanceEvent, Photo, Tenant, User } from "@/BACKEND/Database/schema";
 
 export type CustomError = {
     code: string
@@ -14,6 +14,12 @@ export type TComponent = Component;
 export type TDocument = Document;
 
 export type TEquipment = (Equipment & { lastEvent: string | null, nextEvent: string | null })
+
+export type TEquipmentCategorie = EquipmentCategory;
+
+export type TEquipmentType = EquipmentType;
+
+export type TCategoryAndTypes = (EquipmentCategory & { types: EquipmentType[] })
 
 export type TMaintenance = Maintenance;
 

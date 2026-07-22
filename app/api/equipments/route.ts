@@ -71,6 +71,16 @@ export async function POST(req: NextRequest) {
         // Parse equipment data from request body with DB schema for validation.
         const body = await req.json();
         console.log(body);
+
+            if (body.newCategory) {
+                const newCategory = await storage.addEquipmentCategory(body.newCategory);
+                body.categoryId = newCategory.id
+            }
+            if (body.newType) {
+                const newType = await storage.addEquipmentType(body.newType, body.categoryId);
+                body.typeId = newType.id;
+            }
+
         const equipmentValidatedData = insertEquipmentSchema.parse(body);
 
         // Add validated equipment data to the DB.

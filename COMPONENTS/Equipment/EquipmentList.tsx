@@ -8,7 +8,7 @@ import { EquipmentCategories } from "../utils/equipmentCategories";
 import EquipmentListEl from "./EquipmentListEl";
 import ListSkeleton from "../SKELETONS/ListSkeleteon";
 import { useAuth } from "../utils/authContext";
-import { TEquipment } from "../utils/types";
+import { TCategoryAndTypes, TEquipment } from "../utils/types";
 import { Filter } from "lucide-react";
 
 const equipmentStatuses = ["operational", "under repair", "out of service"]
@@ -18,8 +18,8 @@ const EquipmentList = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [filters, setFilters] = useState({
     search: "",
-    type: "",
-    category: "",
+    type: undefined,
+    category: undefined,
     location: "all",
     status: "all",
   });
@@ -37,7 +37,7 @@ const EquipmentList = () => {
   const { user, isLoading: isLoadingUser } = useAuth();
 
 
-  const updateFilters = <K extends keyof typeof filters>(key: K, value: string) => {
+  const updateFilters = <K extends keyof typeof filters>(key: K, value: string | number) => {
     setPage(0);
     setFilters(prev => ({ ...prev, [key]: value }));
   };
@@ -47,8 +47,8 @@ const EquipmentList = () => {
     setSearchInput("");
     setFilters({
       search: "",
-      type: "",
-      category: "",
+      type: undefined,
+      category: undefined,
       location: "all",
       status: "all"
     });
@@ -79,11 +79,24 @@ const EquipmentList = () => {
     placeholderData: keepPreviousData,
   });
 
+  const { data: categories, isLoading: isLoadingCategories } = useQuery<TCategoryAndTypes[]>({
+    queryKey: ["equipment-categories-types"],
+    queryFn: async () => {
+      const res = await fetch("/api/equipments/categories", {
+        method: "GET",
+        credentials: "include"
+      });
+
+      const data = await res.json();
+      return data;
+    }
+  })
+
   const { data: equipmentLocations, isLoading: isLoadingEquipmentLocations } = useQuery<string[]>({
     queryKey: ["/api/locations"]
   })
 
-  const isLoading = (isLoadingEquipments || !equipments) || (isLoadingUser || !user) || (!equipmentLocations || isLoadingEquipmentLocations);
+  const isLoading = (isLoadingEquipments || !equipments) || (isLoadingUser || !user) || (!equipmentLocations || isLoadingEquipmentLocations) || (!categories || isLoadingCategories);
 
   if (isLoading) return (
     <ListSkeleton />
@@ -92,32 +105,33 @@ const EquipmentList = () => {
   const rows = equipments.equips ?? [];
 
 
+
   return (
     <>
-      {filters.category && (<h1 className="ps-1 pb-1">Equipment Category: <span className="font-semibold underline">{filters.category}</span></h1>)}
+      {filters.category && (<h1 className="ps-1 pb-1">Equipment Category: <span className="font-semibold underline">{categories.find(c => c.id === filters.category)!.name}</span></h1>)}
 
       <div className="">
         <div className="flex gap-2 my-2">
-          {EquipmentCategories.map((c, idx) => (
+          {categories.map(c => (
             !filters.category ? (
-              <Card key={idx} className="w-full flex items-center justify-center">
+              <Card key={c.id} className="w-full flex items-center justify-center">
                 <CardActionArea onClick={() => updateFilters("category", c.id)}>
                   <CardContent className="text-green-600 flex justify-center items-center text-center">
-                    {c.icon}
-                    <p className="ms-2 text-black">{c.id}</p>
+                    {/* {c.icon} */}
+                    <p className="ms-2 text-black">{c.name}</p>
                   </CardContent>
                 </CardActionArea>
               </Card>
             ) : (
-              c.id === filters.category && c.types.map((t, idx) => (
-                <Card key={idx} className="w-full">
+              c.id === filters.category && c.types.map(t => (
+                <Card key={t.id} className="w-full">
                   <CardActionArea
-                    onClick={() => updateFilters("type", t)}
+                    onClick={() => updateFilters("type", t.id)}
                     className="h-full"
-                    sx={{backgroundColor: `${t === filters.type && "rgb(0, 190, 0)"}`}}
+                    sx={{backgroundColor: `${t.id === filters.type && "rgb(0, 190, 0)"}`}}
                   >
-                    <CardContent className={`text-green-600 ${t === filters.type && "text-white"}`}>
-                      <p className="text-black text-sm text-center">{t}</p>
+                    <CardContent>
+                      <p className="text-black text-sm text-center">{t.name}</p>
                     </CardContent>
                   </CardActionArea>
                 </Card>

@@ -8,21 +8,27 @@ import { insertEquipmentSchema } from "@/BACKEND/Database/schema"
 
 import toast from "react-hot-toast";
 import Image from "next/image"
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { Button, FormControl, FormControlLabel, FormLabel, InputAdornment, InputLabel, MenuItem, Radio, RadioGroup, Select, Skeleton, TextField } from "@mui/material";
+import { Button, FormControl, FormControlLabel, FormLabel, Input, InputAdornment, InputLabel, MenuItem, Radio, RadioGroup, Select, Skeleton, TextField } from "@mui/material";
 import { EquipmentCategories } from "../utils/equipmentCategories";
-import { CustomError, TEquipment, TTenant, TUser } from "../utils/types";
-import { ImageIcon } from "lucide-react";
+import { CustomError, TCategoryAndTypes, TEquipment, TEquipmentType, TTenant, TUser } from "../utils/types";
+import { ImageIcon, Save, SendHorizonal } from "lucide-react";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { PickerValue } from "@mui/x-date-pickers/internals";
+import SlideDialog from "../ui/SlideDialog";
+import AddMaintenanceForm from "../Maintenance/AddMaintenanceForm";
 
 
 const formSchema = insertEquipmentSchema.extend({
     projectId: z.string().optional(),
+    categoryId: z.number().nullable(),
+    typeId: z.number().nullable(),
     image: z.file().max(5_000_000).mime(["image/jpeg", "image/png"]).optional(),
+    newCategory: z.string().nullable(),
+    newType: z.string().nullable()
 });
 type EquipmentFormValues = z.infer<typeof formSchema>;
 
@@ -46,6 +52,11 @@ export default function AddEquipmentForm(
     const [equipmentImage, setEquipmentImage] = useState("");
     const [localEquipmentImage, setLocalEquipmentImage] = useState("");
     const [eqLocation, setEqLocation] = useState("");
+    const [equipmentTypes, setEquipmentTypes] = useState<TEquipmentType[]>()
+    const [newCategoryFormShown, setNewCategoryFormShown] = useState(false);
+    const [newTypeFormShown, setNewTypeFormShown] = useState(false);
+    const [newCategory, setNewCategory] = useState<string | null>(null);
+    const [newType, setNewType] = useState<string | null>(null);
     const [requirements, setRequirements] = useState("");
 
     const { data: tenants, isLoading: isLoadingTenants } = useQuery<TTenant[]>({
@@ -68,6 +79,20 @@ export default function AddEquipmentForm(
         },
         enabled: !!equipmentId
     });
+
+    const { data: categories, isLoading: isLoadingCategories } = useQuery<TCategoryAndTypes[]>({
+        queryKey: ["equipment-categories-types"],
+        queryFn: async () => {
+            const res = await fetch("/api/equipments/categories", {
+                method: "GET",
+                credentials: "include"
+            });
+
+            const data = await res.json();
+            
+            return data;
+        }
+    })
 
     
     // const uploadImage = async (file: File | undefined) => {
@@ -163,14 +188,14 @@ export default function AddEquipmentForm(
             assetId: "",
             serialNumber: "",
             model: "",
-            type: "",
-            category: "",
             dateOfManufacturing: format(new Date(), "yyyy-MM-dd"),
             inServiceDate: format(new Date(), "yyyy-MM-dd"),
             location: "",
             projectId: "",
             requirements: "",
             department: "",
+            newCategory: null,
+            newType: null,
             usefulLifeSpan: 180,
             totalWorkingHours: null,
             equipmentImage: "",
@@ -179,7 +204,7 @@ export default function AddEquipmentForm(
     });
 
     // Watch category field for type dependancy
-    const watchCategory = form.watch("category");
+    // const watchCategory = form.watch("categoryId");
 
     // Populate form if equipment ID is passed (edit mode).
     useEffect(() => {
@@ -199,16 +224,16 @@ export default function AddEquipmentForm(
     }, [equipment, form]);
 
     // Change type when category is selected
-    useEffect(() => {
-        if (watchCategory) {
-        const currentCategory = form.getValues("category");
-        const validTypes = EquipmentCategories.find(c => c.id === watchCategory)?.types || [];
+    // useEffect(() => {
+    //     if (watchCategory) {
+    //     const currentCategory = form.getValues("categoryId");
+    //     const validTypes = EquipmentCategories.find(c => c.id === watchCategory)?.types || [];
 
-        if (!validTypes.includes(currentCategory)) {
-            form.setValue("type", validTypes[0]);
-        }
-        }
-    }, [watchCategory, form]);
+    //     if (!validTypes.includes(currentCategory)) {
+    //         form.setValue("type", validTypes[0]);
+    //     }
+    //     }
+    // }, [watchCategory, form]);
 
     const mutation = useMutation({
         mutationFn: async (values: EquipmentFormValues) => {
@@ -250,6 +275,7 @@ export default function AddEquipmentForm(
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["equipment-update", equipmentId] })
             queryClient.invalidateQueries({ queryKey: ["equipment-list"] });
+            queryClient.invalidateQueries({ queryKey: ["equipment-categories-types"] });
             queryClient.invalidateQueries({ queryKey: ["/api/equipments?concise=true"] });
             toast.success(`Equipment ${equipmentId ? "updated" : "added"} successfully`, {
                 duration: 2000,
@@ -280,27 +306,33 @@ export default function AddEquipmentForm(
     const onSubmit = async (values: EquipmentFormValues) => {
 
         
+        console.log("Submitting...")
         // const imageUrl = values.equipmentImage || await uploadImage(values.image);
         // if (!imageUrl) return;
         const data = {
                 ...values,
                 location: (values.location === "Project" && form.getValues("projectId")) ? values.location + " " + form.getValues("projectId") : values.location,
                 // equipmentImage: imageUrl || values.equipmentImage,
-                status: "operational"
+                status: "operational",
+
+                newCategory: newCategory?.trim() || null,
+                newType: newType?.trim() || null 
             };
+        
+        console.log(data);
         mutation.mutate(data);
     }
 
 
-    const isLoading = (isLoadingEquipment) || (!tenants || isLoadingTenants);
+    const isLoading = (isLoadingEquipment) || (!tenants || isLoadingTenants) || (!categories || isLoadingCategories);
     if (isLoading) return (
         <>
             Loading data<span className="dots"></span>
         </>
     )
 
-    console.log(user)
     
+    console.log(categories);
   return (
     <form
         onSubmit={form.handleSubmit(onSubmit, (error) => console.error(error))}
@@ -410,34 +442,80 @@ export default function AddEquipmentForm(
                 )}
             />
             <Controller
-                name="category"
+                name="categoryId"
                 control={form.control}
                 defaultValue=""
                 render={({ field }) => (
                     <FormControl fullWidth>
-                        <InputLabel id="select-category" color="info" required sx={{ margin: "8px 0" }}>Select Category</InputLabel>
-                        <Select labelId="select-category" label="Select Category" {...field} color="info" required sx={{ margin: "8px 0" }}>
-                            {EquipmentCategories.map(c => (
-                                <MenuItem key={c.id} value={c.id}>{c.id}</MenuItem>
+                        <InputLabel id="select-category" required color="info" sx={{ margin: "8px 0" }}>Select Category</InputLabel>
+                        <Select disabled={newCategoryFormShown} labelId="select-category" label="Select Category" color="info" required={!newCategory} sx={{ margin: "8px 0" }} onChange={(e) => {
+                            
+                            const categoryId = Number(e.target.value);
+                            if (isNaN(categoryId)) {
+                                console.error("Category ID must be a number. How the fuck did you even do that?");
+                                return;
+                            }
+                            
+                            setEquipmentTypes(categories.find(c => c.id === categoryId)?.types ?? []);
+                            form.setValue("categoryId", categoryId);
+                        }}>
+                            {categories.map(c => (
+                                <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
                             ))}
                         </Select>
+
+                        {/* Custom equipment category input field */}
+                        <button className={`text-green-600 hover:text-green-800 cursor-pointer ${newCategoryFormShown && "text-red-600 hover:text-red-800"} text-sm`} onClick={() => {
+                            setNewCategoryFormShown(v => !v);
+
+                            if (!setNewCategoryFormShown) {
+                                setNewCategory(null);
+                            } else {
+                                setNewCategory("");
+                                form.setValue("categoryId", null);
+                                form.setValue("typeId", null);
+                            }
+                        }}>
+                            {newCategoryFormShown ? "Discard" : "+ Add new category"}
+                        </button>
+                        <TextField
+                            hidden={!newCategoryFormShown}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCategory(e.target.value)}
+                        />
                     </FormControl>
                 )}
             />
             <Controller
-                name="type"
+                name="typeId"
                 control={form.control}
                 defaultValue=""
-                disabled={!watchCategory}
+                // disabled={}
                 render={({ field }) => (
                     <FormControl fullWidth>
-                        <InputLabel id="select-type" color="info" required sx={{ margin: "8px 0" }} disabled={!watchCategory}>Select Type</InputLabel>
-                        <Select labelId="select-type" label="Select Type" {...field} color="info" required sx={{ margin: "8px 0" }}>
-                            {watchCategory && EquipmentCategories.find(c => c.id === watchCategory)
-                                ?.types.map(t => (
-                                    <MenuItem key={t} value={t} defaultValue={t}>{t}</MenuItem>
-                                ))}
+                        <InputLabel id="select-type" color="info" required sx={{ margin: "8px 0" }}>Select Type</InputLabel>
+                        <Select labelId="select-type" label="Select Type" {...field} color="info" disabled={!form.watch("categoryId")} required={!newType} sx={{ margin: "8px 0" }}>
+                            {(equipmentTypes && equipmentTypes.length > 0) && equipmentTypes.map(t => (
+                                <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
+                            ))}
                         </Select>
+
+                        {/* Custom equipment type input field */}
+                        <button className={`text-green-600 hover:text-green-800 cursor-pointer ${newTypeFormShown && "text-red-600 hover:text-red-800"} text-sm`} onClick={() => {
+                            setNewTypeFormShown(v => !v);
+
+                            if (!setNewTypeFormShown) {
+                                setNewType(null);
+                            } else {
+                                setNewType("");
+                                form.setValue("typeId", null);
+                            }
+                        }}>
+                            {newTypeFormShown ? "Discard" : "+ Add new type"}
+                        </button>
+                        <TextField
+                            hidden={!newTypeFormShown}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewType(e.target.value)}
+                        />
                     </FormControl>
                 )}
             />

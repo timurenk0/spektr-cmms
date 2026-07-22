@@ -4,6 +4,8 @@ import {
     documents, type Document, type InsertDocument,
     equipments, type Equipment, type InsertEquipment,
     maintenances, type Maintenance, type InsertMaintenance,
+    equipmentCategories, type EquipmentCategory, type InsertEquipmentCategory,
+    equipmentTypes, type EquipmentType, type InsertEquipmentType,
     maintenanceEvents, type MaintenanceEvent, type InsertMaintenanceEvent,
     photos, type Photo, type InsertPhoto,
     tenants, type Tenant, type InsertTenant,
@@ -149,8 +151,8 @@ export class DatabaseStorage {
         }
         if (location) filters.push(eq(equipments.location, location));
         if (status) filters.push(eq(equipments.status, status));
-        if (type) filters.push(eq(equipments.type, type));
-        if (category) filters.push(eq(equipments.category, category));
+        if (type) filters.push(eq(equipments.typeId, type));
+        if (category) filters.push(eq(equipments.categoryId, category));
         if (search) {
             filters.push(
                 or(
@@ -281,6 +283,32 @@ export class DatabaseStorage {
         return (await db.selectDistinct({ location: equipments.location }).from(equipments)).map(loc=>loc.location);
     }
 
+    async getEquipmentCategoriesAndTypes(): Promise<any[]> {
+        const query = sql`
+            SELECT
+                c.id,
+                c.name,
+                COALESCE(
+                    json_agg(
+                        json_build_object(
+                            'id', t.id,
+                            'name', t.name
+                        )
+                    ) FILTER (WHERE t.id IS NOT NULL),
+                    '[]'::json
+                    ORDER BY t.id
+                ) AS types
+            FROM equipment_categories c
+            LEFT JOIN equipment_types t
+                ON t.category_id = c.id
+            GROUP BY c.id, c.name
+            ORDER BY c.id;
+        `;
+
+        const res = await db.execute(query);
+        return res.rows;
+    }
+
     async getEquipmentStatusCount(tenantId: number): Promise<{ operational: number, underRepair: number, outOfService: number } | undefined> {
         const operationalCount = await db.select({ count: count() }).from(equipments).where(and(eq(equipments.tenantId, tenantId), eq(equipments.status, "operational")));
         const underRepairCount = await db.select({ count: count() }).from(equipments).where(and(eq(equipments.tenantId, tenantId), eq(equipments.status, "under repair")));
@@ -291,6 +319,14 @@ export class DatabaseStorage {
     
     async addEquipment(insertEquipment: InsertEquipment): Promise<Equipment> {
         return (await db.insert(equipments).values(insertEquipment).returning())[0];
+    }
+
+    async addEquipmentCategory(category: string): Promise<EquipmentCategory> {
+        return (await db.insert(equipmentCategories).values({ name: category}).returning())[0];
+    }
+
+    async addEquipmentType(type: string, categoryId: number): Promise<EquipmentType> {
+        return (await db.insert(equipmentTypes).values({ name: type, categoryId }).returning())[0];
     }
     
     async updateEquipment(id: number, updateData: Partial<InsertEquipment>): Promise<Equipment | undefined> {
