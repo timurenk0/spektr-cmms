@@ -143,7 +143,7 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
 
     /* ================================================ Equipment Methods ===================================================== */
-    async getEquipments(tenant: number, concise?:string, limit?: number, page?: number, location?: string, status?: string, type?: string, category?: string, search?: string): Promise<{equips: (Partial<Equipment>)[], totalCount: number}> {
+    async getEquipments(tenant: number, concise?:string, limit?: number, page?: number, location?: string, status?: string, typeId?: number, categoryId?: number, search?: string): Promise<{equips: (Partial<Equipment>)[], totalCount: number}> {
         const filters = [];
 
         if (tenant !== 1) {
@@ -151,8 +151,8 @@ export class DatabaseStorage {
         }
         if (location) filters.push(eq(equipments.location, location));
         if (status) filters.push(eq(equipments.status, status));
-        if (type) filters.push(eq(equipments.typeId, type));
-        if (category) filters.push(eq(equipments.categoryId, category));
+        if (typeId) filters.push(eq(equipments.typeId, typeId));
+        if (categoryId) filters.push(eq(equipments.categoryId, categoryId));
         if (search) {
             filters.push(
                 or(
@@ -284,29 +284,34 @@ export class DatabaseStorage {
     }
 
     async getEquipmentCategoriesAndTypes(): Promise<any[]> {
-        const query = sql`
-            SELECT
-                c.id,
-                c.name,
-                COALESCE(
-                    json_agg(
-                        json_build_object(
-                            'id', t.id,
-                            'name', t.name
-                        )
-                    ) FILTER (WHERE t.id IS NOT NULL),
-                    '[]'::json
-                    ORDER BY t.id
-                ) AS types
-            FROM equipment_categories c
-            LEFT JOIN equipment_types t
-                ON t.category_id = c.id
-            GROUP BY c.id, c.name
-            ORDER BY c.id;
-        `;
-
-        const res = await db.execute(query);
-        return res.rows;
+        try {
+            const query = sql`
+                SELECT
+                    c.id,
+                    c.name,
+                    COALESCE(
+                        json_agg(
+                            json_build_object(
+                                'id', t.id,
+                                'name', t.name
+                            )
+                            ORDER BY t.id 
+                        ) FILTER (WHERE t.id IS NOT NULL),
+                        '[]'::json
+                    ) AS types
+                FROM equipment_categories c
+                LEFT JOIN equipment_types t
+                    ON t.category_id = c.id
+                GROUP BY c.id, c.name
+                ORDER BY c.id;
+            `;
+    
+            const res = await db.execute(query);
+            return res.rows;
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
     }
 
     async getEquipmentStatusCount(tenantId: number): Promise<{ operational: number, underRepair: number, outOfService: number } | undefined> {

@@ -31,11 +31,18 @@ export async function GET(
 
         const concise = sp.get("concise") === "true";
 
+        const typeId = sp.get("type") ? Number(sp.get("type")) : undefined;
+        const categoryId = sp.get("category") ? Number(sp.get("category")) : undefined;
+
+        if ((typeId && isNaN(typeId)) || (categoryId && isNaN(categoryId))) {
+            throw new Error("Type and category IDs must be integers");
+        }
+        
         const filters = {
             location: sp.get("location") || undefined,
             status: sp.get("status") || undefined,
-            type: sp.get("type") || undefined,
-            category: sp.get("category") || undefined,
+            type: typeId,
+            category: categoryId,
             search: sp.get("search") || undefined,
         }
         

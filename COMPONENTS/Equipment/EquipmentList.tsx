@@ -104,6 +104,8 @@ const EquipmentList = () => {
 
   const rows = equipments.equips ?? [];
 
+  console.log(equipments);
+
 
 
   return (
