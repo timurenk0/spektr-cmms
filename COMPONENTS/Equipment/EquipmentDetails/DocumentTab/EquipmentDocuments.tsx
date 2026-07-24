@@ -3,7 +3,7 @@
 
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Button, Skeleton, Tab } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import EquipmentDocumentsEl from './EquipmentDocumentsEl'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Upload } from 'lucide-react'
@@ -30,9 +30,24 @@ const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, us
     const queryClient = useQueryClient();
     
     const [activeTab, setActiveTab] = useState("other");
+    const listRef = useRef<HTMLDivElement>(null);
 
     const handleTabChange = (event: React.SyntheticEvent, val: string) => {
         setActiveTab(val);
+
+        requestAnimationFrame(() => {
+            const selected = listRef.current?.querySelector(
+                '[role="tab"][aria-selected="true"]'
+            ) as HTMLElement | null;
+
+            if (!selected) return;
+
+            selected.scrollIntoView({
+                behavior: "smooth",
+                inline: "center",
+                block: "nearest",
+            });
+        });
     }
 
 
@@ -99,7 +114,7 @@ const EquipmentDocuments = ({ equipmentId, userRole }: { equipmentId: number, us
                     </SlideDialog>
                 )}
             </div>
-            <TabList scrollButtons={false} onChange={handleTabChange} variant='scrollable'>
+            <TabList ref={listRef} scrollButtons={false} onChange={handleTabChange} variant='scrollable'>
                 {Object.entries(DOCUMENT_CATEGORIES).map(([val, lab]) => (
                     <Tab label={lab} value={val} key={lab} />
                 ))} 

@@ -1,11 +1,12 @@
 "use client"
 
 import * as React from 'react';
-import Dialog from '@mui/material/Dialog';
+import Dialog, { DialogProps } from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
+import { X } from 'lucide-react';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -23,7 +24,9 @@ export default function SlideDialog({ title, Btn, DialogForm }: { title: string,
     setOpen(true);
   };
 
-  const handleClose = () => {
+  const handleClose: DialogProps["onClose"] = (_, reason) => {
+    if (reason === "backdropClick") return;
+    
     setOpen(false);
   };
 
@@ -41,7 +44,12 @@ export default function SlideDialog({ title, Btn, DialogForm }: { title: string,
         fullWidth
         maxWidth="md"
       >
-        <DialogTitle>{title}</DialogTitle>
+        <DialogTitle>
+          <div className='flex justify-between'>
+            {title}
+            <button onClick={() => setOpen(false)} className='cursor-pointer rounded-lg hover:bg-gray-300'><X /></button>
+          </div>
+        </DialogTitle>
         <DialogContent>
           <DialogForm onClose={handleClose} />
         </DialogContent>
