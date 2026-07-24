@@ -15,7 +15,7 @@ const EquipmentComponents = ({
 }) => {
 
     const { data: components = [], isLoading: isLoadingComponents } = useQuery<TComponent[]>({
-        queryKey: [`equipment-components`],
+        queryKey: [`equipment-components`, equipmentId],
         queryFn: async () => {
             const res = await fetch(`/api/components?equipmentId=${equipmentId}`, {
                 credentials: "include"

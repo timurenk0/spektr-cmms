@@ -62,7 +62,7 @@ const AddEquipmentComponentForm = ({
             }
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["equipment-components"] });
+            queryClient.invalidateQueries({ queryKey: ["equipment-components", equipmentId] });
             toast.success("Components added", {
                 duration: 2000,
                 position: "bottom-right",
