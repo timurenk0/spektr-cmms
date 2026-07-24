@@ -673,7 +673,11 @@ export class DatabaseStorage {
     /* ======================================================================================================================== */
     
     /* ================================================== Components Methods ================================================== */
-    async getComponents(id: number): Promise<Component[]> {
+    async getComponents(): Promise<Component[]> {
+        return await db.select().from(components);
+    }
+
+    async getComponentsForEquipment(id: number): Promise<Component[]> {
         return await db.select().from(components).where(eq(components.equipmentId, id));
     }
 

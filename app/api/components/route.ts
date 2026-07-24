@@ -17,7 +17,11 @@ export async function GET(
             status: 400
         });
         
-        const components = await storage.getComponents(equipmentId);
+        let components = [];
+
+        if (!equipmentId) components = await storage.getComponents();
+        
+        components = await storage.getComponentsForEquipment(equipmentId);
 
         return res.json(components, { status: 200 });
     } catch (error) {
