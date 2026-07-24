@@ -1,5 +1,5 @@
 # PRIORITY
-- EQUIPIMENT THUMBNAIL UPLOAD HANDLING WITH NEW GCP STORAGE LOGIC + UPLOAD FILE, NOT FILENAME AND CONTENTTYPE USE GPT
+- Emergency and overhaul events only COMPLETE option and delete future maintenance events allow admins to reevaluate equipment health index on complete
 - REMOVE .toSpliced() in EventManager and think of normal logic
 - Working Hours edit 2+ hours moves the maintenance schedule
 - Reduce health index after incomplete emergency and overhaul???
