@@ -468,7 +468,7 @@ const AddMaintenanceForm = ({
                       required
                       {...field}
                       onChange={(e) => field.onChange(Number(e.target.value))}
-                      helperText="Interval between maintenance tasks in months"
+                      helperText="Interval between inspection tasks in months"
                     />
                   )}
                 />
@@ -487,7 +487,7 @@ const AddMaintenanceForm = ({
                       required
                       {...field}
                       onChange={(e) => field.onChange(Number(e.target.value))}
-                      helperText="Expected maintenance duration in days"
+                      helperText="Expected inspection duration in days"
                     />
                   )}
                 />
@@ -521,7 +521,7 @@ const AddMaintenanceForm = ({
                       required
                       {...field}
                       onChange={(e) => field.onChange(Number(e.target.value))}
-                      helperText="Interval between maintenance tasks in months"
+                      helperText="Interval between inspection tasks in months"
                     />
                   )}
                 />
@@ -540,7 +540,7 @@ const AddMaintenanceForm = ({
                       required
                       {...field}
                       onChange={(e) => field.onChange(Number(e.target.value))}
-                      helperText="Expected maintenance duration in days"
+                      helperText="Expected inspection duration in days"
                     />
                   )}
                 />
