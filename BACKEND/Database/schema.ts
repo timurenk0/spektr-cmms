@@ -103,6 +103,8 @@ export const equipments = pgTable(
     nextHealthIndexUpdate: date("next_health_index_update"),
     hasOverhaul: boolean("has_overhaul").notNull().default(false),
     overhaulCounter: smallint("overhaul_counter").notNull().default(0),
+    hasEmergency: boolean("has_emergency").notNull().default(false),
+    emergencyCounter: smallint("emergency_counter").notNull().default(0),
     notes: varchar("notes", { length: 511 }),
     uploadedAt: timestamp("uploaded_at").notNull().defaultNow()
   },

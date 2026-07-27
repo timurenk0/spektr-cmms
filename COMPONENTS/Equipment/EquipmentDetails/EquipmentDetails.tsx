@@ -20,6 +20,7 @@ import { differenceInMonths, format } from "date-fns";
 import toast from "react-hot-toast";
 import SlideDialog from "@/COMPONENTS/ui/SlideDialog";
 import OverhaulForm from "./OverhaulForm";
+import EmeregencyForm from "./EmeregencyForm";
 
 
 function calculateAge(manufDate: Date): number[] {
@@ -192,7 +193,12 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
             <div className="flex items-center">
               <div className="mr-6 relative">
                 <Image src={equipment.equipmentImage} width={200} height={200} className="max-w-[200px] max-h-[200px] rounded-md object-cover border" alt="Equipment image" />
-                {user.role === "admin" && equipment.hasOverhaul && <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-red-600/50 p-2 text-xs text-white font-bold">ONGOING OVERHAUL</h1>}
+                {
+                equipment.hasOverhaul ?
+                  <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-red-600/50 p-2 text-xs text-white font-bold">ONGOING OVERHAUL</h1>
+                : equipment.hasEmergency ? <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-amber-600/50 p-2 text-xs text-white font-bold">ONGOING EMERGENCY</h1>
+                : ""
+                }
               </div>
               <div>
                 <div className="flex items-center gap-x-2">
@@ -237,12 +243,6 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                             </li>
                             <li
                             className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => updateStatus.mutate("under repair")}
-                            >
-                              Under Repair
-                            </li>
-                            <li
-                            className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                             onClick={() => updateStatus.mutate("out of service")}
                             >
                               Out of Service
@@ -261,11 +261,23 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                 </Button>
               </Link>
               
+              {!equipment.hasEmergency && (
+                <SlideDialog
+                  title="Emergency"
+                  Btn={( props ) => (
+                    <Button size="small" color="warning" {...props}>{equipment.hasEmergency ? "Finish" : "Start"} Emergency</Button>
+                  )}
+                  DialogForm={(props) => (
+                    <EmeregencyForm {...props} equipmentId={equipmentId} />
+                  )}
+                />
+              )}
+              
               {!equipment.hasOverhaul && (
                 <SlideDialog
                   title="Overhaul"
                   Btn={( props ) => (
-                    <Button color="error" {...props}>{equipment.hasOverhaul ? "Finish" : "Start"} Overhaul</Button>
+                    <Button size="small" color="error" {...props}>{equipment.hasOverhaul ? "Finish" : "Start"} Overhaul</Button>
                   )}
                   DialogForm={(props) => (
                     <OverhaulForm {...props} equipmentId={equipmentId} />

@@ -160,7 +160,10 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
               setEventStatus(e.target.value)
             }}>
               <FormControlLabel value="complete" control={<Radio/>} label="Complete" />
-              <FormControlLabel value="incomplete" control={<Radio/>} label="Incomplete" />
+              
+              { event._def.extendedProps.level !== "E" && event._def.extendedProps.level !== "O" && (
+                <FormControlLabel value="incomplete" control={<Radio/>} label="Incomplete" />
+              ) }
             </RadioGroup>
           </FormControl>
           { eventStatus === "complete" && (

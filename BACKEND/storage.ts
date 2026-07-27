@@ -460,7 +460,7 @@ export class DatabaseStorage {
             status: maintenanceEvents.status,
             reason: maintenanceEvents.reason,
             isOverdue: sql<boolean>`
-                CURRENT_DATE - ${maintenanceEvents.start} > 3 AND ${maintenanceEvents.status} != 'complete'
+                CURRENT_DATE - ${maintenanceEvents.start} > 3 AND ${maintenanceEvents.status} != 'complete' AND ${maintenanceEvents.level} != 'E' AND ${maintenanceEvents.level} != 'O'
             `,
             color: sql<string>`
                 CASE
@@ -956,30 +956,36 @@ export class DatabaseStorage {
         }
         
         try {
-        const result = await db.update(maintenanceEvents)
-            .set({
-                status: "incomplete"
-            })
-            .where(
-                and(
-                    gt(sql`CURRENT_DATE - ${maintenanceEvents.start}`, 3),
-                    eq(maintenanceEvents.status, "pending"),
-                )
-            );
-        
-        await db.update(systemState).set({ updatedAt: sql`CURRENT_DATE` }).where(eq(systemState.name, STATE_NAME));
-        
+            const result = await db.update(maintenanceEvents)
+                .set({
+                    status: "incomplete"
+                })
+                .where(
+                    and(
+                        gt(sql`CURRENT_DATE - ${maintenanceEvents.start}`, 3),
+                        eq(maintenanceEvents.status, "pending"),
+                        not(
+                            eq(maintenanceEvents.level, "E")
+                        ),
+                        not(
+                            eq(maintenanceEvents.level, "O")
+                        )
+                    )
+                );
+            
+            await db.update(systemState).set({ updatedAt: sql`CURRENT_DATE` }).where(eq(systemState.name, STATE_NAME));
+            
 
-        const updatedCount = Number(result.rowCount ??  0);
+            const updatedCount = Number(result.rowCount ??  0);
+            
+            
+            if (updatedCount > 0) {
+                console.log(`[STORAGE] Marked ${updatedCount} events as incomplete`);
+            } else {
+                console.log(`[STORAGE] Failed to update events status`)
+            }
         
-        
-        if (updatedCount > 0) {
-            console.log(`[STORAGE] Marked ${updatedCount} events as incomplete`);
-        } else {
-            console.log(`[STORAGE] Failed to update events status`)
-        }
-    
-        await this.updateState(STATE_NAME);
+            await this.updateState(STATE_NAME);
         } catch (err: unknown) {
             if (err instanceof Error) {
                 console.error(`[STORAGE] ${err.message}`);

@@ -144,3 +144,23 @@ export function createMaintenanceEvents(
     
     return events.toSpliced(0, 1);
 }
+
+export function createEmergencyMaintenanceEvent(equipment: Equipment, maintenance: Maintenance) {
+    const today = new Date().toISOString().slice(0, 10);
+    
+    const event: InsertMaintenanceEvent = {
+        equipmentId: equipment.id,
+        maintenanceId: maintenance.id,
+        tenantId: equipment.tenantId,
+        title: `${equipment.assetId} emergency repair`,
+        description: `Emergency repair for equipment ${equipment.name} ${equipment.manufacturer}`,
+        level: "E",
+        status: "pending",
+        scheduledAt: today,
+        start: today,
+        end: null,
+        performedAt: null
+    }
+
+    return event;
+}
