@@ -18,11 +18,11 @@ const OverhaulForm = ({
     const mutation = useMutation({
         mutationFn: async () => {
             try {
-                const res = await fetch(`/api/equipments/${equipmentId}`, {
+                const res = await fetch(`/api/equipments/${equipmentId}/update-status`, {
                     method: "PATCH",
                     body: JSON.stringify({
-                        hasOverhaul: true,
-                        finishDate
+                        status: "overhaul",
+                        endDate: finishDate
                     }),
                     credentials: "include"
                 });
@@ -31,7 +31,7 @@ const OverhaulForm = ({
                     throw new Error(`${data.error.message}. CODE: ${data.error.code}`)
                 }
 
-                return data;                
+                return data;
             } catch (error) {
                 throw error;
             }

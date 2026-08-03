@@ -1,6 +1,7 @@
-import { createEmergencyMaintenanceEvent } from "@/BACKEND/Middleware/EventManager";
+import { validateUser } from "@/BACKEND/Middleware/AuthService";
+import { createEmergencyMaintenanceEvent, createOverhaulMaintenanceEvent } from "@/BACKEND/Middleware/EventManager";
 import { storage } from "@/BACKEND/storage";
-import { buildCustomError, CustomApiError, ERROR_CODES } from "@/BACKEND/Utils/errorBuilder";
+import buildError, { buildCustomError, CustomApiError, ERROR_CODES } from "@/BACKEND/Utils/errorBuilder";
 import { NextRequest, NextResponse as res } from "next/server";
 
 
@@ -9,6 +10,8 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const user = await validateUser("admin");
+        
         const { id } = await params;
 
         const equipmentId = Number(id);
@@ -19,7 +22,8 @@ export async function PATCH(
             status: 400
         });
 
-        const { status } = await req.json();
+        const body = await req.json();
+        const { status } = body;
 
         const equipment = await storage.getEquipment(equipmentId);
         if (!equipment) throw new CustomApiError({
@@ -74,8 +78,8 @@ export async function PATCH(
                 
                 await storage.updateEquipment(equipmentId, { status: "under repair", hasEmergency: true, emergencyCounter: equipment.emergencyCounter+1 });
 
-                const event = createEmergencyMaintenanceEvent(equipment, maintenance);
-                await storage.addMaintenanceEvents([event]);
+                const emergencyEvent = createEmergencyMaintenanceEvent(equipment, maintenance);
+                await storage.addMaintenanceEvents([emergencyEvent]);
 
                 return res.json({ status: 201 });
             case "overhaul":
@@ -93,7 +97,25 @@ export async function PATCH(
                     suggestion: "Complete emergency maintenance event in the calendar first",
                     status: 400
                 });
-                break;
+
+                const { endDate } = body;
+                if (!endDate) throw new CustomApiError({
+                    code: ERROR_CODES.VALIDATION_ERROR,
+                    field: "endDate",
+                    message: "Overhaul event end date value missing",
+                    status: 400
+                });
+
+                await storage.updateEquipment(equipmentId, { status: "under repair", hasOverhaul: true, overhaulCounter: equipment.overhaulCounter+1 });
+
+                const event = createOverhaulMaintenanceEvent(equipment, maintenance, endDate);
+                await storage.addMaintenanceEvents([event]);
+                
+                return res.json({ status: 201 });
+            case "out of service":
+                await storage.updateEquipment(equipmentId, { status: "out of service" });
+
+                return res.json({ status: 201 });
             default:
                 throw new CustomApiError({
                     code: ERROR_CODES.VALIDATION_ERROR,
@@ -104,7 +126,8 @@ export async function PATCH(
                 });
         }
 
+        return res.json({ status: 200 });
     } catch (error) {
-        
+        return buildError(error);
     }
 }

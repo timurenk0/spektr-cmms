@@ -28,33 +28,78 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
   console.log(eventStatus);
   
 
-  const uploadDocument = async () => {
-    setDocumentUploading(true);
-    try {
-      if (!file) throw new Error("No file found");
+ 
+  const documentMutation = useMutation({
+    mutationFn: async () => {
+      if (!file) throw new Error("No file selected!");
 
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("rawEquipmentId", event._def.extendedProps.equipmentId);
-      formData.append("title", `Maintenance report ${completionDate}`);
-      formData.append("category", "maintenance");
-      formData.append("notes", event._def.extendedProps.description);
+      if (file.size > 10_000_000) throw new Error("File size should not esxeed 10MB!");
 
-      const res = await fetch("/api/documents", {
+      const urlRes = await fetch("/api/documents/upload-url", {
         method: "POST",
-        body: formData,
-        credentials: "include"
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          filename: file.name,
+          contentType: file.type
+        })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(`Failed to upload event certificate: ${data.error}`);
 
-      return data;
-    } catch (error) {
-      throw error;
-    } finally {
-      setDocumentUploading(false);
-    } 
-  }
+      const urlData = await urlRes.json();
+      if (!urlRes) throw new Error(urlData.error || "Failed to generate upload URL");
+
+      const gcsRes = await fetch(urlData.uploadUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type
+        },
+        body: file
+      });
+
+      if (!gcsRes.ok) {
+        console.error(await gcsRes.text());
+        throw new Error("Failed to upload file to GCS");
+      }
+
+      const uploadRes = await fetch("/api/documents", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          equipmentId: event.extendedProps.equipmentId,
+          title: `${event.title} maintenance report`,
+          category: "maintenance",
+          fileUrl: urlData.fileUrl
+        })
+      });
+
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error(uploadData.error || "Failed to upload document");
+      
+      return uploadData;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["documents", event.extendedProps.equipmentId] });
+      toast.success("Document uploaded successfully", {
+        duration: 2000,
+        position: "bottom-right",
+        icon: "✅"
+      });
+
+      onClose();
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+    
+      toast.error(msg, {
+        duration: 2000,
+        position: "bottom-right",
+        icon: "❌"
+      });
+    }
+  });
   
   const mutation = useMutation({
     mutationFn: async (status: string) => {
@@ -118,12 +163,9 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
         return;
       }
 
-      const doc = await uploadDocument();
-      if (!doc) {
-        toast.dismiss();
-        toast.error("Failed to upload document. Please try again.");
-        return;
-      }      
+
+      await documentMutation.mutate();
+    
     } else if (eventStatus === "incomplete") {
       if (reason.trim().length < 3) {
         toast.dismiss()

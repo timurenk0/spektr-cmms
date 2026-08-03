@@ -106,69 +106,32 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
           throw new Error("Same status update rejected");
         }
         
-        const res = await fetch(`/api/equipments/${equipmentId}`, {
+        const res = await fetch(`/api/equipments/${equipmentId}/update-status`, {
           method: "PATCH",
-          body: JSON.stringify({
-          status
-        }),
-        credentials: "include"
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(`${data.error.message}. CODE: ${data.error.code}`);
-      }
-      
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard-gauges"] });
-      toast.success("Successfully updated equipment status");
-      return; 
-    },
-    onError: (err: unknown) => {
-      const msg = err instanceof Error ? err.message : "Unknown error";
-      toast.error(msg);
-      console.error(err);
-      return; 
-    }
-  });
-  
-  const overhaulMutation = useMutation({
-    mutationFn: async () => {
-      try {
-        const res = await fetch(`http://localhost:3000/api/equipments/${equipmentId}`, {
-          method: "PATCH",
-          body: JSON.stringify({
-            hasOverhaul: !equipment?.hasOverhaul
-          }),
+          body: JSON.stringify({ status }),
           credentials: "include"
         });
-
         const data = await res.json();
         if (!res.ok) {
           throw new Error(`${data.error.message}. CODE: ${data.error.code}`);
         }
-
+        
         return data;
-      } catch (error) {
-        throw error;
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
+        queryClient.invalidateQueries({ queryKey: ["dashboard-gauges"] });
+        toast.success("Successfully updated equipment status");
+        return; 
+      },
+      onError: (err: unknown) => {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        toast.error(msg);
+        console.error(err);
+        return; 
       }
-    },
-    onSuccess: (data) => {
-      console.log(data);
-      queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard-gauges"] });
-      queryClient.invalidateQueries({ queryKey: ["equipment-list"] })
-      toast.success(`Overhaul ${data ? "initialised" : "finished"} successfully`)
-    },
-    onError: (err: unknown) => {
-      const msg = err instanceof Error ? err.message : "Unknown error";
-      toast.error(msg);
-      console.error(err);
-      return;
-    }
   });
+  
   
   const isLoading = (!equipment || isLoadingEquipment) || (!user || isLoadingUser);
   if (isLoading) {
@@ -265,7 +228,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                 <SlideDialog
                   title="Emergency"
                   Btn={( props ) => (
-                    <Button size="small" color="warning" {...props}>{equipment.hasEmergency ? "Finish" : "Start"} Emergency</Button>
+                    <Button size="small" color="warning" disabled={equipment.hasOverhaul} {...props}>{equipment.hasEmergency ? "Finish" : "Start"} Emergency</Button>
                   )}
                   DialogForm={(props) => (
                     <EmeregencyForm {...props} equipmentId={equipmentId} />
@@ -277,7 +240,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                 <SlideDialog
                   title="Overhaul"
                   Btn={( props ) => (
-                    <Button size="small" color="error" {...props}>{equipment.hasOverhaul ? "Finish" : "Start"} Overhaul</Button>
+                    <Button size="small" color="error" disabled={equipment.hasEmergency} {...props}>{equipment.hasOverhaul ? "Finish" : "Start"} Overhaul</Button>
                   )}
                   DialogForm={(props) => (
                     <OverhaulForm {...props} equipmentId={equipmentId} />

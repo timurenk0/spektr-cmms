@@ -164,3 +164,23 @@ export function createEmergencyMaintenanceEvent(equipment: Equipment, maintenanc
 
     return event;
 }
+
+export function createOverhaulMaintenanceEvent(equipment: Equipment, maintenance: Maintenance, endDate: string) {
+    const today = new Date().toISOString().slice(0, 10);
+
+    const event: InsertMaintenanceEvent = {
+        equipmentId: equipment.id,
+        maintenanceId: maintenance.id,
+        tenantId: equipment.tenantId,
+        title: `${equipment.assetId} overhaul`,
+        description: `Overhaul repair event for equipment ${equipment.name} ${equipment.manufacturer}`,
+        level: "O",
+        status: "pending",
+        scheduledAt: today,
+        start: today,
+        end: endDate,
+        performedAt: null
+    }
+
+    return event;
+}
