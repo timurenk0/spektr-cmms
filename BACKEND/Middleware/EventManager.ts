@@ -96,8 +96,8 @@ export function createMaintenanceEvents(
         
         while (eventStart <= end) {
             const status = Math.floor(differenceInDays(new Date(), eventStart)) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
-            const sortedDates = Object.keys(eventMap)
-                .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+        const sortedDates = Object.keys(eventMap)
+            .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
             const closestDate = sortedDates.findLast(e => 
                 e <= eventStart.toISOString().slice(0, 10) && 

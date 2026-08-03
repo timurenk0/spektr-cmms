@@ -179,40 +179,38 @@ class GStorage {
     
     async generateThumbnail(imageUrl: string): Promise<string> {
         try {
+            const originalPath = imageUrl.replace(`${publicURL}/`, "");
 
-    
-        const originalPath = imageUrl.replace(`${publicURL}/`, "");
+            const [buffer] = await bucket.file(originalPath).download();
 
-        const [buffer] = await bucket.file(originalPath).download();
-
-        const thumbBuffer = await sharp(buffer)
-                .rotate()
-                .resize({
-                    width: 200
-                })
-                .webp({
-                    quality: 70
-                })
-                .toBuffer()
+            const thumbBuffer = await sharp(buffer)
+                    .rotate()
+                    .resize({
+                        width: 200
+                    })
+                    .webp({
+                        quality: 70
+                    })
+                    .toBuffer()
 
 
-        const filename = originalPath.split("/").pop();
-        console.log(filename);
-        const now = new Date();
+            const filename = originalPath.split("/").pop();
+            console.log(filename);
+            const now = new Date();
 
-        const date = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, "0")}`;
+            const date = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, "0")}`;
 
-        const thumbPath = `thumbs/${date}/${crypto.randomUUID()}-${filename}.webp`;
+            const thumbPath = `thumbs/${date}/${crypto.randomUUID()}-${filename}.webp`;
 
-        await bucket.file(thumbPath).save(
-            thumbBuffer,
-            {
-                resumable: false,
-                contentType: "image/webp"
-            }
-        );
+            await bucket.file(thumbPath).save(
+                thumbBuffer,
+                {
+                    resumable: false,
+                    contentType: "image/webp"
+                }
+            );
 
-        return `${publicURL}/${thumbPath}`;
+            return `${publicURL}/${thumbPath}`;
         } catch (error) {
             console.error(error);
             throw error;
