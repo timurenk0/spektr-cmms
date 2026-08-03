@@ -73,7 +73,7 @@ export function createMaintenanceEvents(
                     equipmentId: maintenance.equipmentId,
                     maintenanceId: maintenance.id,
                     tenantId: maintenance.tenantId,
-                    title: `${equipment.name} ${equipment.assetId}`,
+                    title: `${equipment.assetId} inspection task`,
                     description: k === "I2" ? maintenance.levelIDescription2 || "" : maintenance.levelIDescription1 || "",
                     start: eventStart.toISOString().slice(0, 10),
                     end: eventEnd.toISOString().slice(0, 10),
@@ -96,8 +96,8 @@ export function createMaintenanceEvents(
         
         while (eventStart <= end) {
             const status = Math.floor(differenceInDays(new Date(), eventStart)) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
-            const sortedDates = Object.keys(eventMap)
-                .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+        const sortedDates = Object.keys(eventMap)
+            .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
             const closestDate = sortedDates.findLast(e => 
                 e <= eventStart.toISOString().slice(0, 10) && 
