@@ -342,7 +342,7 @@ export class DatabaseStorage {
         return (await db.select().from(maintenances).where(eq(maintenances.id, id)))[0];
     }
     
-    async getMainteancesByEquipmentId(id: number): Promise<Maintenance | undefined> {
+    async getMaintenancesByEquipmentId(id: number): Promise<Maintenance | undefined> {
         return (await db.select().from(maintenances).where(eq(maintenances.equipmentId, id)))[0];
     }
     
@@ -511,17 +511,17 @@ export class DatabaseStorage {
         const upcomingEvents = (await db.select().from(maintenanceEvents).
                             where(
                                 and(
-                                    tenantWhere,
-                                    gte(maintenanceEvents.start, sql`CURRENT_DATE`)
+                                    gte(maintenanceEvents.start, sql`CURRENT_DATE`),
+                                    tenantWhere
                                 )
                             )).length;
 
         const overdueEvents = (await db.select().from(maintenanceEvents).
                             where(
                                 and(
-                                    tenantWhere,
                                     lt(maintenanceEvents.start, sql`CURRENT_DATE`),
-                                    // eq(maintenanceEvents.status, "pending")
+                                    eq(maintenanceEvents.status, "pending"),
+                                    tenantWhere
                                 )
                             )).length;
 
@@ -530,16 +530,16 @@ export class DatabaseStorage {
         const completeEvents = (await db.select().from(maintenanceEvents).
                             where(
                                 and(
-                                    tenantWhere,
-                                    eq(maintenanceEvents.status, "complete")
+                                    eq(maintenanceEvents.status, "complete"),
+                                    tenantWhere
                                 )
                             )).length;
 
         const incompleteEvents = (await db.select().from(maintenanceEvents).
                             where(
                                 and(
-                                    tenantWhere,
                                     eq(maintenanceEvents.status, "incomplete"),
+                                    tenantWhere
                                 )
                             )).length;
 

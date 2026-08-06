@@ -38,7 +38,7 @@ export async function PATCH(
             status: 400
         });
 
-        const maintenance = await storage.getMainteancesByEquipmentId(equipmentId);
+        const maintenance = await storage.getMaintenancesByEquipmentId(equipmentId);
         
         switch (status) {
             case "operational":
@@ -75,9 +75,13 @@ export async function PATCH(
                     suggestion: "Complete overhaul maintenance event in the calendar first",
                     status: 400
                 });
+
+                const { discardEvents } = body;
                 
                 await storage.updateEquipment(equipmentId, { status: "under repair", hasEmergency: true, emergencyCounter: equipment.emergencyCounter+1 });
 
+                
+                
                 const emergencyEvent = createEmergencyMaintenanceEvent(equipment, maintenance);
                 await storage.addMaintenanceEvents([emergencyEvent]);
 

@@ -111,7 +111,7 @@ export async function PATCH(
                 });
             }
 
-            const maintenance = await storage.getMainteancesByEquipmentId(equipment.id);
+            const maintenance = await storage.getMaintenancesByEquipmentId(equipment.id);
             if (!maintenance) return buildCustomError({
                 code: "NO_ACTIVE_MAINTENANCE",
                 message: "Equipment status cannot be changed to 'under repair' without active maintenance",
@@ -168,7 +168,7 @@ export async function PATCH(
             }
 
             if (status === "under repair") {
-                const maintenance = await storage.getMainteancesByEquipmentId(equipment.id);
+                const maintenance = await storage.getMaintenancesByEquipmentId(equipment.id);
                 if (!maintenance) return buildCustomError({
                     code: "NO_ACTIVE_MAINTENANCE",
                     message: "Equipment status cannot be changed to 'under repair' without active maintenance",
