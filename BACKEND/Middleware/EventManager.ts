@@ -19,16 +19,6 @@ export function createMaintenanceEvents(
     endDate?: string
 ): InsertMaintenanceEvent[] {
 
-    const hasBoth = (
-        maintenance.levelAHours !== 0 ||
-        maintenance.levelBHours !== 0 ||
-        maintenance.levelCHours !== 0 ||
-        maintenance.levelDHours !== 0 
-    ) && (
-        maintenance.levelIDuration1 ||
-        maintenance.levelIDuration2
-    )
-    
     const start = startDate ? new Date(startDate) : new Date(maintenance.serviceStartDate);
     start.setUTCHours(0,0,0,0);
     const end = endDate ? new Date(endDate) : new Date(maintenance.serviceEndDate);
@@ -75,6 +65,8 @@ export function createMaintenanceEvents(
         let eventStart = new Date(start.getTime());
         
         if (k === "I2" || k === "I1") {            
+
+            
             while (eventStart <= end) {
                 const eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
                 const status = Math.floor(differenceInDays(new Date(), eventStart)) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
@@ -97,6 +89,7 @@ export function createMaintenanceEvents(
                 events.push(event);
                 
                 eventStart = subDays(addMonths(eventStart, v.hours ), 1);
+                eventStart.setUTCHours(0, 0, 0, 0);
             }
             continue;
         }
@@ -152,6 +145,9 @@ export function createMaintenanceEvents(
         }
     }
     
-    if (hasBoth) return events.toSpliced(0, 2);
-    return events.toSpliced(0, 1);
+    for (let i = 0; i < events.length; i++) {
+        if (events[i].start === start.toISOString().slice(0, 10)) events.splice(i, 1);
+    }
+    
+    return events;
 }

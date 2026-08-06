@@ -1,5 +1,10 @@
 # PRIORITY
-- EQUIPIMENT THUMBNAIL UPLOAD HANDLING WITH NEW GCP STORAGE LOGIC + UPLOAD FILE, NOT FILENAME AND CONTENTTYPE USE GPT
+- Calendar event add equipment name to the title (make copyable)
+- EventManager normal first day deletion 
+- Changing working hours in equipment details page adjusts maintenance schedule
+- Edit equipment usefulLifespan updates health index
+- Out of service status deletes future maintenance
+- Health index MIN value at 30% (Overhaul required banner)
 - REMOVE .toSpliced() in EventManager and think of normal logic
 - Working Hours edit 2+ hours moves the maintenance schedule
 - Reduce health index after incomplete emergency and overhaul???
