@@ -763,7 +763,7 @@ export class DatabaseStorage {
         const overdue = await db.execute(sql`
             SELECT
                 COUNT(DISTINCT equipment_id) FILTER (WHERE start_date < CURRENT_DATE AND status = 'pending') AS oeq,
-                COUNT(*) FILTER (WHERE start_date < CURRENT_DATE) AS omt
+                COUNT(*) FILTER (WHERE start_date < CURRENT_DATE AND status = 'pending') AS omt
             FROM maintenance_events ${whereClause}
         `);
 
