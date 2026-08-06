@@ -22,7 +22,21 @@ const TypeChart = () => {
     const [category, setCategory] = useState<string>("");
 
     const { data: equipments = {equips: [], count:0}, isLoading: isLoadingEquipment } = useQuery<{ equips: TEquipment[], count: number }>({
-        queryKey: ["/api/equipments"]
+        queryKey: ["equipments"],
+        queryFn: async () => {
+            const res = await fetch("/api/equipments", {
+                method: "GET",
+                credentials: "include"
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                console.error(data.error);
+                throw new Error("Failed to fetch equipment data");
+            }
+
+            return data;
+        }
     });
 
     const isLoading = (!equipments  || isLoadingEquipment);

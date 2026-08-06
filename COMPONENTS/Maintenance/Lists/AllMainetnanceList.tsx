@@ -58,7 +58,7 @@ const AllMaintenanceList = ({
             { userRole === "admin" && (
               <TableCell>
                 <div className="flex justify-center gap-2">
-                  <SlideDialog
+                  {/* <SlideDialog
                     title="Edit Maintenance Schedule"
                     Btn={(props) => (
                       <button {...props}><Edit size={20} className="text-blue-400 hover:text-blue-800 cursor-pointer" /></button>
@@ -66,7 +66,7 @@ const AllMaintenanceList = ({
                     DialogForm={(props) => (
                       <AddMaintenanceForm {...props} maintenanceId={m.id} />
                     )}
-                  />
+                  /> */}
                   <SlideDialog
                     title="Delete Maintenance Record"
                     Btn={(props) => (

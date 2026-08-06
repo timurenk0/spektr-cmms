@@ -30,7 +30,7 @@ const VARIATIONS = {
         border: "border-indigo-400",
         bg: "bg-blue-100",
         icon: <Wrench className="text-indigo-400 w-6 h-6" />,
-        header1: "Total Equipment",
+        header1: "Total Equipment With Maintenance",
         header2: "Total Maintenance Tasks"
     },
     overdue: {

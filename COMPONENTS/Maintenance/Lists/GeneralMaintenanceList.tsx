@@ -61,7 +61,7 @@ const GeneralMaintenanceList = ({
                 </TableCell>
                 <TableCell>{format(ev.scheduledAt, "MMM dd, yyyy")}</TableCell>
                 {complete && (
-                    <TableCell>{format(ev.start, "MMM dd, yyyy")}</TableCell>
+                    <TableCell>{format(ev.performedAt!, "MMM dd, yyyy")}</TableCell>
                 )}
                 <TableCell>
                     <div className={`w-20 ${levelMap[ev.level]} text-center mx-auto py-2 rounded-[100px]`}>

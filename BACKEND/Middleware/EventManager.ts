@@ -18,6 +18,16 @@ export function createMaintenanceEvents(
     startDate?: string,
     endDate?: string
 ): InsertMaintenanceEvent[] {
+
+    const hasBoth = (
+        maintenance.levelAHours !== 0 ||
+        maintenance.levelBHours !== 0 ||
+        maintenance.levelCHours !== 0 ||
+        maintenance.levelDHours !== 0 
+    ) && (
+        maintenance.levelIDuration1 ||
+        maintenance.levelIDuration2
+    )
     
     const start = startDate ? new Date(startDate) : new Date(maintenance.serviceStartDate);
     start.setUTCHours(0,0,0,0);
@@ -142,5 +152,6 @@ export function createMaintenanceEvents(
         }
     }
     
+    if (hasBoth) return events.toSpliced(0, 2);
     return events.toSpliced(0, 1);
 }
