@@ -142,7 +142,11 @@ export function createMaintenanceEvents(
         }
     }
     
-    return events.toSpliced(0, 1);
+    for (let i = 0; i < events.length; i++) {
+        if (events[i].start === start.toISOString().slice(0, 10)) events.splice(i, 1);
+    }
+
+    return events;
 }
 
 export function createEmergencyMaintenanceEvent(equipment: Equipment, maintenance: Maintenance) {

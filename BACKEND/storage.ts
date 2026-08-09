@@ -282,9 +282,11 @@ export class DatabaseStorage {
     }
 
     async getEquipmentStatusCount(tenantId: number): Promise<{ operational: number, underRepair: number, outOfService: number } | undefined> {
-        const operationalCount = await db.select({ count: count() }).from(equipments).where(and(eq(equipments.tenantId, tenantId), eq(equipments.status, "operational")));
-        const underRepairCount = await db.select({ count: count() }).from(equipments).where(and(eq(equipments.tenantId, tenantId), eq(equipments.status, "under repair")));
-        const outOfServiceCount = await db.select({ count: count() }).from(equipments).where(and(eq(equipments.tenantId, tenantId), eq(equipments.status, "out of service")));
+        const tenantWhere = tenantId === 1 ? undefined : eq(equipments.tenantId, tenantId);
+        
+        const operationalCount = await db.select({ count: count() }).from(equipments).where(and(tenantWhere, eq(equipments.status, "operational")));
+        const underRepairCount = await db.select({ count: count() }).from(equipments).where(and(tenantWhere, eq(equipments.status, "under repair")));
+        const outOfServiceCount = await db.select({ count: count() }).from(equipments).where(and(tenantWhere, eq(equipments.status, "out of service")));
         
         return { operational: operationalCount[0].count, underRepair: underRepairCount[0].count, outOfService: outOfServiceCount[0].count }
     }
@@ -760,8 +762,8 @@ export class DatabaseStorage {
 
         const overdue = await db.execute(sql`
             SELECT
-                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date < CURRENT_DATE) AS oeq,
-                COUNT(*) FILTER (WHERE start_date < CURRENT_DATE) AS omt
+                COUNT(DISTINCT equipment_id) FILTER (WHERE start_date < CURRENT_DATE AND status = 'pending') AS oeq,
+                COUNT(*) FILTER (WHERE start_date < CURRENT_DATE AND status = 'pending') AS omt
             FROM maintenance_events ${whereClause}
         `);
 
