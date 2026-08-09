@@ -1,9 +1,9 @@
 # PRIORITY
-- Emergency and overhaul events only COMPLETE option and delete future maintenance events allow admins to reevaluate equipment health index on complete
-    - Upon emergency repair "activation" ask admin whether to delete ongoing maintenance schedule for this equipment (e.g. emergency takes too long to fit in the current schedule)
-    - Overhaul is technically also "Under Repair" status so don't use out of service lil bro
-    - Emergency repair count and check in equipment table like overhaul event
-
+- Calendar event add equipment name to the title (make copyable)
+- Changing working hours in equipment details page adjusts maintenance schedule
+- Edit equipment usefulLifespan updates health index
+- Out of service status deletes future maintenance
+- Health index MIN value at 30% (Overhaul required banner)
 - REMOVE .toSpliced() in EventManager and think of normal logic
 - Working Hours edit 2+ hours moves the maintenance schedule
 - Reduce health index after incomplete emergency and overhaul???
