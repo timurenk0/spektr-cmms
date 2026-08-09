@@ -139,7 +139,7 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
       window.location.reload();
     },
     onError: (error) => {
-      console.error(error.cause, error.stack);
+      console.error(error);
       toast.error(`Failed to update maintenance event: ${error.message}`, {
         duration: 2000,
         position: "bottom-right",

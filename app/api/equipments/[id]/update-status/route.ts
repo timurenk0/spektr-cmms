@@ -77,10 +77,12 @@ export async function PATCH(
                 });
 
                 const { discardEvents } = body;
+
+                if (discardEvents) {
+                    await storage.cancelCurrentMaintenanceForEquipment(equipment.id);
+                }
                 
                 await storage.updateEquipment(equipmentId, { status: "under repair", hasEmergency: true, emergencyCounter: equipment.emergencyCounter+1 });
-
-                
                 
                 const emergencyEvent = createEmergencyMaintenanceEvent(equipment, maintenance);
                 await storage.addMaintenanceEvents([emergencyEvent]);

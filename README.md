@@ -2,6 +2,7 @@
 - Calendar event add equipment name to the title (make copyable)
 - Changing working hours in equipment details page adjusts maintenance schedule
 - Edit equipment usefulLifespan updates health index
+- Think of old ass equipment with recent overhaul. How to count health index? (input for last overhaul date upon addition)
 - Out of service status deletes future maintenance
 - Health index MIN value at 30% (Overhaul required banner)
 - REMOVE .toSpliced() in EventManager and think of normal logic

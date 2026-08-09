@@ -62,7 +62,7 @@ export async function PATCH(
             status: 404
         });
 
-        if (!equipment.healthIndex) return buildCustomError({
+        if (Number.isNaN(equipment.healthIndex)) return buildCustomError({
             code: ERROR_CODES.UNKNOWN_ERROR,
             message: "Equipment health index is null",
             suggestion: "Probably a bug. Please try to remove and add the maintenance schedule for this equipment. Otherwise contact development team",
