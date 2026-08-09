@@ -889,7 +889,7 @@ export class DatabaseStorage {
         return trueHealthIndex;
     }
 
-    async subtractPenaltyScore(event: (MaintenanceEvent & { isOverdue: boolean })) {
+    subtractPenaltyScore(event: (MaintenanceEvent & { isOverdue: boolean })) {
         const levelCoeffs: Record<string, number> = {
             "A": 1,
             "B": 2,
@@ -912,7 +912,8 @@ export class DatabaseStorage {
         console.log(penalty);
 
         // update event in the db
-        return await db.update(equipments).set({ healthIndex: sql`${equipments.healthIndex} - ${penalty}` }).where(eq(equipments.id, event.equipmentId));
+        // return await db.update(equipments).set({ healthIndex: sql`${equipments.healthIndex} - ${penalty}` }).where(eq(equipments.id, event.equipmentId));
+        return penalty;
     }
 
     async subtractMonthlyHealthDrop(): Promise<void> {

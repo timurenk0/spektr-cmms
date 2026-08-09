@@ -34,7 +34,7 @@ const getStatusBadge = (status: string) => {
 };
 
 const getHealthBadge = (healthIndex: number | null) => {
-    if (healthIndex == null) {
+    if (healthIndex === null) {
         return (
             <HealthBadge background="#e3e3e3" color="#3e3e3e" value="-" />
         )
@@ -99,7 +99,7 @@ const EquipmentListEl = ({ equipment, user }: { equipment: TEquipment, user: TUs
             </TableCell>
             <TableCell style={{ fontSize: "12px" }}>{equipment.lastEvent ? format(equipment.lastEvent, "MMM d, yyyy") : "N/A"}</TableCell>
             <TableCell style={{ fontSize: "12px" }}>{equipment.nextEvent ? format(equipment.nextEvent, "MMM d, yyyy") : "N/A"}</TableCell>
-            <TableCell style={{ fontSize: "12px" }}>{equipment.healthIndex ? getHealthBadge(equipment.healthIndex) : <div className="bg-gray-200 text-gray-600 rounded-full px-2 py-1 text-bold">-</div>}</TableCell>
+            <TableCell style={{ fontSize: "12px" }}>{!Number.isNaN(equipment.healthIndex) ? getHealthBadge(equipment.healthIndex) : <div className="bg-gray-200 text-gray-600 rounded-full px-2 py-1 text-bold">-</div>}</TableCell>
             {user.role === "admin" && (
                 <TableCell onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-2">

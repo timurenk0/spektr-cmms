@@ -69,34 +69,6 @@ export default function AddEquipmentForm(
         enabled: !!equipmentId
     });
 
-    
-    // const uploadImage = async (file: File | undefined) => {
-    //     try {
-    //         if (!file) throw new Error("No file selected");
-
-    //         const formData = new FormData();
-    //         formData.append("file", file);
-            
-    //         const response = await fetch("/api/photos/thumb", {
-    //             method: "POST",
-    //             body: formData 
-    //         });
-
-    //         const data = await response.json();
-    //         if (!response.ok) {
-    //             const message = data.error || `Request failed: ${response.status} ${response.statusText}`;
-    //             throw new Error(message);
-    //         };
-
-    //         setEquipmentImage(data.equipmentImage);
-    //         return data.equipmentImage;            
-    //     } catch (error) {
-    //         const msg = error instanceof Error ? error.message : "Unknown error";
-    //         toast.error(`Failed to upload image: ${msg}`);
-    //         return;
-    //     }
-    // };
-
     const uploadImage = async (file: File | undefined) => {
         try {
             if (!file) throw new Error("No file selected");     
@@ -249,6 +221,7 @@ export default function AddEquipmentForm(
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["equipment-update", equipmentId] })
+            queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] })
             queryClient.invalidateQueries({ queryKey: ["equipment-list"] });
             queryClient.invalidateQueries({ queryKey: ["/api/equipments?concise=true"] });
             toast.success(`Equipment ${equipmentId ? "updated" : "added"} successfully`, {
