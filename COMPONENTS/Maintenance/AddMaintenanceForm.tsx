@@ -16,6 +16,14 @@ import { TEquipment, TMaintenance } from "../utils/types";
 import { PickerValue } from "@mui/x-date-pickers/internals";
 
 
+const parseDateOnly = (value?: string | null) => {
+  if (!value) return null;
+
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
+
 const formSchema = insertMaintenanceSchema.omit({
   tenantId: true,
 });
@@ -82,8 +90,10 @@ const AddMaintenanceForm = ({
       const eq = equipments.equips.find(eq => eq.id === maintenance.equipmentId);
       if (!eq) throw new Error("No equipment found");
 
+      console.log(maintenance);
+
       if (maintenance.dailyWorkingHours) setRequirements(eq.requirements);
-      form.reset({...maintenance});
+      form.reset({...maintenance, serviceStartDate: maintenance.serviceStartDate, serviceEndDate: maintenance.serviceEndDate });
     }
   }, [maintenance, form]);
   
@@ -222,12 +232,12 @@ const AddMaintenanceForm = ({
           render={({ field }) => (
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
-                defaultValue={serviceStart}
+                value={parseDateOnly(field.value)}
                 minDate={new Date(new Date().getTime() - (1000 * 86400 * 365))}
                 maxDate={new Date(new Date().getTime() + (1000 * 86400 * 365))}
                 onChange={(e: PickerValue) => {
                   setServiceStart(e!);
-                  field.onChange(e?.toISOString().slice(0, 10));
+                  field.onChange(e ? format(e, "yyyy-MM-dd") : null);
                 }}
                 label="Service Start Date"
                 format="dd/MM/yyyy"
@@ -241,10 +251,11 @@ const AddMaintenanceForm = ({
           render={({ field }) => (
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
+                value={parseDateOnly(field.value)}
                 minDate={serviceStart}
                 maxDate={new Date(new Date().getTime() + (1000 * 86400 * 365 * 5))}
                 onChange={(e: PickerValue) => {
-                  field.onChange(e?.toISOString().slice(0, 10));
+                  field.onChange(e ? format(e, "yyyy-MM-dd") : null);
                 }}
                 label="Service End Date"
                 format="dd/MM/yyyy"
@@ -566,12 +577,14 @@ const AddMaintenanceForm = ({
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={mutation.isPending}
-            >
-              {mutation.isPending ? "Saving..." : maintenanceId ? "Update Maintenance" : "Save Maintenance"}
-            </Button>
+            { !maintenanceId && (
+              <Button
+                type="submit"
+                disabled={mutation.isPending}
+              >
+                {mutation.isPending ? "Saving..." : maintenanceId ? "Update Maintenance" : "Save Maintenance"}
+              </Button>
+            ) }
          </div>
       </div>
     </form>
