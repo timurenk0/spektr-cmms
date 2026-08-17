@@ -1,18 +1,16 @@
 # PRIORITY
 - Calendar event add equipment name to the title (make copyable)
 - Changing working hours in equipment details page adjusts maintenance schedule
-- Edit equipment usefulLifespan updates health index
 - Think of old ass equipment with recent overhaul. How to count health index? (input for last overhaul date upon addition)
 - Out of service status deletes future maintenance
 - Health index MIN value at 30% (Overhaul required banner)
-- REMOVE .toSpliced() in EventManager and think of normal logic
+
 - Working Hours edit 2+ hours moves the maintenance schedule
 - Reduce health index after incomplete emergency and overhaul???
     - What to do on incomplete emergency/overhaul event????
 - Edit maintenance logic (leave as it is - ok, but dangerous. adds events, not replaces) (add overhaulCounter )
 - Maint working hours not enough (every 200h, only 100h passed)
-- Disable maintenance event submission button after first click (document upload duplication issue)
-    - Move all document upload to backend to ensure submission atomicity (no duplicate requests from frontend atleast)
+- Move all document upload to backend to ensure submission atomicity (no duplicate requests from frontend atleast)
 
 
 # ISSUES
