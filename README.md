@@ -1,5 +1,6 @@
 # PRIORITY
 - Calendar event add equipment name to the title (make copyable)
+- Pop-up when health index input is higher than ideal (are you sure | previous overhaul case)
 - Changing working hours in equipment details page adjusts maintenance schedule
 - Think of old ass equipment with recent overhaul. How to count health index? (input for last overhaul date upon addition)
 - Out of service status deletes future maintenance
