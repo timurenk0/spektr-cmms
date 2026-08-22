@@ -107,12 +107,6 @@ export async function PATCH(
         const equipmentId = parseInt(id);
         if (isNaN(equipmentId)) return res.json({ error: "Invalid equipment ID" }, { status: 400 });
         
-        const body = await req.json();
-        console.log(body)
-        const { isDeleted, reason } = body;
-        
-        
-        // Fetch specified equipment by ID and check if it exists.
         const equipment = await storage.getEquipment(equipmentId);
         if (!equipment) return buildCustomError({
             code: ERROR_CODES.NOT_FOUND_ERROR,
@@ -120,12 +114,25 @@ export async function PATCH(
             status: 404
         });
 
-        if (isDeleted && reason) {
+        const body = await req.json();
+        console.log(body)
+        const { isDeleted, reason, workingHours } = body;
+        
+        if (isDeleted) {
+            if (!reason) throw new Error("Deletion reason must be provided");
+
             await storage.deleteEquipment(equipmentId);
             await activityLogger(user, "delete", `Equipment ${equipmentId} deleted. Reason: ${reason}`, equipmentId);
             return res.json(true, { status: 201 });
         }
 
+        if (workingHours) {
+            await storage.updateEquipment(equipmentId, { totalWorkingHours: workingHours });
+            await activityLogger(user, "update", `Equipment ${equipmentId} working hours updated`);
+            return res.json(workingHours, { status: 201 });
+        }
+
+        console.log("Nothing changed (edge case)");
         return res.json({ message: "Nothing to change (edge case)" }, { status: 200 });        
     } catch (error: unknown) {
         return buildError(error);

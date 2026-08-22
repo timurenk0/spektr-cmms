@@ -21,6 +21,7 @@ import toast from "react-hot-toast";
 import SlideDialog from "@/COMPONENTS/ui/SlideDialog";
 import OverhaulForm from "./OverhaulForm";
 import EmeregencyForm from "./EmeregencyForm";
+import EditHoursForm from "./EditHoursForm";
 
 
 function calculateAge(manufDate: Date): number[] {
@@ -275,13 +276,22 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                     {equipment.totalWorkingHours || "N/A"}
                   </div>
                   {equipment.totalWorkingHours && (
-                    <Button
-                    variant="text"
-                    color="inherit"
-                    sx={{ height: "24px", fontSize: "8px" }}
-                    >
-                      <Pencil width={12} height={12} className="mr-1" /> Edit
-                    </Button>
+                    <SlideDialog
+                      title="Change Working Hours"
+                      Btn={( props ) => (
+                        <Button
+                          {...props}
+                          variant="text"
+                          color="inherit"
+                          sx={{ height: "24px", fontSize: "8px" }}
+                        >
+                          <Pencil width={12} height={12} className="mr-1" /> Edit
+                        </Button>
+                      )}
+                      DialogForm={( props ) => (
+                        <EditHoursForm {...props} equipmentId={equipmentId} currentWorkingHours={equipment.totalWorkingHours} /> 
+                      )}
+                    />
                   )}
                 </div>
                 <div className="text-xs text-gray-500">Working Hours</div>
