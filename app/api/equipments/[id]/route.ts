@@ -58,17 +58,18 @@ export async function PUT(
         
         // Recalculate equipment health index if usefulLifeSpan value is updated
         if (body.usefulLifeSpan) {
+            const updateBody = {};
             const maintenance = await storage.getMaintenancesByEquipmentId(equipmentId);
 
-            let givenHealthIndex = null;
-            if (maintenance) givenHealthIndex = maintenance.givenHealthIndex;
+            if (!maintenance) {
+                const updatedEquipment = await storage.updateEquipment(equipmentId, { ...equipmentValidatedData });
+                await activityLogger(user, "update", `Equipment ${updatedEquipment?.name} updated`, equipmentId);
+                return res.json(true, { status: 201 });
+            }
+
+            let givenHealthIndex = maintenance.givenHealthIndex;
 
             let newHealthIndex = await storage.calculateHealthIndex(equipmentId, givenHealthIndex);
-            if (!maintenance) {
-                const updatedEquipment = await storage.updateEquipment(equipmentId, { ...equipmentValidatedData, healthIndex: newHealthIndex });
-                await activityLogger(user, "update", `Equipment ${updatedEquipment?.name} updated`, equipmentId);
-                return res.json(newHealthIndex, { status: 201 });
-            }
             
             const maintenanceEvents = await storage.getMaintenanceEvents(user.tenantId, "incomplete", maintenance.serviceStartDate, new Date().toISOString().slice(0, 10));
             let penaltyScore = 0;

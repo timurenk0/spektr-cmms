@@ -67,13 +67,13 @@ export async function POST(req: NextRequest) {
 
         // Add validated maintenance data to the DB.
         const newMaintenance = await storage.addMaintenance(maintenanceValidatedData, equipment);
-        const healthIndex = await storage.calculateHealthIndex(maintenanceValidatedData.equipmentId, maintenanceValidatedData.givenHealthIndex)
+        // const healthIndex = await storage.calculateHealthIndex(maintenanceValidatedData.equipmentId, maintenanceValidatedData.givenHealthIndex)
         await storage.updateEquipment(equipment.id, {
             nextHealthIndexUpdate: new Date(new Date().setMonth((new Date().getMonth()+1)%12, new Date(equipment.dateOfManufacturing).getDate())).toISOString().slice(0, 10)
         })
 
         await storage.updateEquipment(newMaintenance.equipmentId, {
-            healthIndex: healthIndex
+            healthIndex: newMaintenance.givenHealthIndex
         });        
 
         // Log activity for added maintenance using helper logger method.

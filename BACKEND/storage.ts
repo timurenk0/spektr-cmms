@@ -187,8 +187,8 @@ export class DatabaseStorage {
             .from(maintenanceEvents)
             .where(
                 and(
-                eq(maintenanceEvents.equipmentId, equipments.id),
-                gt(maintenanceEvents.start, sql`CURRENT_DATE`),
+                    eq(maintenanceEvents.equipmentId, equipments.id),
+                    gt(maintenanceEvents.start, sql`CURRENT_DATE`),
                 ),
             )
             .orderBy(asc(maintenanceEvents.start))
@@ -206,6 +206,9 @@ export class DatabaseStorage {
                     equipmentImage: equipments.equipmentImage,
                     status: equipments.status,
                     hasOverhaul: equipments.hasOverhaul,
+                    hasEmergency: equipments.hasEmergency,
+                    dateOfManufacturing: equipments.dateOfManufacturing,
+                    usefulLifeSpan: equipments.usefulLifeSpan,
                     lastEvent: lastEventSubquery.lastEvent,
                     nextEvent: nextEventSubquery.nextEvent,
                     requirements: equipments.requirements

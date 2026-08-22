@@ -2,7 +2,7 @@
 
 import { insertMaintenanceSchema } from "@/BACKEND/Database/schema"
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, Dialog, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Button, Dialog, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { differenceInCalendarMonths, format } from "date-fns";
 import React, { useEffect, useState } from "react";
@@ -22,7 +22,7 @@ function calculateIdealHealth(usefulLifeSpan: number, dateOfManufacturing: Date)
   const monthlyHealthDrop = Number((100 / usefulLifeSpan).toFixed(2));
   const idealHealthIndex = Math.max(0, 100-differenceInCalendarMonths(Date(), dateOfManufacturing)*monthlyHealthDrop);
 
-  return idealHealthIndex;
+  return Math.round(idealHealthIndex);
 }
 
 const formSchema = insertMaintenanceSchema.omit({
@@ -40,6 +40,8 @@ const AddMaintenanceForm = ({
   const queryClient = useQueryClient();
   const [serviceStart, setServiceStart] = useState(new Date());
   const [showHealthDialog, setShowHealthDialog] = useState(false);
+  const [idealHealthIndex, setIdealHealhIndex] = useState<number | null>(null);
+  
   
   /* ======================================DATA FETCHING=========================================== */
   
@@ -96,6 +98,20 @@ const AddMaintenanceForm = ({
       form.reset({...maintenance});
     }
   }, [maintenance, form]);
+
+  useEffect(() => {
+    if (!equipments) return;
+    if (!form.getValues("equipmentId")) return;
+
+    const equipment = equipments.equips.find(e => e.id === form.getValues("equipmentId"));
+    if (!equipment) throw new Error("Specified equipment not found");
+
+    console.log(equipment);
+
+    setIdealHealhIndex(calculateIdealHealth(equipment.usefulLifeSpan, new Date(equipment.dateOfManufacturing)));
+  }, [form.getValues("equipmentId")])
+
+  
   
   const mutation = useMutation({
     mutationFn: async (values: MaintenanceFormValues) => {
@@ -124,6 +140,7 @@ const AddMaintenanceForm = ({
       queryClient.invalidateQueries({ queryKey: ["/api/maintenance-events"] });
       queryClient.invalidateQueries({ queryKey: ["/api/maintenance-events/info"] })
       queryClient.invalidateQueries({ queryKey: ["/api/activities"] });
+      queryClient.invalidateQueries({ queryKey: ["equipment-list"] })
       toast.success(`Maintenance record ${maintenanceId ? "updated" : "added"} successfully`, {
         duration: 2000,
         position: "bottom-right",
@@ -150,15 +167,16 @@ const AddMaintenanceForm = ({
   
   const onSubmit = (values: MaintenanceFormValues) => {
     // Check ideal health index
-    const equipment = equipments.equips.find(e => e.id === values.equipmentId)!;
-    const idealHealthIndex = calculateIdealHealth(equipment.usefulLifeSpan, new Date(equipment.dateOfManufacturing));
-
-    if (values.givenHealthIndex > idealHealthIndex) {
-      setShowHealthDialog(true);
+    if (!idealHealthIndex) {
+      throw new Error("Failed to calculate ideal health index value. Try selecting equipment again");
     }
     
-    console.log(values);
-    mutation.mutate(values);
+    if (values.givenHealthIndex > idealHealthIndex) {
+      setShowHealthDialog(true);
+    } else {
+      console.log(values);
+      mutation.mutate(values);
+    }
   };
 
   const equipmentUnderMaintenance = maintenances.map(m => m.equipmentId);
@@ -179,6 +197,7 @@ const AddMaintenanceForm = ({
   return (
     <>
       <form className="space-y-4 px-1" onSubmit={form.handleSubmit(onSubmit, (error) => console.log(error))}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Controller
             name="equipmentId"
             disabled={!!maintenanceId}
@@ -228,9 +247,11 @@ const AddMaintenanceForm = ({
                 margin="dense"
                 slotProps={{ htmlInput: { min: 30, max: 100 } }}
                 fullWidth
+                
                 required
                 {...field}
                 onChange={(e) => field.onChange(Number(e.target.value))}
+                helperText={!!idealHealthIndex && `Ideal health index: ${idealHealthIndex}%`}
               />
             )}
           />
@@ -246,6 +267,11 @@ const AddMaintenanceForm = ({
                   onChange={(e: PickerValue) => {
                     setServiceStart(e!);
                     field.onChange(e?.toISOString().slice(0, 10));
+                  }}
+                  slotProps={{
+                    textField: {
+                      required: true
+                    }
                   }}
                   label="Service Start Date"
                   format="dd/MM/yyyy"
@@ -263,6 +289,11 @@ const AddMaintenanceForm = ({
                   maxDate={new Date(new Date().getTime() + (1000 * 86400 * 365 * 5))}
                   onChange={(e: PickerValue) => {
                     field.onChange(e?.toISOString().slice(0, 10));
+                  }}
+                  slotProps={{
+                    textField: {
+                      required: true
+                    }
                   }}
                   label="Service End Date"
                   format="dd/MM/yyyy"
@@ -591,21 +622,29 @@ const AddMaintenanceForm = ({
                 {mutation.isPending ? "Saving..." : maintenanceId ? "Update Maintenance" : "Save Maintenance"}
               </Button>
           </div>
-          </form>
-          <Dialog
-            open={showHealthDialog}
-            onClose={() => setShowHealthDialog(false)}
-            fullWidth
-            maxWidth="sm"
-          >
-            <DialogTitle>
-              <div className="flex justify-between">
-                <p className="inline">Conflict</p>
-                <button onClick={() => setShowHealthDialog(false)}><X /></button>
-              </div>
-            </DialogTitle>
-          </Dialog>
-        </>
+        </div>
+      </form>
+      <Dialog
+        open={showHealthDialog}
+        onClose={(_, reason) => reason !== "backdropClick" && setShowHealthDialog(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>
+          <div className="flex justify-between">
+            <p className="inline">Conflict</p>
+          </div>
+        </DialogTitle>
+        <DialogContent>
+          <p>System calculated the ideal health index to be <span>{idealHealthIndex}%</span>. Do you wish to override this value?</p>
+          <div className="flex justify-end gap-x-2">
+            <Button variant="outlined" onClick={() => setShowHealthDialog(false)}>Yes</Button>
+            <Button variant="outlined" onClick={() => {(!!idealHealthIndex && form.setValue("givenHealthIndex", idealHealthIndex)); setShowHealthDialog(false)}}>Set ideal value</Button>
+            <Button variant="outlined" color="error" onClick={() => {setIdealHealhIndex(form.getValues("givenHealthIndex")); setShowHealthDialog(false)}}>No</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      </>
   )
 }
 
