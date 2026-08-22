@@ -37,7 +37,7 @@ const EmeregencyForm = ({
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
-            queryClient.invalidateQueries({ queryKey: ["equipments"] })
+            queryClient.invalidateQueries({ queryKey: ["equipment-list"] })
             queryClient.invalidateQueries({ queryKey: ["/api/maintenance-events/info"] });
 
             toast.success("Emergency repair started!");

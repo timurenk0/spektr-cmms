@@ -121,6 +121,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
         queryClient.invalidateQueries({ queryKey: ["dashboard-gauges"] });
+        queryClient.invalidateQueries({ queryKey: ["equipment-list"] });
         toast.success("Successfully updated equipment status");
         return; 
       },

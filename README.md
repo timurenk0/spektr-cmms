@@ -1,8 +1,6 @@
 # PRIORITY
 - Calendar event add equipment name to the title (make copyable)
-- Pop-up when health index input is higher than ideal (are you sure | previous overhaul case)
 - Changing working hours in equipment details page adjusts maintenance schedule
-- Think of old ass equipment with recent overhaul. How to count health index? (input for last overhaul date upon addition)
 - Out of service status deletes future maintenance
 - Health index MIN value at 30% (Overhaul required banner)
 
@@ -24,8 +22,9 @@
     - add separate hadOverhaul or overhaulCounter to keep track of remainingLifeSpan and max allowed health score
 
 # FEATURES
-- Select thumbnail photo from all photos list
 - Trim EVERY form input
+- Think of old ass equipment with recent overhaul. How to count health index? (input for last overhaul date upon addition)
+- Select thumbnail photo from all photos list
 - Search bar for maintenance list
 - Change the TabList in theme to "legacy" version
 - User position in the company for laughs and giggles (maintenance event by position separation in the future)
