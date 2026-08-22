@@ -1,10 +1,10 @@
 # PRIORITY
 - Calendar event add equipment name to the title (make copyable)
 - Changing working hours in equipment details page adjusts maintenance schedule
+- Working Hours edit 2+ hours moves the maintenance schedule
 - Out of service status deletes future maintenance
 - Health index MIN value at 30% (Overhaul required banner)
 
-- Working Hours edit 2+ hours moves the maintenance schedule
 - Reduce health index after incomplete emergency and overhaul???
     - What to do on incomplete emergency/overhaul event????
 - Edit maintenance logic (leave as it is - ok, but dangerous. adds events, not replaces) (add overhaulCounter )

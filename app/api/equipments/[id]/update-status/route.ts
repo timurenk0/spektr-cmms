@@ -114,6 +114,8 @@ export async function PATCH(
 
                 await storage.updateEquipment(equipmentId, { status: "under repair", hasOverhaul: true, overhaulCounter: equipment.overhaulCounter+1 });
 
+                await storage.cancelCurrentMaintenanceForEquipment(equipment.id);
+                
                 const event = createOverhaulMaintenanceEvent(equipment, maintenance, endDate);
                 await storage.addMaintenanceEvents([event]);
                 
