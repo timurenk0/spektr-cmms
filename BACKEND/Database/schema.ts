@@ -101,6 +101,7 @@ export const equipments = pgTable(
     equipmentImage: text("equipment_image").notNull(),
     healthIndex: doublePrecision("health_index"),
     nextHealthIndexUpdate: date("next_health_index_update"),
+    lastWorkingHoursEdit: date("last_working_hours_edit"),
     hasOverhaul: boolean("has_overhaul").notNull().default(false),
     overhaulCounter: smallint("overhaul_counter").notNull().default(0),
     hasEmergency: boolean("has_emergency").notNull().default(false),
