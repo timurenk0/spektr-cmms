@@ -195,6 +195,10 @@ export default function AddEquipmentForm(
             const imageUrl = values.image ? await uploadImage(values.image) : equipment?.equipmentImage;
             if (!imageUrl) throw new Error("Failed to upload image");
             
+            if (values.totalWorkingHours) {
+                values.lastWorkingHoursEdit = new Date().toISOString().slice(0, 10);
+            }
+            
             const url = `/api/equipments${equipmentId ? `/${equipmentId}` : ""}`;
             const method = equipmentId ? "PUT" : "POST";
 
@@ -566,7 +570,7 @@ export default function AddEquipmentForm(
                     </FormControl>
                 )}
               />
-              { (requirements && requirements !== "calibration and/or testing") && (
+              { ((requirements && requirements !== "calibration and/or testing") || (equipment && equipment.requirements !== "calibration and/or testing")) && (
                 <Controller
                     name="totalWorkingHours"
                     control={form.control}
