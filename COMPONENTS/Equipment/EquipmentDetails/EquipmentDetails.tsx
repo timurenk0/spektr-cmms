@@ -295,6 +295,9 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                   )}
                 </div>
                 <div className="text-xs text-gray-500">Working Hours</div>
+                { equipment.lastWorkingHoursEdit && (
+                  <div className="text-xs text-gray-500">Last Edit - {format(new Date(equipment.lastWorkingHoursEdit), "MMM dd, yyyy")}</div>
+                ) }
               </div>
             </div>
 

@@ -127,7 +127,7 @@ export async function PATCH(
         }
 
         if (workingHours) {
-            await storage.updateEquipment(equipmentId, { totalWorkingHours: workingHours });
+            await storage.updateEquipment(equipmentId, { totalWorkingHours: workingHours, lastWorkingHoursEdit: new Date().toISOString().slice(0, 10) });
             await activityLogger(user, "update", `Equipment ${equipmentId} working hours updated`);
             return res.json(workingHours, { status: 201 });
         }

@@ -1,15 +1,13 @@
 # PRIORITY
 - Calendar event add equipment name to the title (make copyable)
-- Changing working hours in equipment details page adjusts maintenance schedule
+
+- Changing working hours in equipment details page adjusts maintenance schedule (check!!! if edit was made a week ago but equipment worked for 3 days only during that week)
 - Working Hours edit 2+ hours moves the maintenance schedule
-- Out of service status deletes future maintenance
+- Maint working hours not enough (every 200h, only 100h passed)
+
 - Health index MIN value at 30% (Overhaul required banner)
 
-- Reduce health index after incomplete emergency and overhaul???
-    - What to do on incomplete emergency/overhaul event????
 - Edit maintenance logic (leave as it is - ok, but dangerous. adds events, not replaces) (add overhaulCounter )
-- Maint working hours not enough (every 200h, only 100h passed)
-- Move all document upload to backend to ensure submission atomicity (no duplicate requests from frontend atleast)
 
 
 # ISSUES
