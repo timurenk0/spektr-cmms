@@ -152,6 +152,15 @@ export const maintenances = pgTable("maintenances", {
   levelIDuration2: integer("level_i_duration_2").notNull().default(0),
   levelIMonths2: integer("level_i_months_2").notNull().default(0),
   levelIDescription2: varchar("level_i_description_2", { length: 255 }),
+  levelIDuration3: integer("level_i_duration_3").notNull().default(0),
+  levelIMonths3: integer("level_i_months_3").notNull().default(0),
+  levelIDescription3: varchar("level_i_description_3", { length: 255 }),
+  levelIDuration4: integer("level_i_duration_4").notNull().default(0),
+  levelIMonths4: integer("level_i_months_4").notNull().default(0),
+  levelIDescription4: varchar("level_i_description_4", { length: 255 }),
+  levelIDuration5: integer("level_i_duration_5").notNull().default(0),
+  levelIMonths5: integer("level_i_months_5").notNull().default(0),
+  levelIDescription5: varchar("level_i_description_5", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 export const insertMaintenanceSchema = createInsertSchema(maintenances).omit({
@@ -175,7 +184,7 @@ export const maintenanceEvents = pgTable("maintenance_events", {
   scheduledAt: date("scheduled_at").notNull().defaultNow(),
   performedAt: date("performed_at")
 }, (table) => [ 
-    check("level_check", sql`level IN ('A', 'B', 'C', 'D', 'E', 'I1', 'I2', 'O')`),
+    check("level_check", sql`level IN ('A', 'B', 'C', 'D', 'E', 'I1', 'I2', 'I3', 'I4', 'I5', 'O')`),
     check("status_check", sql`status IN ('complete', 'incomplete', 'pending')`),
     index("idx_maintenance_events_maintenance_id").on(table.maintenanceId),
     index("idx_me_tenant_equipment_id").on(table.tenantId, table.equipmentId, table.start),
