@@ -1,4 +1,5 @@
 # PRIORITY
+- Add hour-based and monthly-based maintenance input
 - Calendar event add equipment name to the title (make copyable)
 
 - Changing working hours in equipment details page adjusts maintenance schedule (check!!! if edit was made a week ago but equipment worked for 3 days only during that week)

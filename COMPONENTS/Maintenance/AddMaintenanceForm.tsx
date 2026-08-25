@@ -68,7 +68,7 @@ const AddMaintenanceForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       equipmentId: undefined,
-      dailyWorkingHours: 8,
+      dailyWorkingHours: 0,
       givenHealthIndex: 0,
       levelAHours: 0,
       levelADuration: 0,
@@ -306,7 +306,7 @@ const AddMaintenanceForm = ({
             <Controller
               name="dailyWorkingHours"
               control={form.control}
-              defaultValue={1}
+              defaultValue={0}
               render={({ field }) => (
                 <TextField
                   type="number"
