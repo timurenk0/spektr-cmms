@@ -353,17 +353,20 @@ export class DatabaseStorage {
     
     async addMaintenance(insertMaintenance: InsertMaintenance, equipment: Equipment, transaction?: NeonDatabase<Schema>): Promise<Maintenance> {
         const hasValidLevels = [
-            { duration: insertMaintenance.levelADuration, hours: insertMaintenance.levelAHours },
-            { duration: insertMaintenance.levelBDuration, hours: insertMaintenance.levelBHours },
-            { duration: insertMaintenance.levelCDuration, hours: insertMaintenance.levelCHours },
-            { duration: insertMaintenance.levelDDuration, hours: insertMaintenance.levelDHours },
-            { duration: insertMaintenance.levelIDuration1, hours: insertMaintenance.levelIMonths1 },
-            { duration: insertMaintenance.levelIDuration2, hours: insertMaintenance.levelIMonths2 },
-        ].some(level => level.duration && level.duration > 0 && level.hours && level.hours > 0);
+            { duration: insertMaintenance.levelADuration, hours: insertMaintenance.levelAHours, months: insertMaintenance.levelAMonths },
+            { duration: insertMaintenance.levelBDuration, hours: insertMaintenance.levelBHours, months: insertMaintenance.levelBMonths  },
+            { duration: insertMaintenance.levelCDuration, hours: insertMaintenance.levelCHours, months: insertMaintenance.levelCMonths  },
+            { duration: insertMaintenance.levelDDuration, hours: insertMaintenance.levelDHours, months: insertMaintenance.levelDMonths  },
+            { duration: insertMaintenance.levelI1Duration, months: insertMaintenance.levelI1Months },
+            { duration: insertMaintenance.levelI2Duration, months: insertMaintenance.levelI2Months },
+            { duration: insertMaintenance.levelI3Duration, months: insertMaintenance.levelI3Months },
+            { duration: insertMaintenance.levelI4Duration, months: insertMaintenance.levelI4Months },
+            { duration: insertMaintenance.levelI5Duration, months: insertMaintenance.levelI5Months },
+        ].some(level => (level.duration && level.duration > 0) && (level.hours && level.hours > 0) || (level.months && level.months > 0));
         // if (!hasValidLevels) throw new Error("At least one maintenance level must have hours/duration values > 0");
         if (!hasValidLevels) throw new CustomApiError({
             code: "VALIDATION_ERROR",
-            message: "At least one of levels should have both hours and duration values",
+            message: "At least one of levels should have both hours/months and duration values",
             suggestion: "Double-check the submitted form fields",
             status: 400
         });
@@ -391,16 +394,19 @@ export class DatabaseStorage {
         transaction?: NeonDatabase<Schema>
     ): Promise<Maintenance | undefined> {
         const hasValidLevels = [
-            { duration: updateData.levelADuration, hours: updateData.levelAHours },
-            { duration: updateData.levelBDuration, hours: updateData.levelBHours },
-            { duration: updateData.levelCDuration, hours: updateData.levelCHours },
-            { duration: updateData.levelDDuration, hours: updateData.levelDHours },
-            { duration: updateData.levelIDuration1, hours: updateData.levelIMonths1 },
-            { duration: updateData.levelIDuration2, hours: updateData.levelIMonths2 },
-        ].some(level => level.duration && level.duration > 0 && level.hours && level.hours > 0);
+            { duration: updateData.levelADuration, hours: updateData.levelAHours, months: updateData.levelAMonths },
+            { duration: updateData.levelBDuration, hours: updateData.levelBHours, months: updateData.levelBMonths  },
+            { duration: updateData.levelCDuration, hours: updateData.levelCHours, months: updateData.levelCMonths  },
+            { duration: updateData.levelDDuration, hours: updateData.levelDHours, months: updateData.levelDMonths  },
+            { duration: updateData.levelI1Duration, months: updateData.levelI1Months },
+            { duration: updateData.levelI2Duration, months: updateData.levelI2Months },
+            { duration: updateData.levelI3Duration, months: updateData.levelI3Months },
+            { duration: updateData.levelI4Duration, months: updateData.levelI4Months },
+            { duration: updateData.levelI5Duration, months: updateData.levelI5Months },
+        ].some(level => (level.duration && level.duration > 0) && (level.hours && level.hours > 0) || (level.months && level.months > 0));
         if (!hasValidLevels) throw new CustomApiError({
             code: "VALIDATION_ERROR",
-            message: "At least one of levels should have both hours and duration values",
+            message: "At least one of levels should have both hours/months and duration values",
             suggestion: "Double-check the submitted form fields",
             status: 400
         });

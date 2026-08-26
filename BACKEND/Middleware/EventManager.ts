@@ -27,28 +27,44 @@ export function createMaintenanceEvents(
     if (start >= end) throw new Error("Service start date can't be greater than service end date");
 
     const levels = {
+        "I5": {
+            months: maintenance.levelI5Months,
+            duration: maintenance.levelI5Duration
+        },
+        "I4": {
+            months: maintenance.levelI4Months,
+            duration: maintenance.levelI4Duration
+        },
+        "I3": {
+            months: maintenance.levelI3Months,
+            duration: maintenance.levelI3Duration
+        },
         "I2": {
-            hours: maintenance.levelIMonths2,
-            duration: maintenance.levelIDuration2
+            months: maintenance.levelI2Months,
+            duration: maintenance.levelI2Duration
         },
         "I1": {
-            hours: maintenance.levelIMonths1,
-            duration: maintenance.levelIDuration1
+            months: maintenance.levelI1Months,
+            duration: maintenance.levelI1Duration
         },
         "D": {
             hours: maintenance.levelDHours,
+            months: maintenance.levelDMonths,
             duration: maintenance.levelDDuration
         },
         "C": {
             hours: maintenance.levelCHours,
+            months: maintenance.levelCMonths,
             duration: maintenance.levelCDuration
         },
         "B": {
             hours: maintenance.levelBHours,
+            months: maintenance.levelBMonths,
             duration: maintenance.levelBDuration
         },
         "A": {
             hours: maintenance.levelAHours,
+            months: maintenance.levelAMonths,
             duration: maintenance.levelADuration
         },
     };
