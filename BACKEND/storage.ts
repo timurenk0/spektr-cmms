@@ -362,7 +362,7 @@ export class DatabaseStorage {
             { duration: insertMaintenance.levelI3Duration, months: insertMaintenance.levelI3Months },
             { duration: insertMaintenance.levelI4Duration, months: insertMaintenance.levelI4Months },
             { duration: insertMaintenance.levelI5Duration, months: insertMaintenance.levelI5Months },
-        ].some(level => (level.duration && level.duration > 0) && (level.hours && level.hours > 0) || (level.months && level.months > 0));
+        ].some(level => (level.duration && level.duration > 0) && ((level.hours && level.hours > 0) || (level.months && level.months > 0)));
         // if (!hasValidLevels) throw new Error("At least one maintenance level must have hours/duration values > 0");
         if (!hasValidLevels) throw new CustomApiError({
             code: "VALIDATION_ERROR",
@@ -482,8 +482,11 @@ export class DatabaseStorage {
                             WHEN 'C' THEN 'oklch(70.7% 0.165 254.624)'
                             WHEN 'D' THEN 'oklch(43.8% 0.218 303.724)'
                             WHEN 'E' THEN 'oklch(0.4915 0.1306 49.65)'
-                            WHEN 'I1' THEN 'oklch(.704 .14 182.503)'
-                            WHEN 'I2' THEN 'oklch(.704 .14 182.503)'
+                            WHEN 'I1' THEN 'oklch(75% 0.183 55.934)'
+                            WHEN 'I2' THEN 'oklch(75% 0.183 55.934)'
+                            WHEN 'I3' THEN 'oklch(75% 0.183 55.934)'
+                            WHEN 'I4' THEN 'oklch(75% 0.183 55.934)'
+                            WHEN 'I5' THEN 'oklch(75% 0.183 55.934)'
                             WHEN 'O' THEN 'oklch(43.2% 0.232 292.759)'
                             ELSE '#4D96FF'
                         END
@@ -496,8 +499,11 @@ export class DatabaseStorage {
                             WHEN 'C' THEN 'oklch(42.4% 0.199 265.638)'
                             WHEN 'D' THEN 'oklch(71.4% 0.203 305.504)'
                             WHEN 'E' THEN 'oklch(0.559643 0.192567 35.8054)'
-                            WHEN 'I1' THEN 'oklch(.511 .096 186.391)'
-                            WHEN 'I2' THEN 'oklch(.511 .096 186.391)'
+                            WHEN 'I1' THEN 'oklch(64.6% 0.222 41.116)'
+                            WHEN 'I2' THEN 'oklch(64.6% 0.222 41.116)'
+                            WHEN 'I3' THEN 'oklch(64.6% 0.222 41.116)'
+                            WHEN 'I4' THEN 'oklch(64.6% 0.222 41.116)'
+                            WHEN 'I5' THEN 'oklch(64.6% 0.222 41.116)'
                             WHEN 'O' THEN 'oklch(60.6% 0.25 292.717)'
                             ELSE '#4D96FF'
                         END

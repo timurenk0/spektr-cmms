@@ -2,8 +2,6 @@
 - ADD 2 WEEK NOTICE FOR MAINTENANCE TASKS (CRON JOB)
 
 
-- Push schema update to db
-- Logic to check whether months or hours are coming first based on daily working hours
 - Make hours/months and duration inter-dependant
 
 - Calendar event add equipment name to the title (make copyable)

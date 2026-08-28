@@ -21,7 +21,7 @@ const LevelCard = ({
   return (
     <div className={`border p-4 rounded-md col-span-2 ${colors[level[0]]}`}>
         <div className="font-medium text-lg mb-3">{level[0] === "I" ? `Certification ${level[1]}` : `Level ${level} Maintenance`}
-            <div className={`grid grid-cols-${level[0] === "I" ? "2" : "3"} gap-2`}>
+            <div className={`grid grid-cols-3 gap-2`}>
                 <Controller
                     name={`level${level}Months`}
                     control={form.control}
@@ -36,7 +36,7 @@ const LevelCard = ({
                             fullWidth
                             required
                             {...field}
-                            onChangeCapture={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(Number(e.target.value))}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
                             helperText={level[0] === "I" ? "Interval between certification tasks in months (if present)" : "Interval between maintenance tasks in months (if present)"}
                         />
                     )}
@@ -56,7 +56,7 @@ const LevelCard = ({
                                 fullWidth
                                 required
                                 {...field}
-                                onChangeCapture={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(Number(e.target.value))}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.onChange(Number(e.target.value) || 0)}
                                 helperText="Interval between maintenance tasks in hours (if present)"
                             />
                         )}
@@ -81,6 +81,16 @@ const LevelCard = ({
                         />
                     )}
                 />
+                { level[0] === "I" && (
+                    <TextField
+                        label="Short Description"
+                        color="info"
+                        margin="dense"
+                        fullWidth
+                        {...form.register(`level${level}Description`)}
+                    />
+
+                ) }
             </div>
         </div>
     </div>
