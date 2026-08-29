@@ -1,10 +1,11 @@
 import SlideDialog from "@/COMPONENTS/ui/SlideDialog";
 import { TEquipment, TMaintenance } from "@/COMPONENTS/utils/types";
-import { Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material"
+import { Table, TableBody, TableCell, TableHead, TableRow, TextField } from "@mui/material"
 import { Edit, Trash } from "lucide-react";
 import Image from "next/image";
 import { DeleteMaintenanceForm } from "../DeleteMaintenanceForm";
 import AddMaintenanceForm from "../AddMaintenanceForm";
+import { useState } from "react";
 
 const AllMaintenanceList = ({
   userRole,
@@ -16,77 +17,84 @@ const AllMaintenanceList = ({
   equipments: TEquipment[],
 }) => {
 
+  const [searchInput, setSearchInput] = useState("");
+
+  const searchEquipment = equipments.filter(e => e.name.includes(searchInput.trim())).map(e => e.id);
+  const searchMaintenance = maintenances.filter(m => searchEquipment.includes(m.equipmentId));
 
   return (
-    <Table stickyHeader>
-      <TableHead>
-        <TableRow sx={{ "& .MuiTableCell-root": { fontWeight: "bold", textAlign: "center" } }}>
-          <TableCell>Equipment</TableCell>
-          <TableCell>All</TableCell>
-          <TableCell>Upcoming</TableCell>
-          <TableCell>Complete</TableCell>
-          <TableCell>Overdue</TableCell>
-          { userRole === "admin" && (
-            <TableCell>Admin</TableCell>
-          )}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {(maintenances && maintenances.length > 0) ? maintenances.map(m => {
-          const eq = equipments.find(eq => eq.id === m.equipmentId);
-          return eq && (
-          <TableRow key={m.id} sx={{"& .MuiTableCell-root": { textAlign: "center" }}}>
-            <TableCell>
-              <div className="flex items-center">
-                <div className="h-32 w-32 flex items-center">
-                  <Image src={eq.equipmentImage} className="max-h-full m-auto" alt="eq_image" width={128} height={128} />
-                </div>
-                <div className="ml-2 text-left">
-                  <div className="text-sm font-medium text-gray-900">
-                    {eq.name || "Unknown Equipment"}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {eq.assetId}
-                  </div>
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>{m.totalCount}</TableCell>
-            <TableCell>{m.pendingCount}</TableCell>
-            <TableCell>{m.completeCount}</TableCell>
-            <TableCell>{m.overdueCount}</TableCell>
+    <>
+      <TextField size="small" fullWidth placeholder="Search Maintenance" onChange={e => setSearchInput(e.target.value)} />
+      <Table stickyHeader>
+        <TableHead>
+          <TableRow sx={{ "& .MuiTableCell-root": { fontWeight: "bold", textAlign: "center" } }}>
+            <TableCell>Equipment</TableCell>
+            <TableCell>All</TableCell>
+            <TableCell>Upcoming</TableCell>
+            <TableCell>Complete</TableCell>
+            <TableCell>Overdue</TableCell>
             { userRole === "admin" && (
+              <TableCell>Admin</TableCell>
+            )}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {(searchMaintenance && searchMaintenance.length > 0) ? searchMaintenance.map(m => {
+            const eq = equipments.find(eq => eq.id === m.equipmentId);
+            return eq && (
+            <TableRow key={m.id} sx={{"& .MuiTableCell-root": { textAlign: "center" }}}>
               <TableCell>
-                <div className="flex justify-center gap-2">
-                  <SlideDialog
-                    title="Edit Maintenance Schedule"
-                    Btn={(props) => (
-                      <button {...props}><Edit size={20} className="text-blue-400 hover:text-blue-800 cursor-pointer" /></button>
-                    )}
-                    DialogForm={(props) => (
-                      <AddMaintenanceForm {...props} maintenanceId={m.id} />
-                    )}
-                  />
-                  <SlideDialog
-                    title="Delete Maintenance Record"
-                    Btn={(props) => (
-                      <button {...props}><Trash size={20} className="text-red-400 hover:text-red-800 cursor-pointer" /></button>
-                    )}
-                    DialogForm={(props) => (
-                      <DeleteMaintenanceForm {...props} maintenanceId={m.id} />
-                    )}
-                  />
+                <div className="flex items-center">
+                  <div className="h-32 w-32 flex items-center">
+                    <Image src={eq.equipmentImage} className="max-h-full m-auto" alt="eq_image" width={128} height={128} />
+                  </div>
+                  <div className="ml-2 text-left">
+                    <div className="text-sm font-medium text-gray-900">
+                      {eq.name || "Unknown Equipment"}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {eq.assetId}
+                    </div>
+                  </div>
                 </div>
               </TableCell>
-            ) }
-          </TableRow>
-        )}): (
-          <TableRow>
-            <TableCell colSpan={6}>No maintenance records found. Create a new one to start tracking your equipment</TableCell>
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+              <TableCell>{m.totalCount}</TableCell>
+              <TableCell>{m.pendingCount}</TableCell>
+              <TableCell>{m.completeCount}</TableCell>
+              <TableCell>{m.overdueCount}</TableCell>
+              { userRole === "admin" && (
+                <TableCell>
+                  <div className="flex justify-center gap-2">
+                    <SlideDialog
+                      title="Edit Maintenance Schedule"
+                      Btn={(props) => (
+                        <button {...props}><Edit size={20} className="text-blue-400 hover:text-blue-800 cursor-pointer" /></button>
+                      )}
+                      DialogForm={(props) => (
+                        <AddMaintenanceForm {...props} maintenanceId={m.id} />
+                      )}
+                    />
+                    <SlideDialog
+                      title="Delete Maintenance Record"
+                      Btn={(props) => (
+                        <button {...props}><Trash size={20} className="text-red-400 hover:text-red-800 cursor-pointer" /></button>
+                      )}
+                      DialogForm={(props) => (
+                        <DeleteMaintenanceForm {...props} maintenanceId={m.id} />
+                      )}
+                    />
+                  </div>
+                </TableCell>
+              ) }
+            </TableRow>
+          )}): (
+            <TableRow>
+              <TableCell colSpan={6}>No maintenance records found. Create a new one to start tracking your equipment</TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </>
   )
 }
 
