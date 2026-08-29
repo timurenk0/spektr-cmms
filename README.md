@@ -1,7 +1,8 @@
 # PRIORITY
 - ADD 2 WEEK NOTICE FOR MAINTENANCE TASKS (CRON JOB)
 - Tie total working hours to maintenance schedule (what if inputted value is smaller than current one, maintenance should go backwards, might cause trouble, though I don't give a fuck)
-
+    - Updated when hours increase positively
+    - THINK OF SMARTASSES WHO WILL TRY TO UPDATE WORKING HOURS FROM EDIT EQUIPMENT DIALOG MENU
 
 - Make hours/months and duration inter-dependant
 

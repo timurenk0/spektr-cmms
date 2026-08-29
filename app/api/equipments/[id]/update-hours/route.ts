@@ -35,7 +35,7 @@ export async function PATCH(
             status: 400
         });
         
-        if (workingHours === equipment.totalWorkingHours) {
+        if (workingHours <= equipment.totalWorkingHours) {
             await storage.updateEquipment(equipmentId, { totalWorkingHours: workingHours, lastWorkingHoursEdit: new Date().toISOString().slice(0, 10) });
             return res.json({ message: "Same working hours update" }, { status: 201 });
         }
