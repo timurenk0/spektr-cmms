@@ -116,7 +116,7 @@ export async function PATCH(
 
         const body = await req.json();
         console.log(body)
-        const { isDeleted, reason, workingHours } = body;
+        const { isDeleted, reason } = body;
         
         if (isDeleted) {
             if (!reason) throw new Error("Deletion reason must be provided");
@@ -124,12 +124,6 @@ export async function PATCH(
             await storage.deleteEquipment(equipmentId);
             await activityLogger(user, "delete", `Equipment ${equipmentId} deleted. Reason: ${reason}`, equipmentId);
             return res.json(true, { status: 201 });
-        }
-
-        if (workingHours) {
-            await storage.updateEquipment(equipmentId, { totalWorkingHours: workingHours, lastWorkingHoursEdit: new Date().toISOString().slice(0, 10) });
-            await activityLogger(user, "update", `Equipment ${equipmentId} working hours updated`);
-            return res.json(workingHours, { status: 201 });
         }
 
         console.log("Nothing changed (edge case)");

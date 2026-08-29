@@ -1,6 +1,6 @@
 # PRIORITY
 - ADD 2 WEEK NOTICE FOR MAINTENANCE TASKS (CRON JOB)
-- SEARCH BAR FOR MAINTENANCE LIST (MAKE IT TABLE AND CHANGE STORAGE METHOD TO BE LIKE GET_EQUIPMENT)
+- Tie total working hours to maintenance schedule (what if inputted value is smaller than current one, maintenance should go backwards, might cause trouble, though I don't give a fuck)
 
 
 - Make hours/months and duration inter-dependant
@@ -26,6 +26,7 @@
     - add separate hadOverhaul or overhaulCounter to keep track of remainingLifeSpan and max allowed health score
 
 # FEATURES
+- Search bar for maintenance list (make it table and change storage method to be like get_equipment)
 - Trim EVERY form input
 - Think of old ass equipment with recent overhaul. How to count health index? (input for last overhaul date upon addition)
 - Select thumbnail photo from all photos list

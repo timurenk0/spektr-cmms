@@ -282,7 +282,7 @@ const AddMaintenanceForm = ({
                   maxDate={new Date(new Date().getTime() + (1000 * 86400 * 365))}
                   onChange={(e: PickerValue) => {
                     setServiceStart(e!);
-                    field.onChange(e?.toISOString().slice(0, 10));
+                    field.onChange(e ? format(e, "yyyy-MM-dd") : null);
                   }}
                   slotProps={{
                     textField: {
@@ -304,7 +304,7 @@ const AddMaintenanceForm = ({
                   minDate={serviceStart}
                   maxDate={new Date(new Date().getTime() + (1000 * 86400 * 365 * 5))}
                   onChange={(e: PickerValue) => {
-                    field.onChange(e?.toISOString().slice(0, 10));
+                    field.onChange(e ? format(e, "yyyy-MM-dd") : null);
                   }}
                   slotProps={{
                     textField: {

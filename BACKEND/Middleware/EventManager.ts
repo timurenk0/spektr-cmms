@@ -98,6 +98,7 @@ export function createMaintenanceEvents(
         eventStart.setUTCHours(0, 0, 0, 0);
         
         if (k[0] === "I") {
+            console.log("Entered certification event generation logic...");
             if (!v.months) continue;
 
             while (eventStart <= end) {
@@ -154,18 +155,22 @@ export function createMaintenanceEvents(
         }
        
         while (eventStart <= end) {
+            console.log("Entered level-based event generation logic...");
             const status = Math.floor(differenceInDays(new Date(), eventStart)) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
             const sortedDates = Object.keys(eventMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
         
             const closestDate = sortedDates.findLast(d => d <= eventStart.toISOString().slice(0, 10) && eventMap[d].level > k);
-            const previousEventDate = applyInterval(eventStart, interval, "sub");
             
-            if (closestDate && applyInterval(new Date(closestDate), interval, "add") > eventStart) {
-                eventStart = applyInterval(new Date(eventMap[closestDate].end!), interval, "add");
+            if (closestDate && applyInterval(new Date(closestDate), interval, "add").toISOString().slice(0, 10) > eventStart.toISOString().slice(0, 10)) {
+                console.log("Detected nearby higher-level event");
+                eventStart = applyInterval(new Date(closestDate), interval, "add");
                 eventStart.setUTCHours(0, 0, 0, 0);
                     
                 continue;
             }
+
+            console.log("Exited 'detected nearby higher-level event' logic");
+
 
             if (eventStart > end) break;
 
@@ -186,7 +191,8 @@ export function createMaintenanceEvents(
             };
 
             events.push(event);
-            eventMap[eventStart.toISOString().slice(0, 10)] = event;
+            console.log("Pushed event to the events array");
+            eventMap[eventEnd.toISOString().slice(0, 10)] = event;
             eventStart = applyInterval(eventStart, interval, "add");
             eventStart.setUTCHours(0, 0, 0, 0);
         } 
@@ -196,6 +202,7 @@ export function createMaintenanceEvents(
         if (events[i].start === start.toISOString().slice(0, 10)) events.splice(i, 1);
     }
 
+    console.log("Returning events");
     return events;
 }
 

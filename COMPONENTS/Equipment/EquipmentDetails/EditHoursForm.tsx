@@ -19,7 +19,7 @@ const EditHoursForm = ({
 
     const mutation = useMutation({
         mutationFn: async () => {
-            const res = await fetch(`/api/equipments/${equipmentId}`, {
+            const res = await fetch(`/api/equipments/${equipmentId}/update-hours`, {
                 method: "PATCH",
                 body: JSON.stringify({ workingHours }),
                 credentials: "include"
