@@ -69,7 +69,7 @@ const EquipmentListEl = ({ equipment, user }: { equipment: TEquipment, user: TUs
                 <div className="flex items-center">
                     <div className="h-24 w-24 overflow-hidden flex items-center relative rounded-md">
                         {/* add max-h-[128px] to image if you want the image to resize */}
-                        <Image loading="lazy" className="max-w-24 rounded-md" src={equipment.equipmentImage ? equipment.equipmentImage : "/window.svg"} width={96} height={96} alt="Equipment image" />
+                        <Image loading="lazy" unoptimized className="max-w-24 rounded-md" src={equipment.equipmentImage ? equipment.equipmentImage : "/window.svg"} width={96} height={96} alt="Equipment image" />
                         {
                         equipment.hasOverhaul ? 
                             <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-red-600/50 p-2 text-xs text-white font-bold">ONGOING OVERHAUL</h1>

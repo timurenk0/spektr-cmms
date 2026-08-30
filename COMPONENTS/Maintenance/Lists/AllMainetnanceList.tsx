@@ -46,7 +46,7 @@ const AllMaintenanceList = ({
               <TableCell>
                 <div className="flex items-center">
                   <div className="h-32 w-32 flex items-center">
-                    <Image src={eq.equipmentImage} className="max-h-full m-auto" alt="eq_image" width={128} height={128} />
+                    <Image loading="lazy" unoptimized src={eq.equipmentImage} className="max-h-full m-auto" alt="eq_image" width={128} height={128} />
                   </div>
                   <div className="ml-2 text-left">
                     <div className="text-sm font-medium text-gray-900">

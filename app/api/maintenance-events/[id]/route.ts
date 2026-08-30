@@ -62,7 +62,7 @@ export async function PATCH(
             status: 404
         });
 
-        if (Number.isNaN(equipment.healthIndex)) return buildCustomError({
+        if (!equipment.healthIndex) return buildCustomError({
             code: ERROR_CODES.UNKNOWN_ERROR,
             message: "Equipment health index is null",
             suggestion: "Probably a bug. Please try to remove and add the maintenance schedule for this equipment. Otherwise contact development team",
@@ -101,8 +101,8 @@ export async function PATCH(
             return res.json(true, { status: 201 });
         }
         
-        const eventStatus = Math.abs(differenceInDays(body.performedAt, event.scheduledAt)) < 10 ? "overdue" : 
-                            "incomplete"
+        // const eventStatus = (differenceInDays(body.performedAt, event.scheduledAt)) < 10 ? "overdue" : 
+        //                     "incomplete"
 
         
         const updatedEvent = await storage.updateMaintenanceEvent(eventId, body);
@@ -129,7 +129,7 @@ export async function PATCH(
         }
         
         // Update equipment health score
-        const penaltyScore =  storage.subtractPenaltyScore({...updatedEvent, isOverdue: eventStatus === "overdue"});
+        const penaltyScore =  storage.subtractPenaltyScore({...updatedEvent, isOverdue: false});
         await storage.updateEquipment(equipment.id, { healthIndex: equipment.healthIndex-penaltyScore })
         
         return res.json(updatedEvent, { status: 201 });            

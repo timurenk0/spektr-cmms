@@ -85,7 +85,7 @@ const Login = () => {
             onSubmit={form.handleSubmit(onSubmit, (error) => console.error(error))}
             className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:w-[30vw] max-h-[90vh] bg-[#ffffffa6] border-2 border-green-600 p-6 sm:p-8 rounded-xl space-y-4 overflow-auto"
         >
-            <Image src="/spektr-logo.png" width={256} height={256} alt="SpektrGroup logo" className="mx-auto" />
+            <Image unoptimized src="/spektr-logo.png" width={256} height={256} alt="SpektrGroup logo" className="mx-auto" />
             <p className="text-center text-sm text-gray-600">Owned and managed by SpektrGroup</p>
             <h1 className="text-2xl font-bold mt-6">Sign In</h1>
             <TextField

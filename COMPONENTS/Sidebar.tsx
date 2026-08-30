@@ -132,6 +132,7 @@ const Sidebar = () => {
                 <Link href="/settings" className='flex'>
                     <div className='rounded-full border border-gray-400 p-1 me-2 bg-gray-100'>
                         <Image
+                            unoptimized
                             src="https://imgs.search.brave.com/cbRsVEjsNvKT6LRtyrUsWg_th6qPs7DAMD5BtWhHjeU/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jZG4t/aWNvbnMtcG5nLmZs/YXRpY29uLmNvbS81/MTIvMTIyLzEyMjQ2/Mi5wbmc"
                             width={32}
                             height={32}

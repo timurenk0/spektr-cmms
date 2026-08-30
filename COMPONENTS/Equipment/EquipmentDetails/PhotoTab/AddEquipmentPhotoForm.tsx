@@ -151,7 +151,7 @@ const AddEquipmentPhotoForm = ({ equipmentId, onClose }: { equipmentId: number, 
         {localEquipmentImage && (
             <div className="mt-2">
                 <p className="text-sm">Image preview:</p>
-                <Image src={localEquipmentImage} width={32} height={32} alt="equipment_image_preview" className="w-auto h-auto max-w-64 max-h-64 rounded-md mt-1" />
+                <Image unoptimized src={localEquipmentImage} width={32} height={32} alt="equipment_image_preview" className="w-auto h-auto max-w-64 max-h-64 rounded-md mt-1" />
             </div>
         )}
         <div className="mt-6 flex justify-end gap-4">

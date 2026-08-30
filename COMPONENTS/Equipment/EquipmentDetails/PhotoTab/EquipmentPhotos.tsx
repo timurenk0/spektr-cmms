@@ -31,12 +31,12 @@ const EquipmentPhotos = ({ equipmentId, userRole }: { equipmentId: number, userR
     if (isLoading) return (
         <Skeleton>
             <div className='flex gap-4'>
-                <Image src={"/window.svg"} alt="" width={120} height={120} />
-                <Image src={"/window.svg"} alt="" width={120} height={120} />
-                <Image src={"/window.svg"} alt="" width={120} height={120} />
-                <Image src={"/window.svg"} alt="" width={120} height={120} />
-                <Image src={"/window.svg"} alt="" width={120} height={120} />
-                <Image src={"/window.svg"} alt="" width={120} height={120} />
+                <Image unoptimized src={"/window.svg"} alt="" width={120} height={120} />
+                <Image unoptimized src={"/window.svg"} alt="" width={120} height={120} />
+                <Image unoptimized src={"/window.svg"} alt="" width={120} height={120} />
+                <Image unoptimized src={"/window.svg"} alt="" width={120} height={120} />
+                <Image unoptimized src={"/window.svg"} alt="" width={120} height={120} />
+                <Image unoptimized src={"/window.svg"} alt="" width={120} height={120} />
             </div>
         </Skeleton>
     )

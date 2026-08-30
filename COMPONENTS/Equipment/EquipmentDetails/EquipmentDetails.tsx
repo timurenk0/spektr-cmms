@@ -157,7 +157,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
           <div className="flex items-start justify-between">
             <div className="flex items-center">
               <div className="mr-6 relative">
-                <Image src={equipment.equipmentImage} width={200} height={200} className="max-w-[200px] max-h-[200px] rounded-md object-cover border" alt="Equipment image" />
+                <Image unoptimized src={equipment.equipmentImage} width={200} height={200} className="max-w-[200px] max-h-[200px] rounded-md object-cover border" alt="Equipment image" />
                 {
                 equipment.hasOverhaul ?
                   <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-red-600/50 p-2 text-xs text-white font-bold">ONGOING OVERHAUL</h1>

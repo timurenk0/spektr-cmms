@@ -2,6 +2,7 @@
 - IF 0 AVERAGE DAILY HOURS AFTER TOTAL WORKING HOURS EDIT, MOVE ALL EVENTS TO THE INTERVAL
     - check again if months are coming first than hours 'cause the hours are not moving but time is
 - ADD 2 WEEK NOTICE FOR MAINTENANCE TASKS (CRON JOB)
+- ADD OVERDUE LOGIC
 - Change calendar dates to dd/MM/yyyy
 - Overhaul event make stretch if submission date is different than end date
 - Overhaul edit maintenance schedule after overhaul submission
