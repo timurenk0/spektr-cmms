@@ -19,7 +19,7 @@ const AllMaintenanceList = ({
 
   const [searchInput, setSearchInput] = useState("");
 
-  const searchEquipment = equipments.filter(e => e.name.includes(searchInput.trim())).map(e => e.id);
+  const searchEquipment = equipments.filter(e => e.name.toLowerCase().includes(searchInput.trim())).map(e => e.id);
   const searchMaintenance = maintenances.filter(m => searchEquipment.includes(m.equipmentId));
 
   return (
