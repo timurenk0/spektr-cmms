@@ -1,18 +1,25 @@
 # PRIORITY
+- IF 0 AVERAGE DAILY HOURS AFTER TOTAL WORKING HOURS EDIT, MOVE ALL EVENTS TO THE INTERVAL
+    - check again if months are coming first than hours 'cause the hours are not moving but time is
+- ADD 2 WEEK NOTICE FOR MAINTENANCE TASKS (CRON JOB)
+- Change calendar dates to dd/MM/yyyy
+- Overhaul event make stretch if submission date is different than end date
+- Overhaul edit maintenance schedule after overhaul submission
+- Tie total working hours to maintenance schedule (what if inputted value is smaller than current one, maintenance should go backwards, might cause trouble, though I don't give a fuck)
+    - Updated when hours increase positively
+    - THINK OF SMARTASSES WHO WILL TRY TO UPDATE WORKING HOURS FROM EDIT EQUIPMENT DIALOG MENU
+
+- Make hours/months and duration inter-dependant
+
 - Calendar event add equipment name to the title (make copyable)
-- EventManager normal first day deletion 
-- Changing working hours in equipment details page adjusts maintenance schedule
-- Edit equipment usefulLifespan updates health index
-- Out of service status deletes future maintenance
-- Health index MIN value at 30% (Overhaul required banner)
-- REMOVE .toSpliced() in EventManager and think of normal logic
+
+- Changing working hours in equipment details page adjusts maintenance schedule (check!!! if edit was made a week ago but equipment worked for 3 days only during that week)
 - Working Hours edit 2+ hours moves the maintenance schedule
-- Reduce health index after incomplete emergency and overhaul???
-    - What to do on incomplete emergency/overhaul event????
-- Edit maintenance logic (leave as it is - ok, but dangerous. adds events, not replaces) (add overhaulCounter )
 - Maint working hours not enough (every 200h, only 100h passed)
-- Disable maintenance event submission button after first click (document upload duplication issue)
-    - Move all document upload to backend to ensure submission atomicity (no duplicate requests from frontend atleast)
+
+- Health index MIN value at 30% (Overhaul required banner)
+
+- Edit maintenance logic (leave as it is - ok, but dangerous. adds events, not replaces) (add overhaulCounter )
 
 
 # ISSUES
@@ -25,8 +32,10 @@
     - add separate hadOverhaul or overhaulCounter to keep track of remainingLifeSpan and max allowed health score
 
 # FEATURES
-- Select thumbnail photo from all photos list
+- Add Locations
 - Trim EVERY form input
+- Think of old ass equipment with recent overhaul. How to count health index? (input for last overhaul date upon addition)
+- Select thumbnail photo from all photos list
 - Search bar for maintenance list
 - Change the TabList in theme to "legacy" version
 - User position in the company for laughs and giggles (maintenance event by position separation in the future)

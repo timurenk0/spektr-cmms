@@ -17,25 +17,25 @@ const Header = ({ title }: { title: string }) => {
 
             {title === "Calendar" && (
                 <div className="flex items-center space-x-4 pointer-events-none">
-                    <div className="bg-emerald-200 px-2 rounded-lg">
+                    <div className="bg-emerald-400 px-2 rounded-lg">
                         <p>Level A Event</p>
                     </div>
-                    <div className="bg-yellow-200 px-2 rounded-lg">
+                    <div className="bg-yellow-400 px-2 rounded-lg">
                         <p>Level B Event</p>
                     </div>
-                    <div className="bg-blue-200 px-2 rounded-lg">
+                    <div className="bg-blue-400 px-2 rounded-lg">
                         <p>Level C Event</p>
                     </div>
-                    <div className="bg-purple-200 px-2 rounded-lg">
+                    <div className="bg-purple-400 px-2 rounded-lg">
                         <p>Level D Event</p>
                     </div>
-                    <div className="bg-teal-200 px-2 rounded-lg">
-                        <p>Interval Event</p>
+                    <div className="bg-orange-400 px-2 rounded-lg">
+                        <p>Certification Event</p>
                     </div>
                     <div className="police-tape px-2 rounded-lg">
                         <p>Emergency Event</p>
                     </div>
-                    <div className="bg-violet-200 px-2 rounded-lg">
+                    <div className="bg-violet-400 px-2 rounded-lg">
                         <p>Overhaul Event</p>
                     </div>
                 </div>

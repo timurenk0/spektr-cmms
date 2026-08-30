@@ -69,34 +69,6 @@ export default function AddEquipmentForm(
         enabled: !!equipmentId
     });
 
-    
-    // const uploadImage = async (file: File | undefined) => {
-    //     try {
-    //         if (!file) throw new Error("No file selected");
-
-    //         const formData = new FormData();
-    //         formData.append("file", file);
-            
-    //         const response = await fetch("/api/photos/thumb", {
-    //             method: "POST",
-    //             body: formData 
-    //         });
-
-    //         const data = await response.json();
-    //         if (!response.ok) {
-    //             const message = data.error || `Request failed: ${response.status} ${response.statusText}`;
-    //             throw new Error(message);
-    //         };
-
-    //         setEquipmentImage(data.equipmentImage);
-    //         return data.equipmentImage;            
-    //     } catch (error) {
-    //         const msg = error instanceof Error ? error.message : "Unknown error";
-    //         toast.error(`Failed to upload image: ${msg}`);
-    //         return;
-    //     }
-    // };
-
     const uploadImage = async (file: File | undefined) => {
         try {
             if (!file) throw new Error("No file selected");     
@@ -223,9 +195,14 @@ export default function AddEquipmentForm(
             const imageUrl = values.image ? await uploadImage(values.image) : equipment?.equipmentImage;
             if (!imageUrl) throw new Error("Failed to upload image");
             
+            if (values.totalWorkingHours) {
+                values.lastWorkingHoursEdit = new Date().toISOString().slice(0, 10);
+            }
+            
             const url = `/api/equipments${equipmentId ? `/${equipmentId}` : ""}`;
             const method = equipmentId ? "PUT" : "POST";
 
+            console.log(values);
             const response = await fetch(url, {
                 method,
                 headers: {"Content-Type": "application/json"},
@@ -234,6 +211,7 @@ export default function AddEquipmentForm(
                     equipmentImage: imageUrl || values.equipmentImage
                 })
             });
+
 
             const data = await response.json().catch(() => null);
             console.log(data.error);
@@ -249,6 +227,8 @@ export default function AddEquipmentForm(
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["equipment-update", equipmentId] })
+            queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] })
+            queryClient.invalidateQueries({ queryKey: ["/api/equipments?concise=true"] })
             queryClient.invalidateQueries({ queryKey: ["equipment-list"] });
             queryClient.invalidateQueries({ queryKey: ["/api/equipments?concise=true"] });
             toast.success(`Equipment ${equipmentId ? "updated" : "added"} successfully`, {
@@ -592,7 +572,7 @@ export default function AddEquipmentForm(
                     </FormControl>
                 )}
               />
-              { (requirements && requirements !== "calibration and/or testing") && (
+              { (equipment && !equipment.totalWorkingHours) ? ((requirements && requirements !== "calibration and/or testing") || (equipment.requirements !== "calibration and/or testing")) && (
                 <Controller
                     name="totalWorkingHours"
                     control={form.control}
@@ -616,7 +596,7 @@ export default function AddEquipmentForm(
                         />
                     )}
                 />
-              ) }
+              ) : "" }
               
 
               <div className="col-span-2 flex justify-end gap-x-2">

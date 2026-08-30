@@ -55,6 +55,39 @@ export async function PUT(
         // Parse equipment data from the request body with DB schema for validation.
         const body = await req.json();
         const equipmentValidatedData = insertEquipmentSchema.parse(body);
+    
+        
+        // Recalculate equipment health index if usefulLifeSpan value is updated
+        if (body.usefulLifeSpan || body.dateOfManufacturing) {
+            const maintenance = await storage.getMaintenancesByEquipmentId(equipmentId);
+            console.log(maintenance);
+
+            if (maintenance) {
+                let givenHealthIndex = maintenance.givenHealthIndex;
+                console.log("given health index:", givenHealthIndex)
+
+                let newHealthIndex = await storage.calculateHealthIndex(equipmentId, givenHealthIndex, body.usefulLifeSpan);
+                console.log("new health index:", newHealthIndex);
+                
+                const maintenanceEvents = await storage.getMaintenanceEvents(user.tenantId, "incomplete", maintenance.serviceStartDate, new Date().toISOString().slice(0, 10));
+                let penaltyScore = 0;
+                for (let ev of maintenanceEvents) {
+                    penaltyScore += storage.subtractPenaltyScore({ ...ev, isOverdue: false });
+                }
+
+                console.log("newHealthIndex", newHealthIndex-penaltyScore)
+
+                equipmentValidatedData.healthIndex = newHealthIndex - penaltyScore;
+                equipment.usefulLifeSpan = body.usefulLifeSpan;
+            }
+        }
+
+        console.log(body)
+        if (body.requirements && body.requirements === "calibration and/or testing") {
+            console.log("Null the total working hours value");
+            equipmentValidatedData.totalWorkingHours = null;
+            equipmentValidatedData.lastWorkingHoursEdit = null;
+        }
         
         // Updated specified equpiment with validated data.
         const updatedEquipment = await storage.updateEquipment(equipmentId, equipmentValidatedData);
@@ -81,12 +114,6 @@ export async function PATCH(
         const equipmentId = parseInt(id);
         if (isNaN(equipmentId)) return res.json({ error: "Invalid equipment ID" }, { status: 400 });
         
-        const body = await req.json();
-        console.log(body)
-        const { isDeleted, status, reason, hasOverhaul, finishDate } = body;
-        
-        
-        // Fetch specified equipment by ID and check if it exists.
         const equipment = await storage.getEquipment(equipmentId);
         if (!equipment) return buildCustomError({
             code: ERROR_CODES.NOT_FOUND_ERROR,
@@ -94,112 +121,19 @@ export async function PATCH(
             status: 404
         });
 
-        if (isDeleted && reason) {
+        const body = await req.json();
+        console.log(body)
+        const { isDeleted, reason } = body;
+        
+        if (isDeleted) {
+            if (!reason) throw new Error("Deletion reason must be provided");
+
             await storage.deleteEquipment(equipmentId);
             await activityLogger(user, "delete", `Equipment ${equipmentId} deleted. Reason: ${reason}`, equipmentId);
             return res.json(true, { status: 201 });
         }
-        
-        if (hasOverhaul) { 
-            if (!finishDate) {
-                return buildCustomError({
-                    code: ERROR_CODES.VALIDATION_ERROR,
-                    field: "finishDate",
-                    message: "Finish date value not passed",
-                    suggestion: "Double-check form input fields",
-                    status: 400
-                });
-            }
 
-            const maintenance = await storage.getMainteancesByEquipmentId(equipment.id);
-            if (!maintenance) return buildCustomError({
-                code: "NO_ACTIVE_MAINTENANCE",
-                message: "Equipment status cannot be changed to 'under repair' without active maintenance",
-                suggestion: "Start a maintenance operation for this equipment first",
-                status: 409
-            });
-
-            await storage.cancelCurrentMaintenanceForEquipment(equipment.id);
-            
-            await storage.addMaintenanceEvents([
-                {
-                    tenantId: equipment.tenantId,
-                    equipmentId: equipment.id,
-                    maintenanceId: maintenance.id,
-                    level: "O",
-                    title: `${equipment.assetId} overhaul`,
-                    description: `Overhaul maintenance for equipment ${equipment.name}`,
-                    start: new Date().toISOString().slice(0, 10),
-                    end: finishDate,
-                    status: "pending",
-                }
-            ]);
-
-
-            await storage.updateEquipment(equipmentId, { hasOverhaul, status: "out of service" });
-            await activityLogger(user, "update", `Overhaul initiated for equipment ${equipmentId}`, equipmentId);
-            return res.json(hasOverhaul, { status: 201 });
-        }
-
-        if (status) {
-            if (status === "operational" && !await storage.getEmergencyMaintenanceEventByEquipmentId(equipment.id) && !await storage.getOverhaulMaintenanceEventByEquipmentId(equipment.id)) {
-                await storage.updateEquipment(equipmentId, { status: "operational", hasOverhaul: false });
-                await activityLogger(user, "update", `Equipment ${equipmentId} status set as Operational`);
-
-                return res.json(true, { status: 201 });
-            }
-            if (await storage.getEmergencyMaintenanceEventByEquipmentId(equipment.id)) {
-                return buildCustomError({
-                    code: "ONGOING_EMERGENCY",
-                    field: "status",
-                    message: "Can't change equipment status during emergency maintenance",
-                    suggestion: "Complete emergency maintenance event in the calendar first",
-                    status: 400
-                });
-            }
-            if (equipment.hasOverhaul) {
-                return buildCustomError({
-                    code: "ONGOING_OVERHAUL",
-                    field: "status",
-                    message: "Can't change equipment status during overhaul",
-                    suggestion: "Complete overhaul event in the calendar first",
-                    status: 400
-                });
-            }
-
-            if (status === "under repair") {
-                const maintenance = await storage.getMainteancesByEquipmentId(equipment.id);
-                if (!maintenance) return buildCustomError({
-                    code: "NO_ACTIVE_MAINTENANCE",
-                    message: "Equipment status cannot be changed to 'under repair' without active maintenance",
-                    suggestion: "Start a maintenance operation for this equipment first",
-                    status: 409
-                });
-                
-                const today = new Date().toISOString().slice(0, 10);
-                const event: InsertMaintenanceEvent = {
-                    equipmentId: equipment.id,
-                    maintenanceId: maintenance.id,
-                    title: `${equipment.assetId} emergency repair`,
-                    description: `Emergency repair for equipment ${equipment.name} ${equipment.manufacturer}`,
-                    level: "E",
-                    status: "pending",
-                    scheduledAt: today,
-                    start: today,
-                    tenantId: equipment.tenantId,
-                    end: null,
-                    performedAt: null
-                };
-                
-                await storage.addMaintenanceEvents([event]);
-                // await activityLogger(user, "add", `Emergency repair for equipment ${equipment.name} started!`, equipment.id);
-            }
-
-            equipment.status !== "out of service" && await storage.updateEquipment(equipmentId, { status });
-            await activityLogger(user, "update", `Equipment ${equipment.name} status updated to ${status}`, equipmentId);
-            return res.json(true, { status: 201 });
-        }
-
+        console.log("Nothing changed (edge case)");
         return res.json({ message: "Nothing to change (edge case)" }, { status: 200 });        
     } catch (error: unknown) {
         return buildError(error);

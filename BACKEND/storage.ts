@@ -187,8 +187,8 @@ export class DatabaseStorage {
             .from(maintenanceEvents)
             .where(
                 and(
-                eq(maintenanceEvents.equipmentId, equipments.id),
-                gt(maintenanceEvents.start, sql`CURRENT_DATE`),
+                    eq(maintenanceEvents.equipmentId, equipments.id),
+                    gt(maintenanceEvents.start, sql`CURRENT_DATE`),
                 ),
             )
             .orderBy(asc(maintenanceEvents.start))
@@ -206,6 +206,9 @@ export class DatabaseStorage {
                     equipmentImage: equipments.equipmentImage,
                     status: equipments.status,
                     hasOverhaul: equipments.hasOverhaul,
+                    hasEmergency: equipments.hasEmergency,
+                    dateOfManufacturing: equipments.dateOfManufacturing,
+                    usefulLifeSpan: equipments.usefulLifeSpan,
                     lastEvent: lastEventSubquery.lastEvent,
                     nextEvent: nextEventSubquery.nextEvent,
                     requirements: equipments.requirements
@@ -344,23 +347,26 @@ export class DatabaseStorage {
         return (await db.select().from(maintenances).where(eq(maintenances.id, id)))[0];
     }
     
-    async getMainteancesByEquipmentId(id: number): Promise<Maintenance | undefined> {
+    async getMaintenancesByEquipmentId(id: number): Promise<Maintenance | undefined> {
         return (await db.select().from(maintenances).where(eq(maintenances.equipmentId, id)))[0];
     }
     
     async addMaintenance(insertMaintenance: InsertMaintenance, equipment: Equipment, transaction?: NeonDatabase<Schema>): Promise<Maintenance> {
         const hasValidLevels = [
-            { duration: insertMaintenance.levelADuration, hours: insertMaintenance.levelAHours },
-            { duration: insertMaintenance.levelBDuration, hours: insertMaintenance.levelBHours },
-            { duration: insertMaintenance.levelCDuration, hours: insertMaintenance.levelCHours },
-            { duration: insertMaintenance.levelDDuration, hours: insertMaintenance.levelDHours },
-            { duration: insertMaintenance.levelIDuration1, hours: insertMaintenance.levelIMonths1 },
-            { duration: insertMaintenance.levelIDuration2, hours: insertMaintenance.levelIMonths2 },
-        ].some(level => level.duration && level.duration > 0 && level.hours && level.hours > 0);
+            { duration: insertMaintenance.levelADuration, hours: insertMaintenance.levelAHours, months: insertMaintenance.levelAMonths },
+            { duration: insertMaintenance.levelBDuration, hours: insertMaintenance.levelBHours, months: insertMaintenance.levelBMonths  },
+            { duration: insertMaintenance.levelCDuration, hours: insertMaintenance.levelCHours, months: insertMaintenance.levelCMonths  },
+            { duration: insertMaintenance.levelDDuration, hours: insertMaintenance.levelDHours, months: insertMaintenance.levelDMonths  },
+            { duration: insertMaintenance.levelI1Duration, months: insertMaintenance.levelI1Months },
+            { duration: insertMaintenance.levelI2Duration, months: insertMaintenance.levelI2Months },
+            { duration: insertMaintenance.levelI3Duration, months: insertMaintenance.levelI3Months },
+            { duration: insertMaintenance.levelI4Duration, months: insertMaintenance.levelI4Months },
+            { duration: insertMaintenance.levelI5Duration, months: insertMaintenance.levelI5Months },
+        ].some(level => (level.duration && level.duration > 0) && ((level.hours && level.hours > 0) || (level.months && level.months > 0)));
         // if (!hasValidLevels) throw new Error("At least one maintenance level must have hours/duration values > 0");
         if (!hasValidLevels) throw new CustomApiError({
             code: "VALIDATION_ERROR",
-            message: "At least one of levels should have both hours and duration values",
+            message: "At least one of levels should have both hours/months and duration values",
             suggestion: "Double-check the submitted form fields",
             status: 400
         });
@@ -388,16 +394,19 @@ export class DatabaseStorage {
         transaction?: NeonDatabase<Schema>
     ): Promise<Maintenance | undefined> {
         const hasValidLevels = [
-            { duration: updateData.levelADuration, hours: updateData.levelAHours },
-            { duration: updateData.levelBDuration, hours: updateData.levelBHours },
-            { duration: updateData.levelCDuration, hours: updateData.levelCHours },
-            { duration: updateData.levelDDuration, hours: updateData.levelDHours },
-            { duration: updateData.levelIDuration1, hours: updateData.levelIMonths1 },
-            { duration: updateData.levelIDuration2, hours: updateData.levelIMonths2 },
-        ].some(level => level.duration && level.duration > 0 && level.hours && level.hours > 0);
+            { duration: updateData.levelADuration, hours: updateData.levelAHours, months: updateData.levelAMonths },
+            { duration: updateData.levelBDuration, hours: updateData.levelBHours, months: updateData.levelBMonths  },
+            { duration: updateData.levelCDuration, hours: updateData.levelCHours, months: updateData.levelCMonths  },
+            { duration: updateData.levelDDuration, hours: updateData.levelDHours, months: updateData.levelDMonths  },
+            { duration: updateData.levelI1Duration, months: updateData.levelI1Months },
+            { duration: updateData.levelI2Duration, months: updateData.levelI2Months },
+            { duration: updateData.levelI3Duration, months: updateData.levelI3Months },
+            { duration: updateData.levelI4Duration, months: updateData.levelI4Months },
+            { duration: updateData.levelI5Duration, months: updateData.levelI5Months },
+        ].some(level => (level.duration && level.duration > 0) && (level.hours && level.hours > 0) || (level.months && level.months > 0));
         if (!hasValidLevels) throw new CustomApiError({
             code: "VALIDATION_ERROR",
-            message: "At least one of levels should have both hours and duration values",
+            message: "At least one of levels should have both hours/months and duration values",
             suggestion: "Double-check the submitted form fields",
             status: 400
         });
@@ -462,7 +471,7 @@ export class DatabaseStorage {
             status: maintenanceEvents.status,
             reason: maintenanceEvents.reason,
             isOverdue: sql<boolean>`
-                CURRENT_DATE - ${maintenanceEvents.start} > 3 AND ${maintenanceEvents.status} != 'complete'
+                CURRENT_DATE - ${maintenanceEvents.start} > 3 AND ${maintenanceEvents.status} != 'complete' AND ${maintenanceEvents.level} != 'E' AND ${maintenanceEvents.level} != 'O'
             `,
             color: sql<string>`
                 CASE
@@ -473,8 +482,11 @@ export class DatabaseStorage {
                             WHEN 'C' THEN 'oklch(70.7% 0.165 254.624)'
                             WHEN 'D' THEN 'oklch(43.8% 0.218 303.724)'
                             WHEN 'E' THEN 'oklch(0.4915 0.1306 49.65)'
-                            WHEN 'I1' THEN 'oklch(.704 .14 182.503)'
-                            WHEN 'I2' THEN 'oklch(.704 .14 182.503)'
+                            WHEN 'I1' THEN 'oklch(75% 0.183 55.934)'
+                            WHEN 'I2' THEN 'oklch(75% 0.183 55.934)'
+                            WHEN 'I3' THEN 'oklch(75% 0.183 55.934)'
+                            WHEN 'I4' THEN 'oklch(75% 0.183 55.934)'
+                            WHEN 'I5' THEN 'oklch(75% 0.183 55.934)'
                             WHEN 'O' THEN 'oklch(43.2% 0.232 292.759)'
                             ELSE '#4D96FF'
                         END
@@ -487,8 +499,11 @@ export class DatabaseStorage {
                             WHEN 'C' THEN 'oklch(42.4% 0.199 265.638)'
                             WHEN 'D' THEN 'oklch(71.4% 0.203 305.504)'
                             WHEN 'E' THEN 'oklch(0.559643 0.192567 35.8054)'
-                            WHEN 'I1' THEN 'oklch(.511 .096 186.391)'
-                            WHEN 'I2' THEN 'oklch(.511 .096 186.391)'
+                            WHEN 'I1' THEN 'oklch(64.6% 0.222 41.116)'
+                            WHEN 'I2' THEN 'oklch(64.6% 0.222 41.116)'
+                            WHEN 'I3' THEN 'oklch(64.6% 0.222 41.116)'
+                            WHEN 'I4' THEN 'oklch(64.6% 0.222 41.116)'
+                            WHEN 'I5' THEN 'oklch(64.6% 0.222 41.116)'
                             WHEN 'O' THEN 'oklch(60.6% 0.25 292.717)'
                             ELSE '#4D96FF'
                         END
@@ -513,17 +528,17 @@ export class DatabaseStorage {
         const upcomingEvents = (await db.select().from(maintenanceEvents).
                             where(
                                 and(
-                                    tenantWhere,
-                                    gte(maintenanceEvents.start, sql`CURRENT_DATE`)
+                                    gte(maintenanceEvents.start, sql`CURRENT_DATE`),
+                                    tenantWhere
                                 )
                             )).length;
 
         const overdueEvents = (await db.select().from(maintenanceEvents).
                             where(
                                 and(
-                                    tenantWhere,
                                     lt(maintenanceEvents.start, sql`CURRENT_DATE`),
-                                    eq(maintenanceEvents.status, "pending")
+                                    eq(maintenanceEvents.status, "pending"),
+                                    tenantWhere
                                 )
                             )).length;
 
@@ -532,16 +547,16 @@ export class DatabaseStorage {
         const completeEvents = (await db.select().from(maintenanceEvents).
                             where(
                                 and(
-                                    tenantWhere,
-                                    eq(maintenanceEvents.status, "complete")
+                                    eq(maintenanceEvents.status, "complete"),
+                                    tenantWhere
                                 )
                             )).length;
 
         const incompleteEvents = (await db.select().from(maintenanceEvents).
                             where(
                                 and(
-                                    tenantWhere,
                                     eq(maintenanceEvents.status, "incomplete"),
+                                    tenantWhere
                                 )
                             )).length;
 
@@ -869,15 +884,19 @@ export class DatabaseStorage {
     /* =========================================== Miscellaneous Methods ====================================================== */
     async calculateHealthIndex(
         equipmentId: number,
-        givenHealthIndex: number | undefined | null
+        givenHealthIndex: number | undefined | null,
+        newUsefulLifeSpan?: number | null
     ) {
         const equipment = await this.getEquipment(equipmentId);
         if (!equipment) throw new Error("No equipment found");
         if (!givenHealthIndex) throw new Error("No given health index");
 
-        const { usefulLifeSpan, dateOfManufacturing } = equipment;
+        const { dateOfManufacturing } = equipment;
+        const usefulLifeSpan = newUsefulLifeSpan ?? equipment.usefulLifeSpan;
+        console.log("usefulLifeSpan", usefulLifeSpan);
 
         const monthlyHealthDrop = Number((100 / usefulLifeSpan).toFixed(2));
+        console.log("monthlyHealthDrop", monthlyHealthDrop);
 
         let idealHealthIndex = Math.max(0, 100 - differenceInCalendarMonths(Date(), dateOfManufacturing) * monthlyHealthDrop);
 
@@ -889,7 +908,7 @@ export class DatabaseStorage {
         return trueHealthIndex;
     }
 
-    async subtractPenaltyScore(event: (MaintenanceEvent & { isOverdue: boolean })) {
+    subtractPenaltyScore(event: (MaintenanceEvent & { isOverdue: boolean })) {
         const levelCoeffs: Record<string, number> = {
             "A": 1,
             "B": 2,
@@ -912,7 +931,8 @@ export class DatabaseStorage {
         console.log(penalty);
 
         // update event in the db
-        return await db.update(equipments).set({ healthIndex: sql`${equipments.healthIndex} - ${penalty}` }).where(eq(equipments.id, event.equipmentId));
+        // return await db.update(equipments).set({ healthIndex: sql`${equipments.healthIndex} - ${penalty}` }).where(eq(equipments.id, event.equipmentId));
+        return penalty;
     }
 
     async subtractMonthlyHealthDrop(): Promise<void> {
@@ -958,30 +978,36 @@ export class DatabaseStorage {
         }
         
         try {
-        const result = await db.update(maintenanceEvents)
-            .set({
-                status: "incomplete"
-            })
-            .where(
-                and(
-                    gt(sql`CURRENT_DATE - ${maintenanceEvents.start}`, 3),
-                    eq(maintenanceEvents.status, "pending"),
-                )
-            );
-        
-        await db.update(systemState).set({ updatedAt: sql`CURRENT_DATE` }).where(eq(systemState.name, STATE_NAME));
-        
+            const result = await db.update(maintenanceEvents)
+                .set({
+                    status: "incomplete"
+                })
+                .where(
+                    and(
+                        gt(sql`CURRENT_DATE - ${maintenanceEvents.start}`, 3),
+                        eq(maintenanceEvents.status, "pending"),
+                        not(
+                            eq(maintenanceEvents.level, "E")
+                        ),
+                        not(
+                            eq(maintenanceEvents.level, "O")
+                        )
+                    )
+                );
+            
+            await db.update(systemState).set({ updatedAt: sql`CURRENT_DATE` }).where(eq(systemState.name, STATE_NAME));
+            
 
-        const updatedCount = Number(result.rowCount ??  0);
+            const updatedCount = Number(result.rowCount ??  0);
+            
+            
+            if (updatedCount > 0) {
+                console.log(`[STORAGE] Marked ${updatedCount} events as incomplete`);
+            } else {
+                console.log(`[STORAGE] Failed to update events status`)
+            }
         
-        
-        if (updatedCount > 0) {
-            console.log(`[STORAGE] Marked ${updatedCount} events as incomplete`);
-        } else {
-            console.log(`[STORAGE] Failed to update events status`)
-        }
-    
-        await this.updateState(STATE_NAME);
+            await this.updateState(STATE_NAME);
         } catch (err: unknown) {
             if (err instanceof Error) {
                 console.error(`[STORAGE] ${err.message}`);

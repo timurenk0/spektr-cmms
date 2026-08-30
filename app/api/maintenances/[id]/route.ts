@@ -2,7 +2,7 @@ import { insertMaintenanceSchema } from "@/BACKEND/Database/schema";
 import { validateUser } from "@/BACKEND/Middleware/AuthService";
 import { storage } from "@/BACKEND/storage";
 import activityLogger from "@/BACKEND/Utils/activityLogger";
-import buildError, { buildCustomError, ERROR_CODES } from "@/BACKEND/Utils/errorBuilder";
+import buildError, { buildCustomError, CustomApiError, ERROR_CODES } from "@/BACKEND/Utils/errorBuilder";
 import { NextRequest, NextResponse as res } from "next/server";
 
 
@@ -43,7 +43,7 @@ export async function PATCH(
         if (isNaN(maintenanceId)) return res.json({ error: "Invalid maintenance ID" }, { status: 400 });
 
         const body = await req.json();
-        const { reason, ...mData } = body;
+        const { reason } = body;
 
         
         const maintenance = await storage.getMaintenance(maintenanceId);
@@ -63,23 +63,18 @@ export async function PATCH(
         });
 
 
-        if (reason) {
-            await storage.deleteMaintenance(maintenanceId);
-            await activityLogger(user, "delete", `Maintenance for equipment ${maintenance.equipmentId} removed | Reason: ${reason}`, maintenance.equipmentId);
-            return res.json(true, { status: 201 });
-        }
-
-        const validatedData = insertMaintenanceSchema.parse({
-            ...mData,
-            tenantId: maintenance.tenantId,
-            equipmentId: maintenance.equipmentId
+        if (!reason) throw new CustomApiError({
+            code: ERROR_CODES.VALIDATION_ERROR,
+            field: "reason",
+            message: "Deletion reason is missing",
+            status: 400
         });
-        const newMaintenance = await storage.updateMaintenance(maintenanceId, validatedData, equipment);
-
-        await storage.updateEquipment(equipment.id, { healthIndex: newMaintenance?.givenHealthIndex });
         
+        await storage.deleteMaintenance(maintenanceId);
+        await storage.updateEquipment(equipment.id, { hasOverhaul: false, hasEmergency: false, status: "operational" });
+        await activityLogger(user, "delete", `Maintenance for equipment ${maintenance.equipmentId} removed | Reason: ${reason}`, maintenance.equipmentId);
 
-        return res.json(newMaintenance, { status: 201 });
+        return res.json(true, { status: 201 });
     } catch (error: unknown) {
         return buildError(error);
     }

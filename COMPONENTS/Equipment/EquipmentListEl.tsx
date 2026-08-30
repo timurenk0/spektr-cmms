@@ -34,7 +34,7 @@ const getStatusBadge = (status: string) => {
 };
 
 const getHealthBadge = (healthIndex: number | null) => {
-    if (healthIndex == null) {
+    if (healthIndex === null) {
         return (
             <HealthBadge background="#e3e3e3" color="#3e3e3e" value="-" />
         )
@@ -69,8 +69,14 @@ const EquipmentListEl = ({ equipment, user }: { equipment: TEquipment, user: TUs
                 <div className="flex items-center">
                     <div className="h-24 w-24 overflow-hidden flex items-center relative rounded-md">
                         {/* add max-h-[128px] to image if you want the image to resize */}
-                        <Image loading="lazy" unoptimized className="max-w-24 rounded-md" src={equipment.equipmentImage ? equipment.equipmentImage : "/window.svg"} width={96} height={96} alt="Equipment image" />
-                        {equipment.hasOverhaul && <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-red-600/50 p-2 text-xs text-white font-bold">ONGOING OVERHAUL</h1>}
+                        <Image loading="lazy" className="max-w-24 rounded-md" src={equipment.equipmentImage ? equipment.equipmentImage : "/window.svg"} width={96} height={96} alt="Equipment image" />
+                        {
+                        equipment.hasOverhaul ? 
+                            <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-red-600/50 p-2 text-xs text-white font-bold">ONGOING OVERHAUL</h1>
+                        : equipment.hasEmergency ?
+                            <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-amber-600/50 p-2 text-xs text-white font-bold">ONGOING EMERGENCY</h1>
+                        : ""
+                        }
                     </div>
                     <div className="ml-2 flex-1 text-left">
                         <div className="text-xs font-medium truncate max-w-32" title={equipment.name}>
@@ -93,7 +99,7 @@ const EquipmentListEl = ({ equipment, user }: { equipment: TEquipment, user: TUs
             </TableCell>
             <TableCell style={{ fontSize: "12px" }}>{equipment.lastEvent ? format(equipment.lastEvent, "MMM d, yyyy") : "N/A"}</TableCell>
             <TableCell style={{ fontSize: "12px" }}>{equipment.nextEvent ? format(equipment.nextEvent, "MMM d, yyyy") : "N/A"}</TableCell>
-            <TableCell style={{ fontSize: "12px" }}>{equipment.healthIndex ? getHealthBadge(equipment.healthIndex) : <div className="bg-gray-200 text-gray-600 rounded-full px-2 py-1 text-bold">-</div>}</TableCell>
+            <TableCell style={{ fontSize: "12px" }}>{!Number.isNaN(equipment.healthIndex) ? getHealthBadge(equipment.healthIndex) : <div className="bg-gray-200 text-gray-600 rounded-full px-2 py-1 text-bold">-</div>}</TableCell>
             {user.role === "admin" && (
                 <TableCell onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-2">

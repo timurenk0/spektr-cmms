@@ -1,4 +1,4 @@
-import { addMonths, subDays, subMonths } from "date-fns";
+import { add, addMonths, subDays } from "date-fns";
 import { Equipment, InsertMaintenanceEvent, Maintenance, MaintenanceEvent } from "../Database/schema";
 import { storage } from "../storage";
 
@@ -11,22 +11,6 @@ function addDays(date: Date, days: number): Date {
     return new Date(date.getTime() + days * 1000 * 3600 * 24);
 }
 
-function applyInterval(date: Date, interval: MaintenanceInterval, direction: "add" | "sub") {
-    if (interval.type === "days") {
-        return direction === "add"
-            ? addDays(date, interval.value)
-            : subDays(date, interval.value)
-    }
-
-    return direction === "add"
-        ? addMonths(date, interval.value)
-        : subMonths(date, interval.value)
-}
-
-type MaintenanceLevel = "I1" | "I2" | "I3" | "I4" | "I5" | "A" | "B" | "C" | "D";
-type MaintenanceInterval = { type: "days", value: number } | { type: "months", value: number };
-type CertificateDescriptionKey = `level${Extract<MaintenanceLevel, "I1" | "I2" | "I3" | "I4" | "I5">}Description`;
-type LevelData = Record<MaintenanceLevel, { months?: number, hours?: number, duration: number }>
 
 export function createMaintenanceEvents(
     maintenance: Maintenance,
@@ -34,15 +18,15 @@ export function createMaintenanceEvents(
     startDate?: string,
     endDate?: string
 ): InsertMaintenanceEvent[] {
-
+    
     const start = startDate ? new Date(startDate) : new Date(maintenance.serviceStartDate);
     start.setUTCHours(0,0,0,0);
     const end = endDate ? new Date(endDate) : new Date(maintenance.serviceEndDate);
     end.setUTCHours(0,0,0,0);
 
-    if (start >= end) throw new Error("Service start date can't be greater than or equal to the service end date");
+    if (start >= end) throw new Error("Service start date can't be greater than service end date");
 
-    const levels: LevelData = {
+    const levels = {
         "I5": {
             months: maintenance.levelI5Months,
             duration: maintenance.levelI5Duration
@@ -92,15 +76,11 @@ export function createMaintenanceEvents(
     const OVERDUE_THRESHOLD = 3;
 
     for (let [k, v] of Object.entries(levels)) {
-        if (v.duration === 0) continue;
+        if (v.duration === 0 || v.hours === 0) continue;
 
         let eventStart = new Date(start.getTime());
-        eventStart.setUTCHours(0, 0, 0, 0);
         
-        if (k[0] === "I") {
-            console.log("Entered certification event generation logic...");
-            if (!v.months) continue;
-
+        if (k === "I2" || k === "I1") {            
             while (eventStart <= end) {
                 const eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
                 const status = Math.floor(differenceInDays(new Date(), eventStart)) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
@@ -109,8 +89,8 @@ export function createMaintenanceEvents(
                     equipmentId: maintenance.equipmentId,
                     maintenanceId: maintenance.id,
                     tenantId: maintenance.tenantId,
-                    title: `${equipment.assetId} certification task`,
-                    description: maintenance[`level${k}Description` as CertificateDescriptionKey] || "",
+                    title: `${equipment.assetId} inspection task`,
+                    description: k === "I2" ? maintenance.levelIDescription2 || "" : maintenance.levelIDescription1 || "",
                     start: eventStart.toISOString().slice(0, 10),
                     end: eventEnd.toISOString().slice(0, 10),
                     level: k,
@@ -122,56 +102,38 @@ export function createMaintenanceEvents(
                 // eventMap[eventStart.toISOString().slice(0, 10)] = event;
                 events.push(event);
                 
-                eventStart = subDays(addMonths(eventStart, v.months), 1);
-                eventStart.setUTCHours(0, 0, 0, 0);
+                eventStart = subDays(addMonths(eventStart, v.hours ), 1);
             }
             continue;
         }
-     
-        if (!daily) throw new Error("No daily working hours value passed");
-        let interval: MaintenanceInterval;
-
-        if (!v.months && !v.hours) continue;
-    
-        if (!v.months && v.hours) {
-            interval = {
-                type: "days",
-                value: Math.ceil(v.hours / daily)
-            }
-        } else if (!v.hours && v.months) {
-            interval = {
-                type: "months",
-                value: v.months
-            }
-        } else {
-            const hourlyDays = Math.ceil(v.hours! / daily);
-
-            const hourlyDate = addDays(eventStart, hourlyDays);
-            const monthlyDate = addMonths(eventStart, v.months!);
-
-            interval = hourlyDate <= monthlyDate
-                ? { type: "days", value: hourlyDays }
-                : { type: "months", value: v.months! }
-        }
-       
-        while (eventStart <= end) {
-            console.log("Entered level-based event generation logic...");
-            const status = Math.floor(differenceInDays(new Date(), eventStart)) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
-            const sortedDates = Object.keys(eventMap).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
         
-            const closestDate = sortedDates.findLast(d => d <= eventStart.toISOString().slice(0, 10) && eventMap[d].level > k);
+        if (!daily) throw new Error("No daily working hours value passed");
+        const dayInterval = Math.ceil(v.hours / daily);
+        
+        while (eventStart <= end) {
+            const status = Math.floor(differenceInDays(new Date(), eventStart)) > OVERDUE_THRESHOLD ? "incomplete" : "pending";
+        const sortedDates = Object.keys(eventMap)
+            .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+
+            const closestDate = sortedDates.findLast(e => 
+                e <= eventStart.toISOString().slice(0, 10) && 
+                eventMap[e].level > k
+            );
             
-            if (closestDate && applyInterval(new Date(closestDate), interval, "add").toISOString().slice(0, 10) > eventStart.toISOString().slice(0, 10)) {
-                console.log("Detected nearby higher-level event");
-                eventStart = applyInterval(new Date(closestDate), interval, "add");
-                eventStart.setUTCHours(0, 0, 0, 0);
-                    
-                continue;
+            // if (closestDate && (eventStart.getTime() - new Date(closestDate).getTime())/day < dayInterval) {
+            //     eventStart = addDays(new Date(closestDate), dayInterval); 
+            //     eventEnd = new Date(eventStart.getTime() + (day * v.duration)-1);
+
+            //     continue;
+            // }
+            if (closestDate) {
+                const daysSince = Math.floor(differenceInDays(eventStart, new Date(closestDate)));
+                if (daysSince < dayInterval) {
+                    eventStart = addDays(new Date(eventMap[closestDate].end!), dayInterval);
+                    continue;
+                }
             }
-
-            console.log("Exited 'detected nearby higher-level event' logic");
-
-
+            
             if (eventStart > end) break;
 
             const eventEnd = new Date(eventStart.getTime() + (day * v.duration) - 1);
@@ -191,18 +153,15 @@ export function createMaintenanceEvents(
             };
 
             events.push(event);
-            console.log("Pushed event to the events array");
-            eventMap[eventEnd.toISOString().slice(0, 10)] = event;
-            eventStart = applyInterval(eventStart, interval, "add");
-            eventStart.setUTCHours(0, 0, 0, 0);
-        } 
+            eventMap[eventStart.toISOString().slice(0, 10)] = event;
+            eventStart = addDays(eventStart, dayInterval);
+        }
     }
-
+    
     for (let i = 0; i < events.length; i++) {
         if (events[i].start === start.toISOString().slice(0, 10)) events.splice(i, 1);
     }
 
-    console.log("Returning events");
     return events;
 }
 

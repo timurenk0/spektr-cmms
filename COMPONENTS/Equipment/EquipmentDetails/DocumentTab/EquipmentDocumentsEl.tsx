@@ -23,7 +23,7 @@ const EquipmentDocumentsEl = ({ documents, userRole }: Props) => {
                         <FileText width={20} height={20} className="text-blue-600" />
                     </div>
                     <div>
-                        <div className='text-nowrap text-ellipsis overflow-hidden max-w-[200px]'>{doc.title}</div>
+                        <div className='text-nowrap text-ellipsis overflow-hidden max-w-[200px]' title={doc.title}>{doc.title}</div>
                         <div className="text-xs text-gray-500">{format(new Date(doc.uploadedAt), "HH:mm | MMM d, yyyy")}</div>
                     </div>
                     <div className="text-sm text-gray-500 italic ms-10 flex-1 min-w-0 truncate" title={doc.notes ? doc.notes : ""}>

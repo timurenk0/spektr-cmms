@@ -20,6 +20,8 @@ import { differenceInMonths, format } from "date-fns";
 import toast from "react-hot-toast";
 import SlideDialog from "@/COMPONENTS/ui/SlideDialog";
 import OverhaulForm from "./OverhaulForm";
+import EmeregencyForm from "./EmeregencyForm";
+import EditHoursForm from "./EditHoursForm";
 
 
 function calculateAge(manufDate: Date): number[] {
@@ -105,69 +107,33 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
           throw new Error("Same status update rejected");
         }
         
-        const res = await fetch(`/api/equipments/${equipmentId}`, {
+        const res = await fetch(`/api/equipments/${equipmentId}/update-status`, {
           method: "PATCH",
-          body: JSON.stringify({
-          status
-        }),
-        credentials: "include"
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(`${data.error.message}. CODE: ${data.error.code}`);
-      }
-      
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard-gauges"] });
-      toast.success("Successfully updated equipment status");
-      return; 
-    },
-    onError: (err: unknown) => {
-      const msg = err instanceof Error ? err.message : "Unknown error";
-      toast.error(msg);
-      console.error(err);
-      return; 
-    }
-  });
-  
-  const overhaulMutation = useMutation({
-    mutationFn: async () => {
-      try {
-        const res = await fetch(`http://localhost:3000/api/equipments/${equipmentId}`, {
-          method: "PATCH",
-          body: JSON.stringify({
-            hasOverhaul: !equipment?.hasOverhaul
-          }),
+          body: JSON.stringify({ status }),
           credentials: "include"
         });
-
         const data = await res.json();
         if (!res.ok) {
           throw new Error(`${data.error.message}. CODE: ${data.error.code}`);
         }
-
+        
         return data;
-      } catch (error) {
-        throw error;
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
+        queryClient.invalidateQueries({ queryKey: ["dashboard-gauges"] });
+        queryClient.invalidateQueries({ queryKey: ["equipment-list"] });
+        toast.success("Successfully updated equipment status");
+        return; 
+      },
+      onError: (err: unknown) => {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        toast.error(msg);
+        console.error(err);
+        return; 
       }
-    },
-    onSuccess: (data) => {
-      console.log(data);
-      queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard-gauges"] });
-      queryClient.invalidateQueries({ queryKey: ["equipment-list"] })
-      toast.success(`Overhaul ${data ? "initialised" : "finished"} successfully`)
-    },
-    onError: (err: unknown) => {
-      const msg = err instanceof Error ? err.message : "Unknown error";
-      toast.error(msg);
-      console.error(err);
-      return;
-    }
   });
+  
   
   const isLoading = (!equipment || isLoadingEquipment) || (!user || isLoadingUser);
   if (isLoading) {
@@ -191,8 +157,13 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
           <div className="flex items-start justify-between">
             <div className="flex items-center">
               <div className="mr-6 relative">
-                <Image src={equipment.equipmentImage} unoptimized width={200} height={200} className="max-w-[200px] max-h-[200px] rounded-md object-cover border" alt="Equipment image" />
-                {user.role === "admin" && equipment.hasOverhaul && <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-red-600/50 p-2 text-xs text-white font-bold">ONGOING OVERHAUL</h1>}
+                <Image src={equipment.equipmentImage} width={200} height={200} className="max-w-[200px] max-h-[200px] rounded-md object-cover border" alt="Equipment image" />
+                {
+                equipment.hasOverhaul ?
+                  <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-red-600/50 p-2 text-xs text-white font-bold">ONGOING OVERHAUL</h1>
+                : equipment.hasEmergency ? <h1 className="absolute top-[50%] left-[50%] translate-[-50%] w-full text-center bg-amber-600/50 p-2 text-xs text-white font-bold">ONGOING EMERGENCY</h1>
+                : ""
+                }
               </div>
               <div>
                 <div className="flex items-center gap-x-2">
@@ -237,12 +208,6 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                             </li>
                             <li
                             className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => updateStatus.mutate("under repair")}
-                            >
-                              Under Repair
-                            </li>
-                            <li
-                            className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                             onClick={() => updateStatus.mutate("out of service")}
                             >
                               Out of Service
@@ -261,11 +226,23 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                 </Button>
               </Link>
               
+              {!equipment.hasEmergency && (
+                <SlideDialog
+                  title="Emergency"
+                  Btn={( props ) => (
+                    <Button size="small" color="warning" disabled={equipment.hasOverhaul} {...props}>{equipment.hasEmergency ? "Finish" : "Start"} Emergency</Button>
+                  )}
+                  DialogForm={(props) => (
+                    <EmeregencyForm {...props} equipmentId={equipmentId} />
+                  )}
+                />
+              )}
+              
               {!equipment.hasOverhaul && (
                 <SlideDialog
                   title="Overhaul"
                   Btn={( props ) => (
-                    <Button color="error" {...props}>{equipment.hasOverhaul ? "Finish" : "Start"} Overhaul</Button>
+                    <Button size="small" color="error" disabled={equipment.hasEmergency} {...props}>{equipment.hasOverhaul ? "Finish" : "Start"} Overhaul</Button>
                   )}
                   DialogForm={(props) => (
                     <OverhaulForm {...props} equipmentId={equipmentId} />
@@ -299,16 +276,28 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
                     {equipment.totalWorkingHours || "N/A"}
                   </div>
                   {equipment.totalWorkingHours && (
-                    <Button
-                    variant="text"
-                    color="inherit"
-                    sx={{ height: "24px", fontSize: "8px" }}
-                    >
-                      <Pencil width={12} height={12} className="mr-1" /> Edit
-                    </Button>
+                    <SlideDialog
+                      title="Change Working Hours"
+                      Btn={( props ) => (
+                        <Button
+                          {...props}
+                          variant="text"
+                          color="inherit"
+                          sx={{ height: "24px", fontSize: "8px" }}
+                        >
+                          <Pencil width={12} height={12} className="mr-1" /> Edit
+                        </Button>
+                      )}
+                      DialogForm={( props ) => (
+                        <EditHoursForm {...props} equipmentId={equipmentId} currentWorkingHours={equipment.totalWorkingHours} /> 
+                      )}
+                    />
                   )}
                 </div>
                 <div className="text-xs text-gray-500">Working Hours</div>
+                { equipment.lastWorkingHoursEdit && (
+                  <div className="text-xs text-gray-500">Last Edit - {format(new Date(equipment.lastWorkingHoursEdit), "MMM dd, yyyy")}</div>
+                ) }
               </div>
             </div>
 

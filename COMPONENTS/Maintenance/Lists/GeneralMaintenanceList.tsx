@@ -6,14 +6,17 @@ import React from 'react'
 
 
 const levelMap: Record<string, string> = {
-    "A": "bg-green-500 text-white",
-    "B": "bg-orange-500 text-white",
-    "C": "bg-blue-500 text-white",
-    "D": "bg-purple-500 text-white",
+    "A": "bg-green-400 text-white",
+    "B": "bg-orange-400 text-white",
+    "C": "bg-blue-400 text-white",
+    "D": "bg-purple-400 text-white",
     "E": "police-tape",
-    "I1": "bg-teal-500 text-white",
-    "I2": "bg-teal-500 text-white",
-    "O": "bg-violet-500 text-white",
+    "I1": "bg-fuchsia-400 text-white",
+    "I2": "bg-fuchsia-400 text-white",
+    "I3": "bg-fuchsia-400 text-white",
+    "I4": "bg-fuchsia-400 text-white",
+    "I5": "bg-fuchsia-400 text-white",
+    "O": "bg-violet-400 text-white",
 }
 
 const GeneralMaintenanceList = ({
@@ -60,12 +63,12 @@ const GeneralMaintenanceList = ({
                 </div>
                 </TableCell>
                 <TableCell>{format(ev.scheduledAt, "MMM dd, yyyy")}</TableCell>
-                {complete && (
-                    <TableCell>{format(ev.performedAt!, "MMM dd, yyyy")}</TableCell>
+                {complete && ev.performedAt && (
+                    <TableCell>{format(ev.performedAt, "MMM dd, yyyy")}</TableCell>
                 )}
                 <TableCell>
-                    <div className={`w-20 ${levelMap[ev.level]} text-center mx-auto py-2 rounded-[100px]`}>
-                        {ev.level}
+                    <div title={ev.level[0] === "I" ? "CERTIFICATION" : ""} className={`w-20 ${levelMap[ev.level]} text-center mx-auto py-2 rounded-[100px]`}>
+                        {ev.level[0] === "I" ? "CERT" : ev.level}
                     </div>
                 </TableCell>
             </TableRow>

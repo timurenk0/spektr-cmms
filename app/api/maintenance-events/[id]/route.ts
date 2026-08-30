@@ -40,11 +40,12 @@ export async function PATCH(
         const { id } = await params;
         const eventId = parseInt(id);
 
-        
         if (isNaN(eventId)) return res.json({ error: "Invalid event ID" }, { status: 400 });
 
+        
         const body = await req.json();
-
+        
+        
         const event = await storage.getMaintenanceEvent(eventId);
         if (!event) return buildCustomError({
             code: ERROR_CODES.NOT_FOUND_ERROR,
@@ -53,6 +54,21 @@ export async function PATCH(
             status: 404
         });
 
+        const equipment = await storage.getEquipment(event.equipmentId);
+        if (!equipment) return buildCustomError({
+            code: ERROR_CODES.NOT_FOUND_ERROR,
+            message: "Equipment with given ID is not found",
+            suggestion: "Equipment might already be deleted. Try refreshing the page.",
+            status: 404
+        });
+
+        if (Number.isNaN(equipment.healthIndex)) return buildCustomError({
+            code: ERROR_CODES.UNKNOWN_ERROR,
+            message: "Equipment health index is null",
+            suggestion: "Probably a bug. Please try to remove and add the maintenance schedule for this equipment. Otherwise contact development team",
+            status: 500
+        });
+        
 
         if (event.level === "E") {
             const eventValidatedData = insertMaintenanceEventSchema.partial().parse({
@@ -64,7 +80,7 @@ export async function PATCH(
             // const equipment = await storage.updateEquipment(event.equipmentId, {status: "operational"});
             // if (!equipment) return res.json({ error: "Equipment not found!" }, { status: 404 });
 
-            await storage.updateEquipment(event.equipmentId, { status: "operational" });
+            await storage.updateEquipment(event.equipmentId, { status: "operational", hasEmergency: false });
 
             await activityLogger(user, "update", `Emergency repair for equipment ${event.equipmentId} finished!`, event.equipmentId);
             
@@ -75,7 +91,7 @@ export async function PATCH(
             const eventValidatedData = insertMaintenanceEventSchema.partial().parse(body);
             await storage.updateMaintenanceEvent(eventId, eventValidatedData);
 
-            const equipment = await storage.updateEquipment(event.equipmentId, { status: "operational" });
+            const equipment = await storage.updateEquipment(event.equipmentId, { status: "operational", hasOverhaul: false });
             if (!equipment) return res.json({ error: "Equipment not found!" }, { status: 404 });
 
             await storage.updateEquipment(event.equipmentId, { hasOverhaul: false, overhaulCounter: equipment.overhaulCounter+1, status: "operational" });
@@ -113,7 +129,8 @@ export async function PATCH(
         }
         
         // Update equipment health score
-        await storage.subtractPenaltyScore({...updatedEvent, isOverdue: eventStatus === "overdue"});
+        const penaltyScore =  storage.subtractPenaltyScore({...updatedEvent, isOverdue: eventStatus === "overdue"});
+        await storage.updateEquipment(equipment.id, { healthIndex: equipment.healthIndex-penaltyScore })
         
         return res.json(updatedEvent, { status: 201 });            
     } catch (error: unknown) {

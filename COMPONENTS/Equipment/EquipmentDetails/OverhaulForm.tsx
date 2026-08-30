@@ -18,11 +18,11 @@ const OverhaulForm = ({
     const mutation = useMutation({
         mutationFn: async () => {
             try {
-                const res = await fetch(`/api/equipments/${equipmentId}`, {
+                const res = await fetch(`/api/equipments/${equipmentId}/update-status`, {
                     method: "PATCH",
                     body: JSON.stringify({
-                        hasOverhaul: true,
-                        finishDate
+                        status: "overhaul",
+                        endDate: finishDate
                     }),
                     credentials: "include"
                 });
@@ -31,13 +31,13 @@ const OverhaulForm = ({
                     throw new Error(`${data.error.message}. CODE: ${data.error.code}`)
                 }
 
-                return data;                
+                return data;
             } catch (error) {
                 throw error;
             }
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["equipments"] });
+            queryClient.invalidateQueries({ queryKey: ["equipment-list"] });
             queryClient.invalidateQueries({ queryKey: ["equipment", equipmentId] });
             queryClient.invalidateQueries({ queryKey: ["/api/maintenance-events/info"] })
             toast.success("Overhaul initialised successfully!");
@@ -53,7 +53,7 @@ const OverhaulForm = ({
   
   return (
     <div className="flex flex-col gap-8">
-        <p>This action will update equipment status to Out of Service and add Overhaul maintenance event in the calendar. If you wish to continue, please specify the goal finish date of the overhaul below: (start date is automatically set to current date)</p>
+        <p>This action will update equipment status to Out of Service, add Overhaul maintenance event in the calendar, and cancel current schedule. If you wish to continue, please specify the goal finish date of the overhaul below: (start date is automatically set to current date)</p>
         <div className="flex gap-4">
             <TextField
                 label="Start Date"

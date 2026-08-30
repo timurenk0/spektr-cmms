@@ -86,7 +86,7 @@ const EquipmentDocumentsForm = ({ equipmentId, documentCategories, onClose }: { 
 
             if (!file) throw new Error("No file selected");
 
-            if (file.size > 10_000_000) throw new Error("File size should nbot exceed 10MB!");
+            if (file.size > 10_000_000) throw new Error("File size should not exceed 10MB!");
 
             const urlRes = await fetch("/api/documents/upload-url", {
                 method: "POST",
