@@ -3,85 +3,138 @@
 
 import { Box, Button, Card, CardActionArea, CardContent, FormControl, Input, InputAdornment, InputLabel, MenuItem, Paper, Select, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { EquipmentCategories } from "../utils/equipmentCategories";
 import EquipmentListEl from "./EquipmentListEl";
 import ListSkeleton from "../SKELETONS/ListSkeleteon";
 import { useAuth } from "../utils/authContext";
 import { TEquipment } from "../utils/types";
 import { Filter } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const equipmentStatuses = ["operational", "under repair", "out of service"]
 
 const EquipmentList = () => {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [filters, setFilters] = useState({
-    search: "",
-    type: "",
-    category: "",
-    location: "all",
-    status: "all",
-  });
-  const [searchInput, setSearchInput] = useState("");
+  const { user, isLoading: isLoadingUser } = useAuth();
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const page = Number(searchParams.get("page") ?? 0);
+  const rowsPerPage = Number(searchParams.get("limit") ?? 10);
+
+  const search = searchParams.get("search") ?? "";
+  const type = searchParams.get("type") ?? "";
+  const category = searchParams.get("category") ?? "";
+  const location = searchParams.get("location") ?? "all";
+  const status = searchParams.get("status") ?? "all";
+
+  const [searchInput, setSearchInput] = useState(search);
+
+  const updateParams = (updates: Record<string, string | number | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+  
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === "" || value === "all") {
+        params.delete(key);
+      } else {
+        params.set(key, String(value));
+      }
+    });
+
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
 
   // Send search input filter with debounce
   useEffect(() => {
+    if (searchInput === search) return;
+    
     const id = setTimeout(() => {
-      updateFilters("search", searchInput);
+      updateParams({
+        search: searchInput,
+        page: 0
+      });
     }, 500);
   
     return () => clearTimeout(id);
-  }, [searchInput]);
-
-  const { user, isLoading: isLoadingUser } = useAuth();
+  }, [searchInput, search]);
 
 
-  const updateFilters = <K extends keyof typeof filters>(key: K, value: string) => {
-    setPage(0);
-    setFilters(prev => ({ ...prev, [key]: value }));
-  };
-
-  const removeFilters = () => {
-    setPage(0);
-    setSearchInput("");
-    setFilters({
-      search: "",
-      type: "",
-      category: "",
-      location: "all",
-      status: "all"
-    });
-  };
-
-  const queryParams = new URLSearchParams({
-    limit: rowsPerPage.toString(),
-    page: (page + 1).toString(),
-    ...Object.fromEntries(
-      Object.entries(filters).filter(([, v]) => v !== "" && v !== "all")
-    )
-  }).toString();
-
-  const hanldePageChange = (event: unknown, newPage: number) => {
-    setPage(newPage);
+  const handlePageChange = (event: unknown, newPage: number) => {
+    updateParams({ page: newPage });
   }
 
   const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
+    updateParams({
+      page: 0,
+      limit: Number(event.target.value)
+    });
+  } 
+
+  const handleLocationChange = (value: string) => {
+    updateParams({
+      location: value,
+      page: 0
+    });
   }
+
+  const handleStatusChange = (value: string) => {
+    updateParams({
+      status: value,
+      page: 0
+    });
+  }
+
+  const handleCategoryChange = (value: string) => {
+    updateParams({
+      category: value,
+      page: 0
+    });
+  }
+
+  const handleTypeChange = (value: string) => {
+    updateParams({
+      type: value,
+      page: 0
+    });
+  }
+
+  const removeFilters = () => {
+    setSearchInput("");
+    updateParams({
+      page: 0,
+      limit: 10,
+      location: "all",
+      status: "all",
+      category: "",
+      type: ""
+    });
+  };
 
 
   const { data: equipments, isLoading: isLoadingEquipments } = useQuery<{ equips: TEquipment[], totalCount: number }>({
-    queryKey: ["equipment-list", page, rowsPerPage, filters],
-    queryFn: () => 
-      fetch(`/api/equipments?${queryParams}`).then(res => res.json()),
+    queryKey: ["equipment-list", searchParams.toString()],
+    queryFn: async () => {
+      const queryParams = new URLSearchParams({
+        limit: rowsPerPage.toString(),
+        page: (page+1).toString()
+      });
+
+      if (search) queryParams.set("search", search);
+      if (type) queryParams.set("type", type);
+      if (category) queryParams.set("category", category);
+      if (location !== "all") queryParams.set("location", location);
+      if (status !== "all") queryParams.set("status", status);
+      
+      return fetch(`/api/equipments?${queryParams.toString()}`).then(res => res.json());
+    }, 
     placeholderData: keepPreviousData,
   });
 
   const { data: equipmentLocations, isLoading: isLoadingEquipmentLocations } = useQuery<string[]>({
     queryKey: ["/api/locations"]
-  })
+  });
 
   const isLoading = (isLoadingEquipments || !equipments) || (isLoadingUser || !user) || (!equipmentLocations || isLoadingEquipmentLocations);
 
@@ -94,14 +147,14 @@ const EquipmentList = () => {
 
   return (
     <>
-      {filters.category && (<h1 className="ps-1 pb-1">Equipment Category: <span className="font-semibold underline">{filters.category}</span></h1>)}
+      {category && (<h1 className="ps-1 pb-1">Equipment Category: <span className="font-semibold underline">{category}</span></h1>)}
 
       <div className="">
         <div className="flex gap-2 my-2">
           {EquipmentCategories.map((c, idx) => (
-            !filters.category ? (
+            !category ? (
               <Card key={idx} className="w-full flex items-center justify-center">
-                <CardActionArea onClick={() => updateFilters("category", c.id)}>
+                <CardActionArea onClick={() => handleCategoryChange(c.id)}>
                   <CardContent className="text-green-600 flex justify-center items-center text-center">
                     {c.icon}
                     <p className="ms-2 text-black">{c.id}</p>
@@ -109,14 +162,14 @@ const EquipmentList = () => {
                 </CardActionArea>
               </Card>
             ) : (
-              c.id === filters.category && c.types.map((t, idx) => (
+              c.id === category && c.types.map((t, idx) => (
                 <Card key={idx} className="w-full">
                   <CardActionArea
-                    onClick={() => updateFilters("type", t)}
+                    onClick={() => handleTypeChange(t)}
                     className="h-full"
-                    sx={{backgroundColor: `${t === filters.type && "rgb(0, 190, 0)"}`}}
+                    sx={{backgroundColor: `${t === type && "rgb(0, 190, 0)"}`}}
                   >
-                    <CardContent className={`text-green-600 ${t === filters.type && "text-white"}`}>
+                    <CardContent className={`text-green-600 ${t === type && "text-white"}`}>
                       <p className="text-black text-sm text-center">{t}</p>
                     </CardContent>
                   </CardActionArea>
@@ -136,8 +189,8 @@ const EquipmentList = () => {
               <FormControl size="small" fullWidth>
                 <Select
                   color="info"
-                  value={filters.location}
-                  onChange={(e) => updateFilters("location", (e.target as HTMLInputElement).value)}
+                  value={location}
+                  onChange={(e) => handleLocationChange(e.target.value)}
                   startAdornment={
                     <InputAdornment position="start">
                       <Filter />
@@ -153,8 +206,8 @@ const EquipmentList = () => {
               <FormControl size="small" fullWidth>
                 <Select
                   color="info"
-                  value={filters.status}
-                  onChange={(e) => updateFilters("status", (e.target as HTMLInputElement).value)}
+                  value={status}
+                  onChange={(e) => handleStatusChange(e.target.value)}
                   startAdornment={
                     <InputAdornment position="start">
                       <Filter />
@@ -190,7 +243,7 @@ const EquipmentList = () => {
             </TableHead>
             <TableBody>
               {rows.length > 0 ? rows.map((equipment, idx) => (
-                <EquipmentListEl key={idx} equipment={equipment} user={user} />
+                <EquipmentListEl key={idx} equipment={equipment} user={user} searchParams={searchParams.toString()} />
               )): (
                 <TableRow>
                   <TableCell colSpan={7}>
@@ -208,7 +261,7 @@ const EquipmentList = () => {
             count={equipments.totalCount}
             rowsPerPage={rowsPerPage}
             page={page}
-            onPageChange={hanldePageChange}
+            onPageChange={handlePageChange}
             onRowsPerPageChange={handleRowsPerPageChange}
           />
         )}

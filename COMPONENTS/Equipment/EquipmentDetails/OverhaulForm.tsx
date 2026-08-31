@@ -1,4 +1,8 @@
 import { Button, TextField } from "@mui/material"
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { PickerValue } from "@mui/x-date-pickers/internals";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react"
 import toast from "react-hot-toast";
@@ -54,29 +58,34 @@ const OverhaulForm = ({
   return (
     <div className="flex flex-col gap-8">
         <p>This action will update equipment status to Out of Service, add Overhaul maintenance event in the calendar, and cancel current schedule. If you wish to continue, please specify the goal finish date of the overhaul below: (start date is automatically set to current date)</p>
-        <div className="flex gap-4">
-            <TextField
-                label="Start Date"
-                type="date"
-                disabled
-                fullWidth
-                value={new Date().toISOString().slice(0, 10)}
+        <div className="grid grid-cols-2 gap-4">
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                    label="Start Date"
+                    value={new Date()}
+                    minDate={new Date()}
+                    format="dd/MM/yyyy"
+                    disabled
                 />
-            <TextField
-                label="Finish Date"
-                type="date"
-                fullWidth
-                color="info"
-                defaultValue={finishDate}
-                onChange={e => {
-                    setFinishDate(e.target.value);
-                }}
-            />
+            </LocalizationProvider>
+
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                    label="Finish Date"
+                    value={new Date(finishDate)}
+                    minDate={new Date()}
+                    format="dd/MM/yyyy"
+                    onChange={(e: PickerValue) => {
+                        console.log(e);
+                        setFinishDate(e ? e.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10))
+                    }}
+                />
+            </LocalizationProvider>
         </div>
 
         <div className="flex justify-end gap-4">
-            <Button color="error" onClick={() => mutation.mutate()}>
-                Submit
+            <Button color="error" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+                { mutation.isPending ? "Submitting..." : "Submit" }
             </Button>
             <Button variant="outlined" color="inherit" onClick={onClose}>
                 Cancel

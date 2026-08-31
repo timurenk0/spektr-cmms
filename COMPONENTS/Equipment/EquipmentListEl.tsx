@@ -59,11 +59,11 @@ const getHealthBadge = (healthIndex: number | null) => {
     }
 }
 
-const EquipmentListEl = ({ equipment, user }: { equipment: TEquipment, user: TUser }) => {
+const EquipmentListEl = ({ equipment, user, searchParams }: { equipment: TEquipment, user: TUser, searchParams: string }) => {
     const router = useRouter();
 
   return (
-        <TableRow sx={{ "& .MuiTableCell-root": { textAlign: "center", cursor: "pointer", padding: "4px 32px" } }} hover onClick={() => router.push(`/equipment/${equipment.id}`)}>
+        <TableRow sx={{ "& .MuiTableCell-root": { textAlign: "center", cursor: "pointer", padding: "4px 32px" } }} hover onClick={() => router.push(`/equipment/${equipment.id}?${searchParams}`)}>
             {/* Equipment image and name */}
             <TableCell>
                 <div className="flex items-center">

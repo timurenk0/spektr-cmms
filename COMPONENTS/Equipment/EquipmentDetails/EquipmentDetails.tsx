@@ -22,6 +22,7 @@ import SlideDialog from "@/COMPONENTS/ui/SlideDialog";
 import OverhaulForm from "./OverhaulForm";
 import EmeregencyForm from "./EmeregencyForm";
 import EditHoursForm from "./EditHoursForm";
+import { useSearchParams } from "next/navigation";
 
 
 function calculateAge(manufDate: Date): number[] {
@@ -80,6 +81,8 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
   const handleTabChange = (event: React.SyntheticEvent, val: string) => {
     setActiveTab(val);
   }
+  
+  const searchParams = useSearchParams();
 
   
   const { user, isLoading: isLoadingUser } = useAuth();
@@ -220,7 +223,7 @@ const EquipmentDetails = ({ equipmentId }: { equipmentId: number }) => {
               </div>
             </div>
             <div className="flex gap-4">
-              <Link href="/equipment">
+              <Link href={`/equipment?${searchParams.toString()}`}>
                 <Button variant="outlined" color="inherit">
                   <ChevronLeft height={16} width={16} className="mr-1" /> Back to List
                 </Button>

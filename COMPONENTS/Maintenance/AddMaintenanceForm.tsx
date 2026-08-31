@@ -39,7 +39,7 @@ type MaintenanceFormValues = z.infer<typeof formSchema>;
 
 const AddMaintenanceForm = ({
   maintenanceId,
-  onClose
+  onClose,
 }: {
   maintenanceId?: number,
   onClose: () => void
@@ -191,7 +191,7 @@ const AddMaintenanceForm = ({
   
   const onSubmit = (values: MaintenanceFormValues) => {
     // Check ideal health index
-    if (!idealHealthIndex) {
+    if (idealHealthIndex === null) {
       throw new Error("Failed to calculate ideal health index value. Try selecting equipment again");
     }
     
@@ -261,6 +261,7 @@ const AddMaintenanceForm = ({
           />
           <Controller
             name="givenHealthIndex"
+            disabled={!!maintenanceId}
             control={form.control}
             defaultValue={0}
             render={({ field }) => (
@@ -275,17 +276,19 @@ const AddMaintenanceForm = ({
                 required
                 {...field}
                 onChange={(e) => field.onChange(Number(e.target.value))}
-                helperText={!!idealHealthIndex && `Ideal health index: ${idealHealthIndex}%`}
+                helperText={idealHealthIndex !== null && `Ideal health index: ${idealHealthIndex}%`}
               />
             )}
           />
           <Controller
             name="serviceStartDate"
+            disabled={!!maintenanceId}
             control={form.control}
             render={({ field }) => (
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker
                   value={parseDateOnly(field.value)}
+                  disabled={!!maintenanceId}
                   minDate={new Date(new Date().getTime() - (1000 * 86400 * 365))}
                   maxDate={new Date(new Date().getTime() + (1000 * 86400 * 365))}
                   onChange={(e: PickerValue) => {
@@ -305,10 +308,12 @@ const AddMaintenanceForm = ({
           />
           <Controller
             name="serviceEndDate"
+            disabled={!!maintenanceId}
             control={form.control}
             render={({ field }) => (
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker
+                  disabled={!!maintenanceId}
                   value={parseDateOnly(field.value)}
                   minDate={serviceStart}
                   maxDate={new Date(new Date().getTime() + (1000 * 86400 * 365 * 5))}
@@ -330,6 +335,7 @@ const AddMaintenanceForm = ({
           <>
             <Controller
               name="dailyWorkingHours"
+              disabled={!!maintenanceId}
               control={form.control}
               defaultValue={0}
               render={({ field }) => (
@@ -347,19 +353,19 @@ const AddMaintenanceForm = ({
                 />
               )}
             />
-            <LevelCard level="A" form={form} />
-            <LevelCard level="B" form={form} />
-            <LevelCard level="C" form={form} />
-            <LevelCard level="D" form={form} />
+            <LevelCard level="A" form={form} disabled={!!maintenanceId} />
+            <LevelCard level="B" form={form} disabled={!!maintenanceId} />
+            <LevelCard level="C" form={form} disabled={!!maintenanceId} />
+            <LevelCard level="D" form={form} disabled={!!maintenanceId} />
             </>
               )}
             {requirements !== "maintenance" && (
               <>
-                <LevelCard level="I1" form={form} />
-                <LevelCard level="I2" form={form} />
-                <LevelCard level="I3" form={form} />
-                <LevelCard level="I4" form={form} />
-                <LevelCard level="I5" form={form} />
+                <LevelCard level="I1" form={form} disabled={!!maintenanceId} />
+                <LevelCard level="I2" form={form} disabled={!!maintenanceId} />
+                <LevelCard level="I3" form={form} disabled={!!maintenanceId} />
+                <LevelCard level="I4" form={form} disabled={!!maintenanceId} />
+                <LevelCard level="I5" form={form} disabled={!!maintenanceId} />
           </>
           )}
           <div className="col-span-2 flex justify-end gap-x-2">
@@ -397,7 +403,7 @@ const AddMaintenanceForm = ({
           <p>System calculated the ideal health index to be <span>{idealHealthIndex}%</span>. Do you wish to override this value?</p>
           <div className="flex justify-end gap-x-2">
             <Button variant="outlined" onClick={() => {setIdealHealhIndex(form.getValues("givenHealthIndex")); setShowHealthDialog(false)}}>Yes</Button>
-            <Button variant="outlined" onClick={() => {(!!idealHealthIndex && form.setValue("givenHealthIndex", idealHealthIndex)); setShowHealthDialog(false)}}>Set ideal value</Button>
+            <Button variant="outlined" onClick={() => {(idealHealthIndex !== null && form.setValue("givenHealthIndex", idealHealthIndex)); setShowHealthDialog(false)}}>Set ideal value</Button>
             <Button variant="outlined" color="error" onClick={() => setShowHealthDialog(false)}>No</Button>
           </div>
         </DialogContent>

@@ -5,10 +5,12 @@ import { Controller, UseFormReturn } from "react-hook-form"
 
 const LevelCard = ({
     level,
-    form
+    form,
+    disabled
 }: {
     level: "A" | "B" | "C" | "D" | "I1" | "I2" | "I3" | "I4" | "I5",
-    form: UseFormReturn<any>
+    form: UseFormReturn<any>,
+    disabled: boolean
 }) => {
     const colors: Record<string, string> = {
         "A": "bg-green-50",
@@ -24,6 +26,7 @@ const LevelCard = ({
             <div className={`grid grid-cols-3 gap-2`}>
                 <Controller
                     name={`level${level}Months`}
+                    disabled={disabled}
                     control={form.control}
                     defaultValue={0}
                     render={({ field }) => (
@@ -44,6 +47,7 @@ const LevelCard = ({
                 { level[0] !== "I" && (
                     <Controller
                         name={`level${level}Hours`}
+                        disabled={disabled}
                         control={form.control}
                         defaultValue={0}
                         render={({ field }) => (
@@ -64,6 +68,7 @@ const LevelCard = ({
                 ) }
                 <Controller
                     name={`level${level}Duration`}
+                    disabled={disabled}
                     control={form.control}
                     defaultValue={0}
                     render={({ field }) => (
@@ -84,6 +89,7 @@ const LevelCard = ({
                 { level[0] === "I" && (
                     <TextField
                         label="Short Description"
+                        disabled={disabled}
                         color="info"
                         margin="dense"
                         fullWidth

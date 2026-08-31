@@ -3,6 +3,10 @@
 import { EventClickArg } from "@fullcalendar/core/index.js";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, FormControlLabel, FormLabel, InputAdornment, Radio, RadioGroup, Slide, TextField } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { PickerValue } from "@mui/x-date-pickers/internals";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Check, FileIcon, X } from "lucide-react";
@@ -211,19 +215,21 @@ const EventForm = ({ event, onClose }: { event: EventClickArg["event"]; onClose:
           { eventStatus === "complete" && (
             <>
               <p className="text-black/50 text-sm">Select event completion date and upload completion confirmation report below:</p>
-              <TextField
-                label="Completion Date"
-                type="date"
-                color="info"
-                margin="dense"
-                value={completionDate}
-                slotProps={{
-                  htmlInput: event._def.extendedProps.level === "E" ? { min: event.startStr } : {}
-                }}
-                required
-                fullWidth
-                onChange={(e) => setCompletionDate(format(e.target.value, "yyyy-MM-dd"))}
-              />
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="Completion Date"
+                  value={new Date(completionDate)}
+                  minDate={event._def.extendedProps.level === "E" || event._def.extendedProps.level === "O" ? new Date(event.startStr) : undefined}
+                  slotProps={{
+                    textField: {
+                      required: true
+                    }
+                  }}
+                  onChange={(e: PickerValue) => {
+                    setCompletionDate(e ? e.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10));
+                  }}
+                />
+              </LocalizationProvider>
               <TextField
                 type="file"
                 color="info"

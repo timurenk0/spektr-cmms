@@ -62,8 +62,8 @@ const EmeregencyForm = ({
                 </RadioGroup>
             </div>
             <div className="flex justify-end gap-4">
-                <Button color="error" onClick={() => mutation.mutate()}>Submit</Button>
-                <Button variant="outlined" color="inherit" onClick={onClose}>Cancel</Button>
+                <Button color="error" onClick={() => mutation.mutate()} disabled={mutation.isPending}>{ mutation.isPending ? "Submitting..." : "Submit" }</Button>
+                <Button variant="outlined" color="inherit" onClick={onClose}>Cancel</Button> 
             </div>
         </div>
     )
