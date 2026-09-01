@@ -898,7 +898,7 @@ export class DatabaseStorage {
         const monthlyHealthDrop = Number((100 / usefulLifeSpan).toFixed(2));
         console.log("monthlyHealthDrop", monthlyHealthDrop);
 
-        let idealHealthIndex = Math.max(0, 100 - differenceInCalendarMonths(Date(), dateOfManufacturing) * monthlyHealthDrop);
+        const idealHealthIndex = Math.max(0, 100 - differenceInCalendarMonths(Date(), dateOfManufacturing) * monthlyHealthDrop);
 
         
         // const trueHealthIndex = givenHealthIndex > idealHealthIndex ? idealHealthIndex : givenHealthIndex;

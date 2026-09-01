@@ -63,15 +63,15 @@ export async function PUT(
             console.log(maintenance);
 
             if (maintenance) {
-                let givenHealthIndex = maintenance.givenHealthIndex;
+                const givenHealthIndex = maintenance.givenHealthIndex;
                 console.log("given health index:", givenHealthIndex)
 
-                let newHealthIndex = await storage.calculateHealthIndex(equipmentId, givenHealthIndex, body.usefulLifeSpan);
+                const newHealthIndex = await storage.calculateHealthIndex(equipmentId, givenHealthIndex, body.usefulLifeSpan);
                 console.log("new health index:", newHealthIndex);
                 
                 const maintenanceEvents = await storage.getMaintenanceEvents(user.tenantId, "incomplete", maintenance.serviceStartDate, new Date().toISOString().slice(0, 10));
                 let penaltyScore = 0;
-                for (let ev of maintenanceEvents) {
+                for (const ev of maintenanceEvents) {
                     penaltyScore += storage.subtractPenaltyScore({ ...ev, isOverdue: false });
                 }
 

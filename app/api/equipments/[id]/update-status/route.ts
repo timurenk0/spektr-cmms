@@ -121,7 +121,8 @@ export async function PATCH(
                 
                 return res.json({ status: 201 });
             case "out of service":
-                await storage.updateEquipment(equipmentId, { status: "out of service" });
+                await storage.updateEquipment(equipmentId, { status: "out of service", healthIndex: null });
+                await storage.cancelCurrentMaintenanceForEquipment(equipmentId);
 
                 return res.json({ status: 201 });
             default:
